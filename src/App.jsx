@@ -7,6 +7,8 @@ import Blockchain from "./pages/Blockchain.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+import Footer from "./components/Footer.jsx";
+
 
 const App = () => {
   const { isAuthenticated } = useAuth();
@@ -72,8 +74,10 @@ const Layout = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-zinc-900 to-black">
       <Navbar />
       <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   );
 };
+
 
 export default App;
