@@ -4,6 +4,8 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import "leaflet-defaulticon-compatibility";
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

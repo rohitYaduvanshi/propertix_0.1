@@ -7,4 +7,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  optimizeDeps: {
+    include: ['leaflet']  // ✅ Leaflet fix for blank map
+  },
+  define: {
+    global: 'globalThis',  // ✅ Leaflet global fix
+  },
 })

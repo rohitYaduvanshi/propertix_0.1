@@ -4,7 +4,7 @@ import logo from "../assets/propertix.png";
 
 const Footer = () => {
   return (
-    <footer className="mt-10 bg-gradient-to-t from-black via-zinc-950 to-black border-t border-white/10">
+    <footer className=" bg-gradient-to-t from-black via-zinc-950 to-black border-t ">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-10">
         {/* Glassmorphism wrapper */}
         <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_18px_70px_rgba(0,0,0,0.85)] px-5 md:px-7 py-6 md:py-7 flex flex-col md:flex-row gap-8 md:gap-10 md:items-center md:justify-between">

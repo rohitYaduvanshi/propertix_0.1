@@ -261,3 +261,18 @@ Next steps (planned):
 - Optionally property details + IPFS integration for documents.
 
 ---
+#command
+cd property-blockchain-contracts
+npx hardhat node
+
+cd property-blockchain-contracts
+npx hardhat run scripts/deploy.cjs --network localhost
+
+npm run dev
+
+
+
+#Update
+
+Sale---> Wallet disconnect
+All --> same 

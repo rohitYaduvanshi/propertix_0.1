@@ -1,71 +1,83 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { isUserLoggedIn, appLogin } = useAuth();
+  const { loginWithRole, loading } = useAuth();
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    if (isUserLoggedIn) {
-      navigate("/");
+  const handleLogin = async (role) => {
+    setIsProcessing(true);
+    const success = await loginWithRole(role);
+    if (success) {
+      // Role ke hisaab se redirect
+      if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
+          navigate("/admin");
+      } else {
+          navigate("/home");
+      }
     }
-  }, [isUserLoggedIn, navigate]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // abhi dummy: koi bhi email/password chalega
-    appLogin();
-    navigate("/");
+    setIsProcessing(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black">
-      <div className="w-full max-w-md bg-black/70 border border-white/10 rounded-2xl p-8 shadow-2xl shadow-purple-900/40">
-        <h1 className="text-2xl font-semibold mb-4 text-center text-white">
-          Login
-        </h1>
-        <p className="text-sm text-gray-400 mb-6 text-center">
-          Login to access property management dashboard. Wallet connect will be
-          suggested after login.
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl">
+        
+        <h1 className="text-3xl font-bold text-white mb-2 text-center">Welcome Back</h1>
+        <p className="text-gray-500 text-xs text-center mb-8">Select your role to login securely</p>
+
+        <div className="space-y-3">
+            {/* USER LOGIN */}
+            <button 
+                onClick={() => handleLogin("USER")}
+                disabled={loading || isProcessing}
+                className="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-bold py-4 rounded-xl flex items-center justify-between px-6 transition-all group"
+            >
+                <div className="flex flex-col items-start">
+                    <span className="text-sm text-gray-400 group-hover:text-white">Citizen Login</span>
+                    <span className="text-xs text-gray-600">For Property Owners & Buyers</span>
+                </div>
+                <span className="text-2xl">👤</span>
+            </button>
+
+            {/* OFFICERS LOGIN */}
+            <div className="grid grid-cols-2 gap-3">
+                <button 
+                    onClick={() => handleLogin("SURVEYOR")}
+                    disabled={loading || isProcessing}
+                    className="bg-yellow-900/20 hover:bg-yellow-900/40 border border-yellow-700/50 text-yellow-500 font-bold py-4 rounded-xl transition-all"
+                >
+                    🚧 Surveyor
+                </button>
+
+                <button 
+                    onClick={() => handleLogin("REGISTRAR")}
+                    disabled={loading || isProcessing}
+                    className="bg-green-900/20 hover:bg-green-900/40 border border-green-700/50 text-green-500 font-bold py-4 rounded-xl transition-all"
+                >
+                    ⚖️ Registrar
+                </button>
+            </div>
+
+            {/* ADMIN LOGIN (Hidden-ish) */}
+            <button 
+                onClick={() => handleLogin("ADMIN")}
+                disabled={loading || isProcessing}
+                className="w-full mt-4 text-xs text-red-900 hover:text-red-500 font-mono tracking-widest uppercase transition-colors"
+            >
+                • Government Admin Access •
+            </button>
+        </div>
+
+        {isProcessing && (
+            <p className="text-center text-cyan-500 text-xs mt-4 animate-pulse">Connecting to Wallet...</p>
+        )}
+
+        <p className="text-center text-gray-500 text-xs mt-8">
+          New to Propertix? <Link to="/register" className="text-cyan-400 font-bold hover:underline">Create Account</Link>
         </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Email</label>
-            <input
-              type="email"
-              className="w-full rounded-lg bg-zinc-900/80 border border-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              className="w-full rounded-lg bg-zinc-900/80 border border-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full mt-4 py-2.5 rounded-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-lg shadow-cyan-500/40 transition-all"
-          >
-            Login
-          </button>
-        </form>
       </div>
     </div>
   );
