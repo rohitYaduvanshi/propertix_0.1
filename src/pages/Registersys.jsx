@@ -7,9 +7,6 @@ import {
   PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig";
 
-// Axios Default Config: Isse 405 error ke chances khatam ho jate hain
-axios.defaults.baseURL = window.location.origin;
-
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", email: "", role: "USER", secretCode: "" });
@@ -84,28 +81,31 @@ const Register = () => {
       await tx.wait();
       console.log("✅ Blockchain identity secured");
 
-      // 4. BACKEND REGISTRATION (Fixed for Vercel)
-      // Step 4: BACKEND REGISTRATION (Vercel Fix)
-      setStatus("Step 4/4: Saving Profile to Neon DB...");
+      // 4. BACKEND REGISTRATION (The Ultimate Fix for Vercel 405/404)
+      setStatus("Step 4/4: Finalizing Registration...");
       const signatureMessage = `Registering to Propertix\nWallet: ${walletAddress}\nRole: ${formData.role}`;
       const signature = await signer.signMessage(signatureMessage);
 
+      // URL ko pura (Absolute) likha hai taaki Vercel confusion na kare
       const response = await axios({
-        method: 'POST', 
-        url: '/api/auth/register',
+        method: 'POST', // Capital mein POST
+        url: 'https://propertix-0-1.vercel.app/api/auth/register', 
         data: {
           name: formData.name,
           email: formData.email,
           role: formData.role,
           walletAddress: walletAddress.toLowerCase(),
-          signature: signature
+          signature: signature 
         },
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
 
       if (response.status === 200 || response.status === 201) {
         setStatus("Success!");
-        alert("🎉 Registration Successful! Database updated.");
+        alert("🎉 Registration Successful! Neon DB and Blockchain synced.");
         navigate("/login");
       }
 
@@ -122,11 +122,12 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
       <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
-
+        
         {/* Connection Status Badge */}
         <div className="mb-6 text-center">
-          <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-mono ${connectedAddress ? "border-green-500/30 bg-green-500/5 text-green-400" : "border-yellow-500/30 bg-yellow-500/5 text-yellow-400"
-            }`}>
+          <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-mono ${
+            connectedAddress ? "border-green-500/30 bg-green-500/5 text-green-400" : "border-yellow-500/30 bg-yellow-500/5 text-yellow-400"
+          }`}>
             {connectedAddress ? `CONNECTED: ${connectedAddress.substring(0, 6)}...${connectedAddress.substring(38)}` : "WAITING FOR WALLET"}
           </div>
         </div>
@@ -147,8 +148,9 @@ const Register = () => {
           <div className="grid grid-cols-3 gap-2 mt-2">
             {['USER', 'SURVEYOR', 'REGISTRAR'].map(role => (
               <button key={role} type="button" onClick={() => setFormData({ ...formData, role: role, secretCode: "" })}
-                className={`py-2 text-[10px] font-black rounded-xl border transition-all ${formData.role === role ? 'bg-white text-black border-white shadow-lg' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                  }`}
+                className={`py-2 text-[10px] font-black rounded-xl border transition-all ${
+                  formData.role === role ? 'bg-white text-black border-white shadow-lg' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                }`}
               >
                 {role}
               </button>
@@ -160,15 +162,16 @@ const Register = () => {
           )}
 
           <button type="submit" disabled={loading}
-            className={`w-full font-black text-xs uppercase tracking-widest py-4 rounded-xl mt-6 transition-all duration-500 ${loading ? "bg-zinc-900 text-zinc-700 cursor-not-allowed" : "bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
-              }`}
+            className={`w-full font-black text-xs uppercase tracking-widest py-4 rounded-xl mt-6 transition-all duration-500 ${
+              loading ? "bg-zinc-900 text-zinc-700 cursor-not-allowed" : "bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+            }`}
           >
             {loading ? "SYNCING..." : "SECURE IDENTITY"}
           </button>
         </form>
 
-        <p className="text-center text-zinc-600 text-[9px] mt-8 uppercase tracking-tighter">
-          *Switch to the 10,000 ETH account during MetaMask popup*
+        <p className="text-center text-zinc-600 text-[9px] mt-8 uppercase tracking-tighter italic">
+          *Blockchain Transaction complete hone ke baad Database save hoga.*
         </p>
       </div>
     </div>
