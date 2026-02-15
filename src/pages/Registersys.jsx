@@ -14,51 +14,48 @@ const Register = () => {
   const [status, setStatus] = useState(""); 
   const [connectedAddress, setConnectedAddress] = useState(""); 
 
-  // --- WALLET LOGIC ---
-
-  // अकाउंट बदलने पर अपने आप अपडेट होने के लिए useEffect
+  // अकाउंट बदलने पर स्क्रीन पर एड्रेस अपडेट करने के लिए
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
-        if (accounts.length > 0) {
-          setConnectedAddress(accounts[0]);
-        } else {
-          setConnectedAddress("");
-        }
+        setConnectedAddress(accounts[0] || "");
       });
     }
   }, []);
 
-  const connectWallet = async () => {
-    try {
-      if (!window.ethereum) return alert("MetaMask install karein!");
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
-      setConnectedAddress(accounts[0]);
-    } catch (err) {
-      console.error("Connection failed", err);
-    }
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!connectedAddress) return alert("Pehle Wallet Connect/Select karein!");
-    
     setLoading(true);
-    setStatus("Initializing...");
+    setStatus("Opening MetaMask Account Selector...");
 
     try {
+      if (!window.ethereum) return alert("MetaMask install karein!");
+
+      // --- ACCOUNT SELECTION LOGIC ---
+      // यह कमांड MetaMask को मजबूर करेगी कि वह आपको अकाउंट चुनने का मौका दे
+      const accounts = await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      }).then(() => window.ethereum.request({
+        method: "eth_requestAccounts"
+      }));
+
+      const walletAddress = accounts[0];
+      setConnectedAddress(walletAddress);
+      
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const walletAddress = await signer.getAddress();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
       // STEP 1: BLOCKCHAIN REGISTRATION
-      setStatus("Step 1/2: Securing Role on Blockchain...");
+      setStatus("Step 1/2: Securing Role on Blockchain... Please Confirm in MetaMask");
+      
+      // गैस एरर से बचने के लिए हम मैन्युअल गैस सेटिंग्स भी जोड़ सकते हैं
       const tx = await contract.registerUser(
         formData.role, 
         formData.secretCode || "N/A"
       );
+      
       await tx.wait(); 
       console.log("✅ Blockchain identity secured");
 
@@ -68,7 +65,7 @@ const Register = () => {
       const signatureMessage = `Registering to Propertix\nWallet: ${walletAddress}\nRole: ${formData.role}`;
       const signature = await signer.signMessage(signatureMessage);
 
-      // यहा अपने Vercel Backend का URL डालें
+      // अपनी Vercel API का लिंक यहाँ डालें
       const response = await axios.post("https://propertix-0-1.vercel.app/api/auth/register", {
           name: formData.name,
           email: formData.email,
@@ -79,13 +76,15 @@ const Register = () => {
 
       if (response.status === 200 || response.status === 201) {
         setStatus("Registration Complete!");
-        alert("🎉 Success! 10,000 ETH use karne ke liye taiyar hain!");
+        alert("🎉 Registration Successful! 10,000 ETH has been utilized.");
         navigate("/login");
       }
 
     } catch (error) {
       console.error(error);
-      alert("❌ Error: " + (error.response?.data?.message || error.message));
+      // अगर यूजर ने गलत अकाउंट चुना या ट्रांजेक्शन रिजेक्ट किया
+      const errorMsg = error.reason || error.message || "Unknown Error";
+      alert("❌ Error: " + errorMsg);
     } finally {
       setLoading(false);
       setStatus("");
@@ -96,25 +95,16 @@ const Register = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
       <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
         
-        {/* Wallet Selection Button */}
+        {/* Connection Status Badge */}
         <div className="mb-6 text-center">
-          <button 
-            type="button"
-            onClick={connectWallet}
-            className={`w-full py-3 rounded-xl text-[10px] font-mono border transition-all ${
-              connectedAddress 
-              ? "border-green-500/50 bg-green-500/5 text-green-400" 
-              : "border-cyan-500/50 bg-cyan-500/5 text-cyan-400 animate-pulse"
-            }`}
-          >
-            {connectedAddress 
-              ? `WALLET: ${connectedAddress.substring(0, 6)}...${connectedAddress.substring(38)}` 
-              : "CONNECT METAMASK ACCOUNT"}
-          </button>
-          <p className="text-[8px] text-zinc-600 mt-2 uppercase">MetaMask mein account switch karein</p>
+          <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-mono ${
+              connectedAddress ? "border-green-500/30 bg-green-500/5 text-green-400" : "border-yellow-500/30 bg-yellow-500/5 text-yellow-400"
+          }`}>
+            {connectedAddress ? `ACTIVE: ${connectedAddress.substring(0,6)}...${connectedAddress.substring(38)}` : "WALLET NOT CONNECTED"}
+          </div>
         </div>
 
-        <h1 className="text-3xl font-bold mb-2 text-center tracking-tight">Join Propertix</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center tracking-tight text-white">Join Propertix</h1>
         <p className="text-gray-500 text-[11px] text-center mb-6 uppercase tracking-widest">Decentralized Land Registry</p>
 
         {status && (
@@ -126,7 +116,7 @@ const Register = () => {
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="text-gray-500 text-[9px] font-bold uppercase tracking-tighter ml-1">Full Name</label>
-            <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1 text-sm" placeholder="Rohit Y.." />
+            <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1 text-sm" placeholder="Rohit Yadav" />
           </div>
 
           <div>
@@ -165,12 +155,12 @@ const Register = () => {
                 : "bg-cyan-500 text-black hover:bg-cyan-400 shadow-lg shadow-cyan-500/20"
             }`}
           >
-            {loading ? "Processing..." : "Secure Identity"}
+            {loading ? "CHECK METAMASK..." : "SECURE IDENTITY"}
           </button>
         </form>
 
-        <p className="text-center text-zinc-600 text-[10px] mt-8 font-medium">
-          ALREADY SECURED? <Link to="/login" className="text-white hover:text-cyan-400 underline underline-offset-4 transition-colors">ACCESS PORTAL</Link>
+        <p className="text-center text-zinc-600 text-[10px] mt-8 font-medium italic">
+          *Note: 10,000 ETH waala account hi select karein.*
         </p>
       </div>
     </div>
