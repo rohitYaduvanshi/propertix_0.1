@@ -32,7 +32,6 @@ const Blockchain = () => {
   const [docFile, setDocFile] = useState(null); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
-  const [ipfsLink, setIpfsLink] = useState(""); 
   const [txHash, setTxHash] = useState("");
 
   useEffect(() => {
@@ -87,7 +86,6 @@ const Blockchain = () => {
       setStatus("Mining Transaction...");
       await tx.wait();
       
-      setIpfsLink(metadataURL);
       setTxHash(tx.hash);
       setStatus("✅ Registered Successfully!");
     } catch (err) { setStatus("❌ Error: " + (err.reason || err.message)); }
@@ -97,39 +95,28 @@ const Blockchain = () => {
   return (
     <section className="relative flex flex-col items-center px-4 md:px-8 py-12 min-h-screen bg-black text-white overflow-x-hidden">
       
-      {/* --- TOP TITLE TEXT --- */}
       <div className="w-full max-w-6xl mb-8 text-center lg:text-left">
         <p className="text-[10px] font-black tracking-[0.4em] text-cyan-400 uppercase mb-2">Immutable Protocol</p>
         <h1 className="text-3xl md:text-6xl font-black leading-tight">
           Propertix Land <span className="text-cyan-400">Ledger</span>
         </h1>
-        <p className="text-gray-500 text-xs md:text-sm mt-2">Blockchain-backed land verification with Satellite Precision.</p>
       </div>
 
       <div className="relative w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
         
-        {/* LEFT SIDE: Proofs & Status (Now clean and truncated) */}
+        {/* LEFT SIDE: Proofs & Status (Hash only) */}
         <div className="space-y-6 w-full order-2 lg:order-1 lg:sticky lg:top-10">
-          {(ipfsLink || txHash) && (
+          {txHash && (
             <div className="space-y-4 animate-in fade-in slide-in-from-left-8">
-              {/* IPFS Card */}
-              <div className="p-4 bg-zinc-900/60 border border-emerald-500/30 rounded-3xl backdrop-blur-xl">
-                <p className="text-[9px] font-bold text-emerald-400 uppercase mb-2 tracking-widest">🌍 IPFS Digital Asset</p>
-                <div className="flex items-center gap-2 bg-black/40 p-2 rounded-xl border border-white/5 overflow-hidden">
-                  <span className="text-[10px] font-mono text-gray-500 truncate flex-1">{ipfsLink}</span>
-                  <a href={ipfsLink} target="_blank" rel="noreferrer" className="text-[10px] bg-emerald-600 px-3 py-1.5 rounded-lg font-black text-white whitespace-nowrap">VIEW</a>
-                </div>
-              </div>
-
-              {/* Hash Card - Using Substring for clean look */}
               <div className="p-4 bg-zinc-900/60 border border-cyan-500/30 rounded-3xl backdrop-blur-xl">
-                <p className="text-[9px] font-bold text-cyan-400 uppercase mb-2 tracking-widest">🔗 Tx Hash</p>
+                <p className="text-[9px] font-bold text-cyan-400 uppercase mb-2 tracking-widest">🔗 Transaction Hash</p>
                 <div className="flex items-center gap-2 bg-black/40 p-2 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-mono text-gray-400 flex-1">
-                    {txHash.substring(0, 12)}...{txHash.substring(txHash.length - 10)}
+                  <span className="text-[10px] font-mono text-gray-500 flex-1">
+                    {txHash.substring(0, 15)}...{txHash.substring(txHash.length - 12)}
                   </span>
                   <button onClick={() => navigator.clipboard.writeText(txHash)} className="text-[10px] bg-cyan-600 px-3 py-1.5 rounded-lg font-black text-white whitespace-nowrap">COPY</button>
                 </div>
+                <p className="text-[8px] text-gray-600 mt-2 italic">*Link will be reflected in Owner Dashboard.</p>
               </div>
             </div>
           )}
@@ -138,7 +125,6 @@ const Blockchain = () => {
         {/* RIGHT SIDE: FORM */}
         <div className="w-full bg-zinc-900/40 backdrop-blur-2xl border border-white/10 p-5 md:p-10 rounded-[32px] shadow-3xl order-1 lg:order-2">
           <form onSubmit={handleRegister} className="space-y-6">
-            
             <div className="flex p-1 bg-black/60 rounded-2xl border border-zinc-800">
               {["Ownership", "Government"].map((p) => (
                 <button key={p} type="button" onClick={() => setRegistrationPurpose(p)}
@@ -158,7 +144,6 @@ const Blockchain = () => {
               <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-cyan-600/10 hover:bg-cyan-600 hover:text-white border border-cyan-600/30 py-3 rounded-xl text-[10px] font-black transition-all">LOCATE ON MAP</button>
             </div>
 
-            {/* MAP WITH SATELLITE TOGGLE */}
             <div className="h-52 md:h-64 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl z-0">
                <MapContainer center={coordinates} zoom={13} style={{height: '100%', width: '100%'}}>
                   <LayersControl position="topright">
@@ -196,7 +181,6 @@ const Blockchain = () => {
             <button type="submit" disabled={isSubmitting} className="w-full py-5 bg-white text-black font-black text-[12px] rounded-2xl tracking-[0.2em] uppercase hover:bg-cyan-400 transition-all shadow-2xl disabled:opacity-50">
               {isSubmitting ? "Securing on Chain..." : "SUBMIT APPLICATION (0.001 ETH)"}
             </button>
-
             {status && <div className="text-[10px] text-center font-bold text-cyan-400 animate-pulse uppercase tracking-widest">{status}</div>}
           </form>
         </div>
@@ -205,7 +189,6 @@ const Blockchain = () => {
   );
 };
 
-// --- Helpers ---
 const MapController = ({ coords }) => {
   const map = useMap();
   useEffect(() => { if (coords) map.setView([coords.lat, coords.lng], 16); }, [coords, map]);
