@@ -88,14 +88,12 @@ const Register = () => {
 
       // URL ko pura (Absolute) likha hai taaki Vercel confusion na kare
       // Register.jsx 
-      const response = await axios.post("/api/auth/register", {
+      const response = await axios.post("https://propertixbackend-production.up.railway.app/api/auth/register", {
         name: formData.name,
         email: formData.email,
         role: formData.role,
         walletAddress: walletAddress.toLowerCase(),
         signature: signature
-      }, {
-        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.status === 200 || response.status === 201) {
