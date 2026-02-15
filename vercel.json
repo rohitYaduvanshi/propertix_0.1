@@ -1,13 +1,8 @@
 {
-  "version": 2,
   "rewrites": [
     {
-      "source": "/api/auth/register",
-      "destination": "/backend/server.js"
-    },
-    {
-      "source": "/api/auth/user/:address",
-      "destination": "/backend/server.js"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
