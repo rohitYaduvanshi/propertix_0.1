@@ -86,21 +86,19 @@ const LeaseTimer = ({ leaseEnd, tenant, userRole }) => {
 
             {userRole === "OWNER" && (
 
-                <p className="text-xs text-indigo-400 font-mono mb-3">{tenant.slice(0,8)}...{tenant.slice(-6)}</p>
+                <p className="text-xs text-indigo-400 font-mono mb-3">{tenant.slice(0, 8)}...{tenant.slice(-6)}</p>
 
             )}
 
-           
 
-            <div className={`px-3 py-2 rounded-lg text-xs font-bold border flex flex-col gap-1 ${
 
-                isOverdue
+            <div className={`px-3 py-2 rounded-lg text-xs font-bold border flex flex-col gap-1 ${isOverdue
 
-                ? 'bg-red-500/10 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                    ? 'bg-red-500/10 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
 
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50'
+                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50'
 
-            }`}>
+                }`}>
 
                 <div className="flex items-center gap-2">
 
@@ -230,7 +228,7 @@ const OwnerDashboard = () => {
 
                         else if (userProfile && userProfile.name) currentOwnerName = userProfile.name;
 
-                    } catch (err) {}
+                    } catch (err) { }
 
                 }
 
@@ -238,9 +236,9 @@ const OwnerDashboard = () => {
 
                 const getAttr = (key) => meta.attributes?.find(a => a.trait_type === key)?.value || "N/A";
 
-                let safePrice = "0"; if (item.price) try { safePrice = formatEther(item.price); } catch (e) {}
+                let safePrice = "0"; if (item.price) try { safePrice = formatEther(item.price); } catch (e) { }
 
-                let safeLeasePrice = "0"; if (item.leasePrice) try { safeLeasePrice = formatEther(item.leasePrice); } catch (e) {}
+                let safeLeasePrice = "0"; if (item.leasePrice) try { safeLeasePrice = formatEther(item.leasePrice); } catch (e) { }
 
 
 
@@ -428,7 +426,7 @@ const OwnerDashboard = () => {
 
             const input = document.getElementById(elementId);
 
-            if(!input) return;
+            if (!input) return;
 
             document.body.style.cursor = "wait";
 
@@ -518,17 +516,15 @@ const OwnerDashboard = () => {
 
                         {myProperties.map((prop) => (
 
-                            <div key={prop.id} className={`bg-zinc-900 border rounded-3xl overflow-hidden flex flex-col relative shadow-2xl transition-all ${
+                            <div key={prop.id} className={`bg-zinc-900 border rounded-3xl overflow-hidden flex flex-col relative shadow-2xl transition-all ${prop.userRole === "TENANT" ? 'border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.15)]' :
 
-                                prop.userRole === "TENANT" ? 'border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.15)]' :
+                                    prop.saleStatus === 1 ? 'border-green-500/50' :
 
-                                prop.saleStatus === 1 ? 'border-green-500/50' :
+                                        prop.saleStatus === 2 ? 'border-indigo-500/50' :
 
-                                prop.saleStatus === 2 ? 'border-indigo-500/50' :
+                                            prop.saleStatus === 3 ? 'border-rose-500/50' : 'border-white/5'
 
-                                prop.saleStatus === 3 ? 'border-rose-500/50' : 'border-white/5'
-
-                            }`}>
+                                }`}>
 
 
 
@@ -546,7 +542,7 @@ const OwnerDashboard = () => {
 
                                     )}
 
-                                   
+
 
                                     <div className="absolute top-4 left-4 flex flex-col gap-2">
 
@@ -570,7 +566,7 @@ const OwnerDashboard = () => {
 
                                         )}
 
-                                       
+
 
                                         {/* SALE / LEASE BADGES (Only for Owner to see status) */}
 
