@@ -239,7 +239,7 @@ const PropertyMap = () => {
                       {walletAddress?.toLowerCase() === selectedProperty.owner.toLowerCase() ? (
                           <button className="w-full font-black py-5 rounded-2xl bg-zinc-800 text-zinc-500 uppercase text-[11px] cursor-not-allowed">You are the Owner</button>
                       ) : (
-                          selectedProperty.status === 'sale' ? <button onClick={() => setActionModal({show:true, type:'SALE'})} className="w-full font-black py-5 rounded-2xl bg-red-600 hover:bg-blue-500 text-white uppercase text-[11px] shadow-xl transition-all">Purchase Ownership</button> :
+                          selectedProperty.status === 'sale' ? <button onClick={() => setActionModal({show:true, type:'SALE'})} className="w-full font-black py-5 rounded-2xl bg-red-600 hover:bg-red-500 text-white uppercase text-[11px] shadow-xl transition-all">Purchase Ownership</button> :
                           selectedProperty.status === 'lease' ? <button onClick={() => setActionModal({show:true, type:'LEASE'})} className="w-full font-black py-5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white uppercase text-[11px] shadow-xl transition-all">Start Lease Contract</button> :
                           <button className="w-full font-black py-5 rounded-2xl bg-zinc-800 text-zinc-500 uppercase text-[11px] cursor-not-allowed">Currently Private</button>
                       )}
