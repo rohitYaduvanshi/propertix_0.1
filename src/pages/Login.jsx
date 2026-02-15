@@ -8,17 +8,27 @@ const Login = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleLogin = async (role) => {
-    setIsProcessing(true);
-    const success = await loginWithRole(role);
-    if (success) {
-      // Role ke hisaab se redirect
-      if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
-          navigate("/admin");
+    try {
+      setIsProcessing(true);
+      // loginWithRole अब Backend से data लाकर state update करेगा
+      const success = await loginWithRole(role);
+      
+      if (success) {
+        // Role के हिसाब से सही जगह भेजें
+        if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
+            navigate("/admin");
+        } else {
+            navigate("/home");
+        }
       } else {
-          navigate("/home");
+        alert("Login failed. Please make sure you are registered!");
       }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during login.");
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   return (
@@ -61,7 +71,7 @@ const Login = () => {
                 </button>
             </div>
 
-            {/* ADMIN LOGIN (Hidden-ish) */}
+            {/* ADMIN LOGIN */}
             <button 
                 onClick={() => handleLogin("ADMIN")}
                 disabled={loading || isProcessing}
@@ -72,7 +82,7 @@ const Login = () => {
         </div>
 
         {isProcessing && (
-            <p className="text-center text-cyan-500 text-xs mt-4 animate-pulse">Connecting to Wallet...</p>
+            <p className="text-center text-cyan-500 text-xs mt-4 animate-pulse">Verifying Credentials on Chain...</p>
         )}
 
         <p className="text-center text-gray-500 text-xs mt-8">
