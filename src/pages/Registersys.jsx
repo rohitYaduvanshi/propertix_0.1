@@ -14,17 +14,18 @@ const Register = () => {
   const [status, setStatus] = useState(""); 
   const [connectedAddress, setConnectedAddress] = useState(""); 
 
-  // Chain ID for Hardhat (31337) in Hexadecimal
+  // Hardhat Chain ID (31337) Hex format mein
   const HARDHAT_CHAIN_ID = "0x7a69"; 
-  // Apna latest Ngrok URL yahan dalein
+  // Apna ACTIVE Ngrok URL yahan confirm karein
   const NGROK_RPC_URL = "https://pseudoascetically-respective-granville.ngrok-free.dev";
 
   useEffect(() => {
     if (window.ethereum) {
+      // Account badalne par UI update karein
       window.ethereum.on("accountsChanged", (accounts) => {
         setConnectedAddress(accounts[0] || "");
       });
-      // Network change hone par alert dene ke liye
+      // Network badalne par page refresh karein
       window.ethereum.on("chainChanged", () => window.location.reload());
     }
   }, []);
@@ -37,9 +38,8 @@ const Register = () => {
     try {
       if (!window.ethereum) return alert("MetaMask install karein!");
 
-      // 1. FORCE ACCOUNT SELECTION
-      // Isse user wahi account choose karega jisme 10,000 ETH hain
-      setStatus("Step 1/3: Please select your 10,000 ETH account...");
+      // 1. FORCE ACCOUNT SELECTION (Jisme 10,000 ETH hain)
+      setStatus("Step 1/4: Please select your 10,000 ETH account...");
       const accounts = await window.ethereum.request({
         method: "wallet_requestPermissions",
         params: [{ eth_accounts: {} }],
@@ -48,16 +48,14 @@ const Register = () => {
       const walletAddress = accounts[0];
       setConnectedAddress(walletAddress);
 
-      // 2. FORCE NETWORK SWITCH (Prevents Ethereum Mainnet error)
-      // Isse transaction ke waqt network apne aap change nahi hoga
-      setStatus("Step 2/3: Verifying Propertix Testnet Connection...");
+      // 2. FORCE NETWORK SWITCH (Ngrok connection verify karne ke liye)
+      setStatus("Step 2/4: Connecting to Propertix Testnet...");
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: HARDHAT_CHAIN_ID }],
         });
       } catch (switchError) {
-        // Agar network MetaMask mein add nahi hai
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -77,37 +75,42 @@ const Register = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-      // 3. BLOCKCHAIN REGISTRATION
-      setStatus("Step 3/3: Securing Identity on Blockchain...");
+      // 3. BLOCKCHAIN REGISTRATION (Transaction confirmation)
+      setStatus("Step 3/4: Securing Identity on Blockchain...");
       const tx = await contract.registerUser(
         formData.role, 
         formData.secretCode || "N/A"
       );
-      
       await tx.wait(); 
       console.log("✅ Blockchain identity secured");
 
-      // 4. BACKEND REGISTRATION (Vercel)
+      // 4. BACKEND REGISTRATION (Vercel 405 Error Fix)
+      setStatus("Step 4/4: Saving Profile to Neon DB...");
       const signatureMessage = `Registering to Propertix\nWallet: ${walletAddress}\nRole: ${formData.role}`;
       const signature = await signer.signMessage(signatureMessage);
 
-      const response = await axios.post("https://propertix-0-1.vercel.app/api/auth/register", {
+      // FIX: Full URL ke bajaye Relative Path use karein taaki Vercel 405 error na de
+      const response = await axios.post("/api/auth/register", {
           name: formData.name,
           email: formData.email,
           role: formData.role,
           walletAddress: walletAddress.toLowerCase(),
           signature: signature 
+      }, {
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (response.status === 200 || response.status === 201) {
         setStatus("Success!");
-        alert("🎉 Registration Successful! You can now access the portal.");
+        alert("🎉 Registration Successful! Neon DB and Blockchain synced.");
         navigate("/login");
       }
 
     } catch (error) {
       console.error(error);
-      alert("❌ Error: " + (error.reason || error.message));
+      // Detailed error alert for debugging
+      const errorMsg = error.response?.data?.message || error.reason || error.message;
+      alert("❌ Error: " + errorMsg);
     } finally {
       setLoading(false);
       setStatus("");
@@ -118,6 +121,7 @@ const Register = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
       <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
         
+        {/* Wallet Connection Status */}
         <div className="mb-6 text-center">
           <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-mono ${
               connectedAddress ? "border-green-500/30 bg-green-500/5 text-green-400" : "border-yellow-500/30 bg-yellow-500/5 text-yellow-400"
@@ -127,24 +131,24 @@ const Register = () => {
         </div>
 
         <h1 className="text-3xl font-bold mb-2 text-center tracking-tight">Join Propertix</h1>
-        <p className="text-gray-500 text-[11px] text-center mb-6 uppercase tracking-widest font-bold">Secure Land Registry</p>
+        <p className="text-gray-400 text-[11px] text-center mb-6 uppercase tracking-widest font-bold">Secure Land Registry</p>
 
         {status && (
-          <div className="mb-6 p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl text-cyan-400 text-[10px] text-center font-mono">
+          <div className="mb-6 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 text-[10px] text-center font-mono">
             {status}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition text-sm" placeholder="Full Name" />
+          <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition text-sm placeholder:text-zinc-600" placeholder="Full Name" />
           
-          <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition text-sm" placeholder="Email Address" />
+          <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition text-sm placeholder:text-zinc-600" placeholder="Email Address" />
 
           <div className="grid grid-cols-3 gap-2 mt-2">
               {['USER', 'SURVEYOR', 'REGISTRAR'].map(role => (
                   <button key={role} type="button" onClick={() => setFormData({...formData, role: role, secretCode: ""})} 
                       className={`py-2 text-[10px] font-black rounded-xl border transition-all ${
-                          formData.role === role ? 'bg-white text-black border-white' : 'bg-transparent border-zinc-800 text-zinc-500'
+                          formData.role === role ? 'bg-white text-black border-white' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700'
                       }`}
                   >
                       {role}
@@ -153,20 +157,20 @@ const Register = () => {
           </div>
 
           {formData.role !== "USER" && (
-              <input type="password" required onChange={(e) => setFormData({...formData, secretCode: e.target.value})} className="w-full bg-red-500/5 border border-red-500/20 text-white p-3 rounded-xl outline-none transition text-sm" placeholder="Secret Access Key" />
+              <input type="password" required onChange={(e) => setFormData({...formData, secretCode: e.target.value})} className="w-full bg-red-500/5 border border-red-500/20 text-white p-3 rounded-xl outline-none transition text-sm placeholder:text-zinc-600" placeholder="Secret Access Key" />
           )}
 
           <button type="submit" disabled={loading} 
-            className={`w-full font-black text-xs uppercase tracking-widest py-4 rounded-xl mt-6 transition-all ${
-                loading ? "bg-zinc-900 text-zinc-700" : "bg-cyan-500 text-black hover:bg-cyan-400 shadow-lg shadow-cyan-500/20"
+            className={`w-full font-black text-xs uppercase tracking-widest py-4 rounded-xl mt-6 transition-all duration-500 ${
+                loading ? "bg-zinc-900 text-zinc-700 cursor-not-allowed" : "bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
             }`}
           >
-            {loading ? "CHECKING..." : "SECURE IDENTITY"}
+            {loading ? "SYNCING..." : "SECURE IDENTITY"}
           </button>
         </form>
 
-        <p className="text-center text-zinc-600 text-[10px] mt-8">
-          *Make sure to select the account with 10,000 ETH in MetaMask.*
+        <p className="text-center text-zinc-600 text-[9px] mt-8 uppercase tracking-tighter">
+          *Switch to the 10,000 ETH account during MetaMask popup*
         </p>
       </div>
     </div>
