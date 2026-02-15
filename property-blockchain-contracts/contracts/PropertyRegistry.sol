@@ -88,21 +88,26 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     }
 
     // ==========================================
-    // 📝 1. REGISTRATION FUNCTIONS (Govt & User)
+    // 📝 1. REGISTRATION FUNCTIONS (Updated for Hybrid Model)
     // ==========================================
-    
-    // Naya User ya Officer (Surveyor/Registrar) register karne ke liye
-    function registerUser(string memory _name, string memory _email, string memory _role, string memory _secretCode) public {
-        require(!users[msg.sender].isRegistered, "Already registered!");
+
+// Naya User ya Officer register karne ke liye
+// Humne 'email' aur 'name' yahan se hata diya hai (Wo MongoDB sambhal lega)
+// Sirf 'Role' ko blockchain par lock karenge for Security.
+    function registerUser(string memory _role, string memory _secretCode) public {
+        require(!users[msg.sender].isRegistered, "Already registered on Blockchain!");
 
         if (keccak256(bytes(_role)) == keccak256(bytes("SURVEYOR"))) {
-             require(keccak256(bytes(_secretCode)) == keccak256(bytes("SURVEY123")), "Invalid Code");
-             _grantRole(SURVEYOR_ROLE, msg.sender);
+            require(keccak256(bytes(_secretCode)) == keccak256(bytes("SURVEY123")), "Invalid Code");
+            _grantRole(SURVEYOR_ROLE, msg.sender);
         } else if (keccak256(bytes(_role)) == keccak256(bytes("REGISTRAR"))) {
-             require(keccak256(bytes(_secretCode)) == keccak256(bytes("REGISTRAR123")), "Invalid Code");
-             _grantRole(REGISTRAR_ROLE, msg.sender);
+            require(keccak256(bytes(_secretCode)) == keccak256(bytes("REGISTRAR123")), "Invalid Code");
+            _grantRole(REGISTRAR_ROLE, msg.sender);
         }
-        users[msg.sender] = UserProfile(_name, _email, _role, true);
+    
+        // Sirf Role aur Registration status lock kar rahe hain
+        users[msg.sender].role = _role;
+        users[msg.sender].isRegistered = true;
     }
 
     // Nayi Property Register karne ki Application dalne ke liye

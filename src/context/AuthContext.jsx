@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { BrowserProvider, Contract } from "ethers";
+import axios from "axios"; 
 import {
   PROPERTY_REGISTRY_ADDRESS,
   PROPERTY_REGISTRY_ABI,
@@ -7,138 +8,135 @@ import {
 
 const AuthContext = createContext(null);
 
+// Backend Base URL (Neon DB optimized)
+const API_BASE_URL = "http://localhost:5000/api/auth";
+
 export const AuthProvider = ({ children }) => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Roles State
   const [roleData, setRoleData] = useState({
     isAdmin: false,
     isSurveyor: false,
     isRegistrar: false,
     isOfficer: false
   });
-
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- HELPER: Identify User from Blockchain ---
+  // --- HELPER: Identify User (Blockchain + Neon DB) ---
   const fetchUserIdentity = async (account) => {
     try {
+      if (!window.ethereum || !account) return null;
+
       const provider = new BrowserProvider(window.ethereum);
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, provider);
 
-      // User Details Fetch
+      // 1. BLOCKCHAIN CHECK (Primary Source of Truth)
       const userStruct = await contract.users(account);
       const roleString = userStruct.role; 
-      const isRegistered = userStruct.isRegistered;
+      const isRegisteredOnBC = userStruct.isRegistered;
 
-      // Role Boolean Setters
+      if (!isRegisteredOnBC) return { isRegistered: false };
+
+      // 2. NEON DB (PostgreSQL) CHECK
+      let dbUser = { name: "Unknown", email: "N/A" };
+      try {
+        // Neon DB API Call
+        const response = await axios.get(`${API_BASE_URL}/user/${account.toLowerCase()}`);
+        dbUser = response.data;
+      } catch (err) {
+        console.warn("⚠️ Profile not found in Neon DB, showing Blockchain data.");
+      }
+
       const isAdmin = roleString === "ADMIN";
       const isSurveyor = roleString === "SURVEYOR";
       const isRegistrar = roleString === "REGISTRAR";
-      const isOfficer = isAdmin || isSurveyor || isRegistrar;
 
-      setRoleData({ isAdmin, isSurveyor, isRegistrar, isOfficer });
+      setRoleData({ 
+        isAdmin, 
+        isSurveyor, 
+        isRegistrar, 
+        isOfficer: isAdmin || isSurveyor || isRegistrar 
+      });
 
       setCurrentUser({
-        name: userStruct.name,
-        email: userStruct.email,
+        name: dbUser.name || "User",
+        email: dbUser.email || "",
         role: roleString,
+        // PostgreSQL column might be wallet_address
+        walletAddress: account, 
         photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account}`
       });
 
-      return { isRegistered, roleString };
-
+      return { isRegistered: true, roleString };
     } catch (error) {
       console.error("❌ Error fetching identity:", error);
       return null;
     }
   };
 
-  // --- INITIAL CHECK (Page Load) ---
+  // --- AUTO LOGIN ---
   useEffect(() => {
     const initAuth = async () => {
-      // 🛑 STRICT CHECK: Kya user ne Login kiya tha?
-      // Agar 'loginSession' nahi hai, to hum auto-connect NAHI karenge.
       const isSessionActive = localStorage.getItem("loginSession");
-
       if (window.ethereum && isSessionActive === "active") {
         try {
-            const provider = new BrowserProvider(window.ethereum);
-            const accounts = await provider.listAccounts();
-            
-            if (accounts.length > 0) {
-              const address = accounts[0].address;
-              console.log("🔄 Auto-Restoring Session for:", address);
-              setWalletAddress(address);
-              
-              const result = await fetchUserIdentity(address);
-              if (result && result.isRegistered) {
-                  setIsUserLoggedIn(true);
-              }
-            } else {
-                // Agar MetaMask locked hai ya disconnected hai
-                localStorage.removeItem("loginSession");
+          const provider = new BrowserProvider(window.ethereum);
+          const accounts = await provider.listAccounts();
+          
+          if (accounts.length > 0) {
+            const address = accounts[0].address;
+            setWalletAddress(address);
+            const result = await fetchUserIdentity(address);
+            if (result?.isRegistered) {
+                setIsUserLoggedIn(true);
             }
+          }
         } catch (err) {
-            console.error(err);
-            localStorage.removeItem("loginSession");
+          console.error("Auto-login error:", err);
+          localStorage.removeItem("loginSession");
         }
       }
       setLoading(false);
     };
-
     initAuth();
-
-    // Account Changed = Force Logout
-    if (window.ethereum) {
-        window.ethereum.on("accountsChanged", () => {
-            appLogout(); // Turant bahar phek do
-        });
-    }
   }, []);
 
-  // --- MANUAL LOGIN FUNCTION ---
+  // --- FREE LOGIN (MetaMask Signature) ---
   const loginWithRole = async (desiredRole) => {
-    if (!window.ethereum) return alert("MetaMask not found!");
+    if (!window.ethereum) {
+        alert("MetaMask not found!");
+        return false;
+    }
     setLoading(true);
 
     try {
-      // 1. Force Account Selection (Hamesha Puchega)
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const address = accounts[0];
+      
+      // डिजिटल सिग्नेचर ( साबित करता है कि वॉलेट आपका है - 100% FREE)
+      const message = `Propertix Login Verification\n\nRole: ${desiredRole}\nWallet: ${address}\nTime: ${new Date().toLocaleString()}`;
       await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }],
+        method: "personal_sign",
+        params: [message, address],
       });
 
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.listAccounts();
-      if (accounts.length === 0) {
-          setLoading(false);
-          return false;
-      }
-
-      const address = accounts[0].address;
-      
-      // 2. Check Identity
       const identity = await fetchUserIdentity(address);
 
       if (!identity || !identity.isRegistered) {
-        alert("❌ Wallet not registered! Please Register first.");
+        alert("❌ Wallet not registered on Blockchain. Please register your property/profile first.");
         setLoading(false);
         return false;
       }
 
-      // 3. Role Mismatch Check
-      if (desiredRole !== "ADMIN" && identity.roleString !== desiredRole) {
-          alert(`⚠️ Access Denied! Wallet is registered as ${identity.roleString}`);
+      // Role Logic
+      if (identity.roleString !== "ADMIN" && identity.roleString !== desiredRole) {
+          alert(`⚠️ Access Denied! Your assigned role is ${identity.roleString}`);
           setLoading(false);
           return false;
       }
 
-      // ✅ SUCCESS: Set Session Flag
       localStorage.setItem("loginSession", "active");
-      
       setWalletAddress(address);
       setIsUserLoggedIn(true);
       setLoading(false);
@@ -151,16 +149,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- LOGOUT FUNCTION (The Cleaner) ---
   const appLogout = () => {
-    // 🗑️ Clear Everything
     localStorage.removeItem("loginSession");
     setIsUserLoggedIn(false);
     setWalletAddress(null);
     setRoleData({ isAdmin: false, isSurveyor: false, isRegistrar: false, isOfficer: false });
     setCurrentUser(null);
-    
-    // Redirect
     window.location.href = "/login";
   };
 
@@ -172,7 +166,8 @@ export const AuthProvider = ({ children }) => {
     ...roleData,
     currentUser,
     loginWithRole,
-    appLogout
+    appLogout,
+    refreshUser: () => fetchUserIdentity(walletAddress)
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

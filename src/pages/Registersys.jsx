@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { BrowserProvider, Contract } from "ethers";
-import { PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI } from "../blockchain/contractConfig";
+import axios from "axios"; 
+import {
+  PROPERTY_REGISTRY_ADDRESS,
+  PROPERTY_REGISTRY_ABI,
+} from "../blockchain/contractConfig";
 
 const Register = () => {
   const navigate = useNavigate();
-  
-  // States
   const [formData, setFormData] = useState({ name: "", email: "", role: "USER", secretCode: "" });
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(""); 
 
-  // --- REGISTER HANDLE (Connect Wallet -> Select Account -> Register) ---
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setStatus("Initializing...");
 
     try {
       if (!window.ethereum) {
@@ -22,98 +25,94 @@ const Register = () => {
         return;
       }
 
-      // 1. Force Wallet Selection (User picks specific account NOW)
-      // Isse pehle se connected account hat jayega aur user naya account chun sakega
-      await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }],
-      });
-
-      // 2. Get Provider & Signer after selection
+      // 1. Setup Connection
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const connectedAddress = signer.address;
-
-      console.log(`Selected Wallet: ${connectedAddress}`);
-      console.log(`Registering as: ${formData.role}`);
-
-      // 3. Validation Check
-      if (formData.role !== "USER" && !formData.secretCode) {
-         setLoading(false);
-         return alert(`Please enter the Secret Code for ${formData.role}`);
-      }
-
-      // 4. Contract Instance
+      const walletAddress = await signer.getAddress();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-      // 🛑 DEBUG CHECK: Agar ABI purana hai to yahi pakad lo
-      if (typeof contract.registerUser !== "function") {
-          alert("CRITICAL ERROR: 'registerUser' function not found in ABI!\nPlease update src/blockchain/contractConfig.js with the latest ABI.");
-          setLoading(false);
-          return;
-      }
-
-      // 5. Call Smart Contract
-      // Note: Hum 4 arguments bhej rahe hain (Name, Email, Role, SecretCode)
+      // 2. STEP 1: BLOCKCHAIN REGISTRATION (Requires Gas)
+      // Yeh role को स्मार्ट कॉन्ट्रैक्ट में हमेशा के लिए लॉक कर देगा
+      setStatus("Step 1/2: Securing Role on Blockchain...");
       const tx = await contract.registerUser(
-          formData.name, 
-          formData.email, 
-          formData.role, 
-          formData.secretCode || "N/A" // Agar User hai to dummy text bhej do
+        formData.role, 
+        formData.secretCode || "N/A"
       );
-      
-      console.log("Transaction Sent:", tx.hash);
-      await tx.wait(); // Blockchain confirmation ka wait
+      await tx.wait(); 
+      console.log("✅ Blockchain identity secured");
 
-      alert(`✅ Registration Successful for ${formData.role}! Redirecting to Login...`);
-      navigate("/login");
+      // 3. STEP 2: NEON DB REGISTRATION (Free Profile)
+      setStatus("Step 2/2: Saving Profile to Database...");
+      
+      // Digital Signature for Backend Verification (Security)
+      const signatureMessage = `Registering to Propertix\nWallet: ${walletAddress}\nRole: ${formData.role}`;
+      const signature = await signer.signMessage(signatureMessage);
+
+      const response = await axios.post("http://localhost:5000/api/auth/register", {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+          walletAddress: walletAddress.toLowerCase(),
+          signature: signature // Backend can verify this
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setStatus("Registration Complete!");
+        alert("🎉 Registration Successful on Blockchain & Neon DB!");
+        navigate("/login");
+      }
 
     } catch (error) {
       console.error(error);
-      
-      // Error Handling
       if (error.code === 4001) {
-         alert("❌ You cancelled the wallet selection.");
-      } else if (error.reason) {
-        alert("❌ Blockchain Error: " + error.reason);
+         alert("❌ Transaction/Signature Denied.");
+      } else if (error.response) {
+        alert("❌ Database Error: " + error.response.data.message);
       } else {
-        alert("❌ Failed: " + (error.message || "Unknown Error"));
+        alert("❌ Registration Failed: " + (error.message || "Unknown Error"));
       }
+    } finally {
+      setLoading(false);
+      setStatus("");
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md relative overflow-hidden shadow-2xl">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans">
+      <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
         
-        <h1 className="text-3xl font-bold text-white mb-2 text-center">Create Account</h1>
-        <p className="text-gray-500 text-xs text-center mb-6">Select your role, then connect wallet</p>
+        {/* Decorative Light Effect */}
+        <div className="absolute -top-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl"></div>
+
+        <h1 className="text-3xl font-bold text-white mb-2 text-center tracking-tight">Join Propertix</h1>
+        <p className="text-gray-500 text-[11px] text-center mb-6 uppercase tracking-widest">Decentralized Land Registry</p>
+
+        {status && (
+          <div className="mb-6 p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl text-cyan-400 text-[10px] text-center font-mono italic">
+            {status}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          
           <div>
-            <label className="text-gray-500 text-[10px] font-bold tracking-widest uppercase ml-1">Full Name</label>
-            <input type="text" required onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-black border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1" />
+            <label className="text-gray-500 text-[9px] font-bold uppercase tracking-tighter ml-1">Full Name</label>
+            <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1 text-sm" placeholder="John Doe" />
           </div>
 
           <div>
-            <label className="text-gray-500 text-[10px] font-bold tracking-widest uppercase ml-1">Email</label>
-            <input type="email" required onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-black border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1" />
+            <label className="text-gray-500 text-[9px] font-bold uppercase tracking-tighter ml-1">Email Address</label>
+            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white p-3 rounded-xl focus:border-cyan-500 outline-none transition mt-1 text-sm" placeholder="john@example.com" />
           </div>
 
           <div>
-            <label className="text-gray-500 text-[10px] font-bold tracking-widest uppercase ml-1">Select Role</label>
+            <label className="text-gray-500 text-[9px] font-bold uppercase tracking-tighter ml-1">Account Role</label>
             <div className="grid grid-cols-3 gap-2 mt-2">
                 {['USER', 'SURVEYOR', 'REGISTRAR'].map(role => (
-                    <button 
-                        key={role}
-                        type="button"
-                        onClick={() => setFormData({...formData, role: role, secretCode: ""})} 
-                        className={`py-3 px-2 text-[10px] sm:text-xs font-bold rounded-xl border transition-all duration-200 ${
+                    <button key={role} type="button" onClick={() => setFormData({...formData, role: role, secretCode: ""})} 
+                        className={`py-2.5 text-[10px] font-black rounded-xl border transition-all duration-300 ${
                             formData.role === role 
-                            ? 'bg-cyan-600 border-cyan-500 text-white shadow-lg' 
-                            : 'bg-zinc-900 border-zinc-800 text-gray-500 hover:bg-zinc-800'
+                            ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' 
+                            : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-600'
                         }`}
                     >
                         {role}
@@ -122,47 +121,26 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Secret Code Input (Sirf Officers ke liye) */}
           {formData.role !== "USER" && (
-              <div className="animate-fade-in-down">
-                <label className="text-red-400 text-[10px] font-bold tracking-widest uppercase ml-1 flex justify-between">
-                    <span>Secret Code Required</span>
-                    <span className="opacity-50">(Ask Admin)</span>
-                </label>
-                <input 
-                    type="password" 
-                    required 
-                    onChange={(e) => setFormData({...formData, secretCode: e.target.value})} 
-                    className="w-full bg-red-900/10 border border-red-500/30 text-white p-3 rounded-xl focus:border-red-500 outline-none transition mt-1 placeholder-red-500/30" 
-                    placeholder={`Enter code for ${formData.role}`}
-                />
+              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="text-red-500 text-[9px] font-bold uppercase tracking-tighter ml-1">Authorized Access Code</label>
+                <input type="password" required onChange={(e) => setFormData({...formData, secretCode: e.target.value})} className="w-full bg-red-500/5 border border-red-500/20 text-white p-3 rounded-xl focus:border-red-500 outline-none transition mt-1 text-sm" placeholder="Enter Secret Key" />
               </div>
           )}
 
-          {/* Main Action Button */}
-          <button 
-            type="submit"
-            disabled={loading} 
-            className={`w-full font-bold py-3.5 rounded-xl mt-6 transition-all flex items-center justify-center gap-2 ${
+          <button type="submit" disabled={loading} 
+            className={`w-full font-black text-xs uppercase tracking-widest py-4 rounded-xl mt-6 transition-all duration-500 ${
                 loading 
-                ? "bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800" 
-                : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:shadow-xl hover:shadow-cyan-500/20 active:scale-95"
+                ? "bg-zinc-900 text-zinc-700 cursor-not-allowed" 
+                : "bg-cyan-500 text-black hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 shadow-lg shadow-cyan-500/20"
             }`}
           >
-            {loading ? (
-                <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Processing...
-                </>
-            ) : (
-                <>Connect Wallet & Register</>
-            )}
+            {loading ? "Syncing Blockchain..." : "Secure Identity"}
           </button>
-
         </form>
 
-        <p className="text-center text-gray-500 text-xs mt-6">
-          Already have an account? <Link to="/login" className="text-cyan-400 font-bold hover:underline">Login here</Link>
+        <p className="text-center text-zinc-600 text-[10px] mt-8 font-medium">
+          ALREADY SECURED? <Link to="/login" className="text-white hover:text-cyan-400 underline underline-offset-4 transition-colors">ACCESS PORTAL</Link>
         </p>
       </div>
     </div>
