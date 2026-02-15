@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/auth/register",
+      "destination": "/backend/server.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/backend/server.js"
     }
