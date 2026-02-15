@@ -8,8 +8,8 @@ import {
 
 const AuthContext = createContext(null);
 
-// Backend Base URL (Neon DB optimized)
-const API_BASE_URL = "http://localhost:5000/api/auth";
+// ✅ Railway Backend URL (Updated from localhost)
+const API_BASE_URL = "https://propertixbackend-production.up.railway.app/api/auth";
 
 export const AuthProvider = ({ children }) => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- HELPER: Identify User (Blockchain + Neon DB) ---
+  // --- HELPER: Identify User (Blockchain + Neon DB Sync) ---
   const fetchUserIdentity = async (account) => {
     try {
       if (!window.ethereum || !account) return null;
@@ -31,21 +31,23 @@ export const AuthProvider = ({ children }) => {
       const provider = new BrowserProvider(window.ethereum);
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, provider);
 
-      // 1. BLOCKCHAIN CHECK (Primary Source of Truth)
+      // 1. BLOCKCHAIN CHECK
       const userStruct = await contract.users(account);
       const roleString = userStruct.role; 
       const isRegisteredOnBC = userStruct.isRegistered;
 
       if (!isRegisteredOnBC) return { isRegistered: false };
 
-      // 2. NEON DB (PostgreSQL) CHECK
-      let dbUser = { name: "Unknown", email: "N/A" };
+      // 2. NEON DB (PostgreSQL) CHECK - Fetch real Name and Email
+      let dbUser = { name: "Citizen", email: "No Email Linked" };
       try {
-        // Neon DB API Call
+        // वॉलेट एड्रेस को lowercase में भेजें ताकि DB मैचिंग में गलती न हो
         const response = await axios.get(`${API_BASE_URL}/user/${account.toLowerCase()}`);
-        dbUser = response.data;
+        if (response.data) {
+            dbUser = response.data;
+        }
       } catch (err) {
-        console.warn("⚠️ Profile not found in Neon DB, showing Blockchain data.");
+        console.warn("⚠️ User profile not found in Neon DB. Ensure registration was successful.");
       }
 
       const isAdmin = roleString === "ADMIN";
@@ -59,15 +61,16 @@ export const AuthProvider = ({ children }) => {
         isOfficer: isAdmin || isSurveyor || isRegistrar 
       });
 
-      setCurrentUser({
-        name: dbUser.name || "User",
+      // ✅ Setting the real name and email from Database
+      const updatedUser = {
+        name: dbUser.name || "Verified User",
         email: dbUser.email || "",
         role: roleString,
-        // PostgreSQL column might be wallet_address
         walletAddress: account, 
         photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account}`
-      });
+      };
 
+      setCurrentUser(updatedUser);
       return { isRegistered: true, roleString };
     } catch (error) {
       console.error("❌ Error fetching identity:", error);
@@ -102,7 +105,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // --- FREE LOGIN (MetaMask Signature) ---
+  // --- LOGIN LOGIC ---
   const loginWithRole = async (desiredRole) => {
     if (!window.ethereum) {
         alert("MetaMask not found!");
@@ -114,7 +117,7 @@ export const AuthProvider = ({ children }) => {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
       
-      // डिजिटल सिग्नेचर ( साबित करता है कि वॉलेट आपका है - 100% FREE)
+      // डिजिटल सिग्नेचर (FREE & SECURE)
       const message = `Propertix Login Verification\n\nRole: ${desiredRole}\nWallet: ${address}\nTime: ${new Date().toLocaleString()}`;
       await window.ethereum.request({
         method: "personal_sign",
@@ -124,12 +127,12 @@ export const AuthProvider = ({ children }) => {
       const identity = await fetchUserIdentity(address);
 
       if (!identity || !identity.isRegistered) {
-        alert("❌ Wallet not registered on Blockchain. Please register your property/profile first.");
+        alert("❌ Wallet not registered in our system. Please Register first.");
         setLoading(false);
         return false;
       }
 
-      // Role Logic
+      // Role Check
       if (identity.roleString !== "ADMIN" && identity.roleString !== desiredRole) {
           alert(`⚠️ Access Denied! Your assigned role is ${identity.roleString}`);
           setLoading(false);
