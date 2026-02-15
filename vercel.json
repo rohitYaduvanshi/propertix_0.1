@@ -6,7 +6,7 @@
       "destination": "/backend/server.js"
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/auth/user/:address",
       "destination": "/backend/server.js"
     }
   ]
