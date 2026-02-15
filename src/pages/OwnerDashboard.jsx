@@ -6,66 +6,9 @@ import { useAuth } from "../context/AuthContext";
 import * as htmlToImage from "html-to-image"; 
 import nftTemplate from "../assets/NFT_Ownership_certificate.png";
 
-// 🔥 LEASE TIMER COMPONENT (Wahi rahega)
-const LeaseTimer = ({ leaseEnd, tenant, userRole }) => {
-    const [timeLeft, setTimeLeft] = useState("");
-    const [isOverdue, setIsOverdue] = useState(false);
-    const [overdueDays, setOverdueDays] = useState(0);
-
-    useEffect(() => {
-        const calculateTime = () => {
-            const now = Date.now();
-            if (now > leaseEnd) {
-                setIsOverdue(true);
-                const daysLate = Math.ceil((now - leaseEnd) / (1000 * 60 * 60 * 24));
-                setOverdueDays(daysLate);
-                setTimeLeft(`Overstayed by ${daysLate} Day(s)`);
-            } else {
-                setIsOverdue(false);
-                const diff = leaseEnd - now;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const mins = Math.floor((diff / (1000 * 60)) % 60);
-                setTimeLeft(`${days}d ${hours}h ${mins}m remaining`);
-            }
-        };
-        calculateTime();
-        const interval = setInterval(calculateTime, 60000); 
-        return () => clearInterval(interval);
-    }, [leaseEnd]);
-
-    return (
-        <div className="mt-4 p-3 rounded-xl border bg-black/40 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-            <p className="text-[10px] text-gray-400 uppercase font-bold mb-1 tracking-wider">
-                {userRole === "TENANT" ? "Your Lease Status" : "Tenant Wallet"}
-            </p>
-            {userRole === "OWNER" && (
-                <p className="text-xs text-indigo-400 font-mono mb-3">{tenant.slice(0,8)}...{tenant.slice(-6)}</p>
-            )}
-            <div className={`px-3 py-2 rounded-lg text-xs font-bold border flex flex-col gap-1 ${
-                isOverdue ? 'bg-red-500/10 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50'
-            }`}>
-                <div className="flex items-center gap-2">
-                    <span className="text-lg">{isOverdue ? '⚠️' : '⏳'}</span>
-                    <span>{timeLeft}</span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const OwnerDashboard = () => {
     const [myProperties, setMyProperties] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [actionLoading, setActionLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState(null);
-    const [selectedPropertyId, setSelectedPropertyId] = useState(null);
-    const [inputPrice, setInputPrice] = useState("");
-    const [leaseTimeVal, setLeaseTimeVal] = useState("");
-    const [leaseTimeUnit, setLeaseTimeUnit] = useState("months");
-
     const { walletAddress, isWalletConnected } = useAuth();
 
     const loadMyProperties = async () => {
@@ -77,6 +20,7 @@ const OwnerDashboard = () => {
             const data = await contract.getAllRequests();
             const currentTimestamp = Math.floor(Date.now() / 1000);
 
+            // Filter logic
             const filtered = data.filter((item) => {
                 const isOwner = item.requester.toLowerCase() === walletAddress.toLowerCase();
                 const isTenant = item.tenant.toLowerCase() === walletAddress.toLowerCase() && Number(item.leaseEndTime) > currentTimestamp;
@@ -84,13 +28,19 @@ const OwnerDashboard = () => {
             });
 
             const formatted = await Promise.all(filtered.map(async (item) => {
-                let meta = { name: "Unnamed Property", image: null, attributes: [] };
+                // Default metadata if fetch fails
+                let meta = { name: "Property Record", image: null, attributes: [] };
+                
                 if (item.ipfsMetadata && item.ipfsMetadata.startsWith("http")) {
                     try {
-                        const response = await fetch(item.ipfsMetadata);
-                        const json = await response.json();
-                        meta = { ...meta, ...json };
-                    } catch (err) { console.warn("IPFS Error", err); }
+                        const response = await fetch(item.ipfsMetadata, { timeout: 5000 });
+                        if (response.ok) {
+                            const json = await response.json();
+                            meta = { ...meta, ...json };
+                        }
+                    } catch (err) { 
+                        console.warn("IPFS fetch skipped for ID:", item.id); 
+                    }
                 }
 
                 const getAttr = (key) => meta.attributes?.find(a => a.trait_type === key)?.value || "N/A";
@@ -98,19 +48,13 @@ const OwnerDashboard = () => {
 
                 return {
                     id: Number(item.id),
-                    name: item.ownerName || meta.name, 
-                    address: getAttr("Address"),
+                    name: item.ownerName || meta.name || "Verified Owner", 
+                    address: getAttr("Address") !== "N/A" ? getAttr("Address") : item.propertyAddress,
                     status: Number(item.status),
                     saleStatus: Number(item.saleStatus),
-                    salePrice: item.price ? formatEther(item.price) : "0",
-                    leasePrice: item.leasePrice ? formatEther(item.leasePrice) : "0",
-                    leaseEnd: Number(item.leaseEndTime) * 1000,
-                    tenant: item.tenant,
                     area: getAttr("Area"),
-                    // ✨ IPFS LINK ADDED HERE
                     ipfsLink: item.ipfsMetadata,
-                    // ✨ Tx HASH logic: Hardhat mein events se milta hai, filhal hum placeholder ya item attributes use kar sakte hain
-                    txHash: item.identityHash || "N/A", 
+                    identityHash: item.identityHash, 
                     displayImage: meta.image,
                     date: new Date(Number(item.requestTime) * 1000).toLocaleDateString(),
                     userRole: isOwner ? "OWNER" : "TENANT" 
@@ -118,9 +62,9 @@ const OwnerDashboard = () => {
             }));
 
             setMyProperties(formatted.reverse());
-            setLoading(false);
         } catch (error) {
-            console.error("Loading Error:", error);
+            console.error("Dashboard Load Error:", error);
+        } finally {
             setLoading(false);
         }
     };
@@ -128,26 +72,6 @@ const OwnerDashboard = () => {
     useEffect(() => {
         if (isWalletConnected) loadMyProperties();
     }, [isWalletConnected, walletAddress]);
-
-    const executeAction = async (id = selectedPropertyId, type = modalType) => {
-        try {
-            setActionLoading(true);
-            const provider = new BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
-            let tx;
-            if (type === "SALE") tx = await contract.listPropertyForSale(id, parseEther(inputPrice));
-            else if (type === "LEASE") {
-                let duration = leaseTimeUnit === "days" ? parseInt(leaseTimeVal) * 86400 : parseInt(leaseTimeVal) * 2592000;
-                tx = await contract.listPropertyForLease(id, parseEther(inputPrice), duration);
-            }
-            else if (type === "PRIVATE") tx = await contract.makePropertyPrivate(id);
-            await tx.wait();
-            setShowModal(false);
-            loadMyProperties();
-        } catch (error) { alert("Error: " + error.message); }
-        setActionLoading(false);
-    };
 
     const downloadNFTCard = async (elementId, propertyName) => {
         try {
@@ -160,85 +84,94 @@ const OwnerDashboard = () => {
         } catch (error) { console.error(error); }
     };
 
-    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-cyan-400">Loading Dashboard...</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-cyan-500 font-black tracking-widest animate-pulse">SYNCING ASSETS...</p>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4">
+        <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4 overflow-x-hidden">
             <div className="max-w-7xl mx-auto">
-                <div className="mb-10 flex justify-between items-end border-b border-white/10 pb-6">
+                {/* Header */}
+                <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-cyan-400">Owner Dashboard</h1>
-                        <p className="text-gray-400">Manage your assets, IPFS links, and Blockchain proofs.</p>
+                        <h1 className="text-4xl md:text-5xl font-black text-cyan-400 uppercase tracking-tighter">My Vault</h1>
+                        <p className="text-gray-500 text-sm mt-2">Manage your verified blockchain land records.</p>
+                    </div>
+                    <div className="bg-zinc-900 border border-white/5 px-4 py-2 rounded-2xl text-[10px] font-mono text-zinc-400">
+                        CONNECTED: {walletAddress}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {myProperties.map((prop) => (
-                        <div key={prop.id} className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden flex flex-col shadow-2xl">
-                            {/* Property Image */}
-                            <div className="h-40 bg-zinc-800 relative">
-                                {prop.displayImage && <img src={prop.displayImage} className="w-full h-full object-cover opacity-60" alt="" />}
-                                <div className="absolute top-3 left-3 bg-emerald-500 text-black text-[10px] font-black px-2 py-1 rounded">
-                                    ID: #{prop.id}
-                                </div>
-                            </div>
-
-                            <div className="p-5 flex-1 flex flex-col">
-                                <h3 className="text-lg font-bold mb-1 truncate">{prop.name}</h3>
-                                <p className="text-gray-500 text-xs mb-4">📍 {prop.address}</p>
-
-                                {/* ✨ NEW: REGISTRY PROOFS SECTION (CHOTA HASH & LINK) */}
-                                <div className="mb-5 space-y-2 p-3 bg-black/40 rounded-2xl border border-white/5">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Digital Asset</span>
-                                        <a href={prop.ipfsLink} target="_blank" rel="noreferrer" className="text-[9px] text-cyan-400 hover:underline">VIEW IPFS</a>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Identity Hash</span>
-                                        {/* Chota Hash logic */}
-                                        <span className="text-[9px] font-mono text-zinc-400">
-                                            {prop.txHash.slice(0, 10)}...{prop.txHash.slice(-8)}
-                                        </span>
+                {myProperties.length === 0 ? (
+                    <div className="text-center py-24 border-2 border-dashed border-zinc-800 rounded-[40px] bg-zinc-900/10">
+                        <p className="text-gray-500 font-medium">Your vault is currently empty.</p>
+                        <Link to="/blockchain" className="inline-block mt-4 text-cyan-400 hover:text-white font-bold transition">Register Property →</Link>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {myProperties.map((prop) => (
+                            <div key={prop.id} className="group bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden flex flex-col shadow-2xl hover:border-cyan-500/30 transition-all duration-500">
+                                
+                                {/* Property Header Image */}
+                                <div className="h-44 bg-zinc-800 relative overflow-hidden">
+                                    {prop.displayImage ? (
+                                        <img src={prop.displayImage} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" alt="" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-zinc-900 text-zinc-700 text-5xl">🏘️</div>
+                                    )}
+                                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-cyan-400 border border-white/10">
+                                        ID: #{prop.id}
                                     </div>
                                 </div>
 
-                                {prop.status === 2 ? (
-                                    <div className="flex-1 flex flex-col">
-                                        <div id={`nft-card-${prop.id}`} className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl border border-yellow-500/20 scale-90 origin-top">
-                                            <img src={nftTemplate} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                                            <div className="absolute inset-0 z-10 text-white p-4">
-                                                <div className="absolute top-[28%] left-[22%] text-xs font-bold">{prop.name}</div>
-                                                <div className="absolute top-[38%] left-[10%] text-[10px] w-[70%]">{prop.address}</div>
-                                                <div className="absolute top-[60%] left-[8%] text-[8px] font-mono opacity-60">{walletAddress}</div>
-                                            </div>
+                                <div className="p-6 flex-1 flex flex-col">
+                                    <h3 className="text-xl font-bold mb-1 truncate">{prop.name}</h3>
+                                    <p className="text-gray-500 text-[10px] mb-6 uppercase tracking-widest font-bold truncate">📍 {prop.address}</p>
+
+                                    {/* ✨ PROOF OF REGISTRY (IPFS & HASH) */}
+                                    <div className="mb-6 space-y-3 p-4 bg-black/40 rounded-2xl border border-white/5">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Digital Asset (IPFS)</span>
+                                            <a href={prop.ipfsLink} target="_blank" rel="noreferrer" className="text-[10px] text-emerald-400 truncate hover:text-emerald-300 transition-colors font-mono">
+                                                {prop.ipfsLink}
+                                            </a>
                                         </div>
-                                        <button onClick={() => downloadNFTCard(`nft-card-${prop.id}`, prop.name)} className="mt-2 text-[10px] font-bold text-yellow-500 text-center uppercase tracking-tighter hover:text-white transition">
-                                            ⬇ Download Official Deed
-                                        </button>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Identity Proof (Hash)</span>
+                                            <span className="text-[10px] text-zinc-300 font-mono truncate bg-zinc-800/50 p-1 rounded">
+                                                {prop.identityHash}
+                                            </span>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="py-10 text-center bg-zinc-800/20 rounded-2xl border border-dashed border-zinc-700">
-                                        <p className="text-yellow-500 text-xs font-bold animate-pulse">Verification in Progress...</p>
-                                    </div>
-                                )}
 
-                                {/* Owner Actions */}
-                                {prop.userRole === "OWNER" && prop.status === 2 && (
-                                    <div className="mt-6 flex gap-2">
-                                        {prop.saleStatus === 0 ? (
-                                            <>
-                                                <button onClick={() => openActionModal(prop.id, "SALE")} className="flex-1 py-2 bg-emerald-600 text-[11px] font-bold rounded-lg">SELL</button>
-                                                <button onClick={() => openActionModal(prop.id, "LEASE")} className="flex-1 py-2 bg-indigo-600 text-[11px] font-bold rounded-lg">LEASE</button>
-                                            </>
-                                        ) : (
-                                            <button onClick={() => openActionModal(prop.id, "PRIVATE")} className="w-full py-2 bg-zinc-800 text-red-400 text-[11px] font-bold rounded-lg border border-red-500/20">MAKE PRIVATE</button>
-                                        )}
-                                    </div>
-                                )}
+                                    {prop.status === 2 ? (
+                                        <div className="flex-1 flex flex-col">
+                                            {/* NFT Card Preview */}
+                                            <div id={`nft-card-${prop.id}`} className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-yellow-500/20 group-hover:shadow-yellow-500/10 transition-shadow">
+                                                <img src={nftTemplate} className="absolute inset-0 w-full h-full object-cover" alt="" />
+                                                <div className="absolute inset-0 z-10 text-white p-4">
+                                                    <div className="absolute top-[28%] left-[22%] text-[10px] md:text-xs font-bold truncate w-[50%]">{prop.name}</div>
+                                                    <div className="absolute top-[38%] left-[10%] text-[8px] md:text-[9px] w-[70%] leading-tight text-zinc-200">{prop.address}</div>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => downloadNFTCard(`nft-card-${prop.id}`, prop.name)} className="mt-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-yellow-500 text-center uppercase tracking-widest transition-all">
+                                                ⬇ Download Official Deed
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="py-16 text-center bg-zinc-800/10 rounded-3xl border border-dashed border-zinc-800/50">
+                                            <div className="text-2xl mb-2 animate-bounce">⏳</div>
+                                            <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest animate-pulse">Verification Pending</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
