@@ -25,7 +25,7 @@ L.Icon.Default.mergeOptions({
 
 // 🎨 Clean Theme Colors Config
 const themeColors = {
-    sale: { text: "text-blue-500", bg: "bg-blue-600", hex: "#2563eb", badge: "bg-blue-600 text-white", icon: "💰" },
+    sale: { text: "text-blue-500", bg: "bg-blue-600", hex: "##FF0000", badge: "bg-blue-600 text-white", icon: "💰" },
     lease: { text: "text-purple-500", bg: "bg-purple-600", hex: "#9333ea", badge: "bg-purple-600 text-white", icon: "🔑" },
     private: { text: "text-emerald-500", bg: "bg-emerald-600", hex: "#059669", badge: "bg-emerald-600 text-white", icon: "🏠" },
     government: { text: "text-amber-500", bg: "bg-amber-600", hex: "#d97706", badge: "bg-amber-600 text-white", icon: "🏛️" }
@@ -158,7 +158,7 @@ const PropertyMap = () => {
                
                <div className="space-y-3">
                   {filteredProperties.map(prop => (
-                      <div key={prop.id} onClick={() => { setSelectedProperty(prop); setIsMobileListOpen(false); }} className={`bg-zinc-900/50 hover:bg-zinc-800 border-l-4 p-4 rounded-r-2xl cursor-pointer transition-all ${prop.status === 'sale' ? 'border-blue-600' : prop.status === 'lease' ? 'border-purple-600' : prop.status === 'government' ? 'border-amber-600' : 'border-emerald-600'}`}>
+                      <div key={prop.id} onClick={() => { setSelectedProperty(prop); setIsMobileListOpen(false); }} className={`bg-zinc-900/50 hover:bg-zinc-800 border-l-4 p-4 rounded-r-2xl cursor-pointer transition-all ${prop.status === 'sale' ? 'border-red-600' : prop.status === 'lease' ? 'border-purple-600' : prop.status === 'government' ? 'border-amber-600' : 'border-emerald-600'}`}>
                           <div className="flex justify-between items-start mb-2">
                               <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md ${themeColors[prop.status].badge}`}>{prop.status}</span>
                               <span className="text-xs font-bold text-cyan-400">{prop.status === 'sale' ? `${prop.price} ETH` : prop.status === 'lease' ? `${prop.leasePrice} ETH/mo` : 'Private'}</span>
@@ -239,7 +239,7 @@ const PropertyMap = () => {
                       {walletAddress?.toLowerCase() === selectedProperty.owner.toLowerCase() ? (
                           <button className="w-full font-black py-5 rounded-2xl bg-zinc-800 text-zinc-500 uppercase text-[11px] cursor-not-allowed">You are the Owner</button>
                       ) : (
-                          selectedProperty.status === 'sale' ? <button onClick={() => setActionModal({show:true, type:'SALE'})} className="w-full font-black py-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white uppercase text-[11px] shadow-xl transition-all">Purchase Ownership</button> :
+                          selectedProperty.status === 'sale' ? <button onClick={() => setActionModal({show:true, type:'SALE'})} className="w-full font-black py-5 rounded-2xl bg-red-600 hover:bg-blue-500 text-white uppercase text-[11px] shadow-xl transition-all">Purchase Ownership</button> :
                           selectedProperty.status === 'lease' ? <button onClick={() => setActionModal({show:true, type:'LEASE'})} className="w-full font-black py-5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white uppercase text-[11px] shadow-xl transition-all">Start Lease Contract</button> :
                           <button className="w-full font-black py-5 rounded-2xl bg-zinc-800 text-zinc-500 uppercase text-[11px] cursor-not-allowed">Currently Private</button>
                       )}
