@@ -7,262 +7,203 @@ import {
 import { useAuth } from "../context/AuthContext.jsx";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../utils/ipfs.js";
 
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Polygon } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
-
-// 🔥 MODERN TRANSACTION LOADER COMPONENT (Responsive)
-const TransactionLoader = ({ statusText }) => (
-    <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96 bg-cyan-600/20 blur-[100px] rounded-full"></div>
-        <div className="relative flex items-center justify-center z-10 mb-8">
-            <div className="absolute w-20 h-20 md:w-24 md:h-24 border-t-2 border-r-2 border-cyan-400 rounded-full animate-spin"></div>
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 border-b-2 border-l-2 border-emerald-500 rounded-full animate-spin shadow-[0_0_15px_rgba(16,185,129,0.5)]" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-            <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-tr from-cyan-400 to-emerald-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(34,211,238,0.8)]"></div>
-        </div>
-        <h2 className="text-base md:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 animate-pulse z-10 uppercase">
-            {statusText || "PROCESSING TRANSACTION..."}
-        </h2>
-        <p className="mt-4 text-[10px] md:text-xs text-gray-400 font-mono z-10 leading-relaxed max-w-xs">
-            Confirm in wallet and wait. <br/>
-            <span className="text-emerald-500 font-bold">Do not close this window.</span>
-        </p>
-    </div>
-);
+// --- Formats for search ---
+const SEARCH_STEPS = ["State", "District", "Village/Area"];
 
 const Blockchain = () => {
   const { isWalletConnected } = useAuth();
+  
+  // --- Form States ---
+  const [formData, setFormData] = useState({
+    state: "",
+    district: "",
+    village: "",
+    aadhaar: "",
+    ownerName: "",
+    area: "",
+    address: "",
+    description: ""
+  });
+
   const [registrationPurpose, setRegistrationPurpose] = useState("Ownership");
-  const [ownerName, setOwnerName] = useState("");
-  const [propertyAddress, setPropertyAddress] = useState("");
-  const [area, setArea] = useState("");
-  const [propertyType, setPropertyType] = useState("Residential");
-  const [description, setDescription] = useState("");
-  const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [coordinates, setCoordinates] = useState({ lat: 20.5937, lng: 78.9629 });
   const [isLocationSelected, setIsLocationSelected] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [images, setImages] = useState([]);
-  const [documents, setDocuments] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [ipfsLink, setIpfsLink] = useState(""); 
   const [txHash, setTxHash] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState([]);
 
-  useEffect(() => {
-    if (registrationPurpose === "Government") {
-        setOwnerName("Government of India"); 
-    } else {
-        setOwnerName(""); 
-    }
-  }, [registrationPurpose]);
-
-  const MapController = ({ coords }) => {
-    const map = useMap();
-    useEffect(() => {
-      if (coords) map.setView([coords.lat, coords.lng], 16, { animate: true });
-    }, [coords, map]);
-    return null;
+  // --- Map Hierarchy Search ---
+  const handleHierarchicalSearch = async () => {
+    const query = `${formData.village}, ${formData.district}, ${formData.state}, India`;
+    if (!formData.state) return alert("Please enter at least the State name.");
+    
+    setStatus("Searching location in India...");
+    try {
+      const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`);
+      const data = await response.json();
+      if (data?.features?.length > 0) {
+        const [lng, lat] = data.features[0].geometry.coordinates;
+        setCoordinates({ lat, lng });
+        setIsLocationSelected(true);
+        setStatus("Location Pinned ✅");
+      } else {
+        alert("Location not found. Please try a nearby area.");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally { setStatus(null); }
   };
 
   const LocationMarker = () => {
     useMapEvents({
       click(e) {
-        const { lat, lng } = e.latlng;
-        setCoordinates({ lat, lng });
+        setCoordinates(e.latlng);
         setIsLocationSelected(true);
       },
     });
     return isLocationSelected ? <Marker position={coordinates} /> : null;
   };
 
-  const handleManualSearch = async () => {
-    if (!searchQuery.trim()) return;
-    setIsSearching(true);
-    try {
-        const q = encodeURIComponent(searchQuery);
-        const url = `https://photon.komoot.io/api/?q=${q}&limit=1`;
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data?.features?.length > 0) {
-            const feature = data.features[0];
-            const [lng, lat] = feature.geometry.coordinates;
-            const props = feature.properties;
-            const formattedAddress = [props.name, props.city, props.state].filter(Boolean).join(", ");
-            setCoordinates({ lat, lng });
-            setIsLocationSelected(true);
-            if (!propertyAddress) setPropertyAddress(formattedAddress);
-        } else {
-            alert("Location not found.");
-        }
-    } catch (error) {
-        alert("Search failed. Select manually on map.");
-    } finally {
-        setIsSearching(false);
-    }
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!isWalletConnected) return setStatus("Please connect wallet.");
-    if (images.length !== 3) return setStatus("Upload exactly 3 images.");
-    if (!isLocationSelected) return setStatus("Pin location on map.");
-
+    if (images.length < 1) return setStatus("Upload property image.");
+    
     try {
       setIsSubmitting(true);
       setStatus("Uploading to IPFS...");
-      const imageUrls = [];
-      for (let img of images) {
-        const url = await uploadFileToIPFS(img);
-        if(url) imageUrls.push(url);
-      }
       
+      const imgUrl = await uploadFileToIPFS(images[0]);
       const metadata = {
-        name: ownerName,
-        description,
-        attributes: [
-            { trait_type: "Address", value: propertyAddress },
-            { trait_type: "Area", value: area },
-            { trait_type: "Latitude", value: coordinates.lat },
-            { trait_type: "Longitude", value: coordinates.lng }
-        ]
+        ...formData,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        image: imgUrl,
+        purpose: registrationPurpose
       };
 
       const metadataURL = await uploadJSONToIPFS(metadata);
+      
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-      setStatus("Sign transaction (0.001 ETH)...");
+      setStatus("Confirm in Wallet...");
       const tx = await contract.requestRegistration(
-          ownerName, metadataURL, id(aadhaarNumber), area.toString(), propertyAddress,
-          { value: parseEther("0.001") }
+        formData.ownerName, metadataURL, id(formData.aadhaar), formData.area.toString(), formData.address,
+        { value: parseEther("0.001") }
       );
 
-      setStatus("Confirming on Blockchain...");
+      setStatus("Mining Transaction...");
       await tx.wait();
-      setIpfsLink(metadataURL); 
+      
+      setIpfsLink(metadataURL);
       setTxHash(tx.hash);
-      setStatus("✅ Success! Request Submitted.");
+      setStatus("✅ Successfully Registered!");
     } catch (err) {
-      setStatus("❌ Failed: " + (err.reason || err.message));
-    } finally {
-      setIsSubmitting(false);
-    }
+      setStatus("❌ Error: " + (err.reason || err.message));
+    } finally { setIsSubmitting(false); }
   };
 
-  const PurposeButton = ({ label, value }) => (
-    <button type="button" onClick={() => setRegistrationPurpose(value)}
-      className={`w-full px-3 py-3 text-[11px] font-bold rounded-xl border transition-all ${
-        registrationPurpose === value ? "bg-cyan-600 text-white border-transparent shadow-lg" : "bg-zinc-900/50 border-zinc-700 text-gray-400"
-      }`}
-    >
-      {label}
-    </button>
-  );
-
   return (
-    // Updated: Changed h-screen to min-h-screen and items-center to items-start for scrolling
     <section className="relative flex items-start justify-center px-4 md:px-8 py-24 min-h-screen bg-black text-white overflow-x-hidden">
       
-      {isSubmitting && <TransactionLoader statusText={status} />}
-
       <div className="relative max-w-6xl w-full grid lg:grid-cols-2 gap-10">
         
-        {/* LEFT SIDE: Info (Responsive Sticky) */}
-        <div className="space-y-4 lg:sticky lg:top-24 h-fit">
-          <p className="text-[10px] font-black tracking-[0.3em] text-cyan-400 uppercase">PROPERTIX NODE</p>
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-            Register your <span className="text-cyan-400">Digital Land</span>
-          </h1>
-          <p className="text-gray-400 text-sm max-w-sm">Immutable ownership powered by Blockchain & IPFS.</p>
+        {/* LEFT SIDE: Proofs & Links */}
+        <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.3em] text-cyan-400 uppercase">PROPERTIX SECURE</p>
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight">Digital Land <span className="text-cyan-400">Registry</span></h1>
+          </div>
 
-          {(ipfsLink || txHash) && !isSubmitting && (
-            <div className="mt-6 p-4 bg-zinc-900/90 border border-cyan-500/30 rounded-2xl space-y-3 animate-in slide-in-from-bottom-5">
-               <p className="text-[10px] font-bold text-emerald-400">✅ TRANSACTION COMPLETE</p>
-               <div className="text-[9px] font-mono text-gray-500 break-all bg-black/50 p-2 rounded">Hash: {txHash}</div>
+          {(ipfsLink || txHash) && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-left-5">
+              {/* IPFS Card */}
+              <div className="p-4 bg-zinc-900/80 border border-emerald-500/30 rounded-2xl">
+                <p className="text-[9px] font-bold text-emerald-400 uppercase mb-2">🌍 IPFS Digital Asset (Metadata)</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-gray-400 truncate flex-1">{ipfsLink}</span>
+                  <a href={ipfsLink} target="_blank" className="text-[9px] bg-emerald-600 px-3 py-1 rounded font-bold">VIEW</a>
+                </div>
+              </div>
+
+              {/* Hash Card */}
+              <div className="p-4 bg-zinc-900/80 border border-cyan-500/30 rounded-2xl">
+                <p className="text-[9px] font-bold text-cyan-400 uppercase mb-2">🔗 Blockchain Transaction Hash</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-gray-400 truncate flex-1">{txHash}</span>
+                  <button onClick={() => navigator.clipboard.writeText(txHash)} className="text-[9px] bg-cyan-600 px-3 py-1 rounded font-bold">COPY</button>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* RIGHT SIDE: FORM (Responsive container) */}
-        <div className="relative w-full">
-          <div className="rounded-2xl md:rounded-3xl bg-zinc-900/40 backdrop-blur-xl border border-white/5 p-5 md:p-8 shadow-3xl">
-            <form onSubmit={handleRegister} className="space-y-5">
-              
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase text-cyan-500 font-black">Registration Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <PurposeButton label="Private Ownership" value="Ownership" />
-                  <PurposeButton label="Govt Allocation" value="Government" />
-                </div>
+        {/* RIGHT SIDE: Hierarchical Form */}
+        <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-3xl">
+          <form onSubmit={handleRegister} className="space-y-5">
+            
+            {/* Hierarchical Search Section */}
+            <div className="space-y-3 p-4 bg-black/40 rounded-2xl border border-zinc-800">
+              <label className="text-[10px] uppercase text-cyan-500 font-black">Location Hierarchy (India)</label>
+              <div className="grid grid-cols-3 gap-2">
+                <input type="text" placeholder="State" className="bg-zinc-900 text-[11px] p-2 rounded-lg border border-zinc-700 outline-none focus:border-cyan-500" onChange={(e)=>setFormData({...formData, state: e.target.value})} />
+                <input type="text" placeholder="District" className="bg-zinc-900 text-[11px] p-2 rounded-lg border border-zinc-700 outline-none focus:border-cyan-500" onChange={(e)=>setFormData({...formData, district: e.target.value})} />
+                <input type="text" placeholder="Village" className="bg-zinc-900 text-[11px] p-2 rounded-lg border border-zinc-700 outline-none focus:border-cyan-500" onChange={(e)=>setFormData({...formData, village: e.target.value})} />
               </div>
+              <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-zinc-800 hover:bg-cyan-600 py-2 rounded-lg text-[10px] font-bold transition-all">LOCATE AREA ON MAP</button>
+            </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase text-gray-500 font-bold">Aadhaar No</label>
-                  <input type="text" value={aadhaarNumber} onChange={(e)=>setAadhaarNumber(e.target.value)} required className="w-full rounded-xl bg-black/40 border border-zinc-800 px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="XXXX-XXXX-XXXX" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase text-gray-500 font-bold">Full Name</label>
-                  <input type="text" value={ownerName} onChange={(e)=>setOwnerName(e.target.value)} disabled={registrationPurpose === "Government"} className="w-full rounded-xl bg-black/40 border border-zinc-800 px-4 py-3 text-sm focus:border-cyan-500 outline-none disabled:opacity-50" placeholder="Rohit Kumar" />
-                </div>
+            {/* Map Container */}
+            <div className="h-60 rounded-2xl overflow-hidden border border-zinc-800">
+               <MapContainer center={coordinates} zoom={13} style={{height: '100%'}}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <MapController coords={coordinates} />
+                  <LocationMarker />
+               </MapContainer>
+            </div>
+
+            {/* Other Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <input type="text" placeholder="Owner Name" className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl text-sm" onChange={(e)=>setFormData({...formData, ownerName: e.target.value})} />
+              <input type="text" placeholder="Aadhaar Number" className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl text-sm" onChange={(e)=>setFormData({...formData, aadhaar: e.target.value})} />
+            </div>
+
+            <input type="text" placeholder="Exact Property Address" className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl text-sm" onChange={(e)=>setFormData({...formData, address: e.target.value})} />
+            
+            <div className="flex gap-4">
+              <input type="number" placeholder="Area (Sq Ft)" className="w-1/2 bg-black/40 border border-zinc-800 p-3 rounded-xl text-sm" onChange={(e)=>setFormData({...formData, area: e.target.value})} />
+              <div onClick={()=>document.getElementById('img-up').click()} className="w-1/2 border border-dashed border-zinc-700 p-3 rounded-xl text-center cursor-pointer text-[10px]">
+                <input id="img-up" type="file" hidden onChange={(e)=>setImages([e.target.files[0]])} />
+                {images.length > 0 ? "✅ IMAGE READY" : "📸 UPLOAD PHOTO"}
               </div>
+            </div>
 
-              {/* MAP SECTION (Responsive height) */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase text-cyan-500 font-black">Geolocation</label>
-                <div className="flex gap-1">
-                  <input type="text" value={searchQuery} onChange={(e)=>setSearchQuery(e.target.value)} className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs outline-none" placeholder="Search city..." />
-                  <button type="button" onClick={handleManualSearch} className="bg-zinc-800 px-4 rounded-lg text-[10px] font-bold">FIND</button>
-                </div>
-                <div className="h-52 md:h-64 rounded-xl overflow-hidden border border-zinc-800 z-0">
-                  <MapContainer center={coordinates} zoom={13} style={{ height: "100%", width: "100%" }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <MapController coords={isLocationSelected ? coordinates : null} />
-                    <LocationMarker />
-                  </MapContainer>
-                </div>
-              </div>
+            <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-black text-[11px] rounded-xl tracking-widest transition-all">
+              {isSubmitting ? "PROCESSING..." : "SUBMIT APPLICATION (0.001 ETH)"}
+            </button>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <input type="text" value={propertyAddress} onChange={(e)=>setPropertyAddress(e.target.value)} required className="w-full rounded-xl bg-black/40 border border-zinc-800 px-4 py-3 text-sm focus:border-cyan-500 outline-none" placeholder="Property Address" />
-                <input type="number" value={area} onChange={(e)=>setArea(e.target.value)} required className="w-full rounded-xl bg-black/40 border border-zinc-800 px-4 py-3 text-sm focus:border-cyan-500 outline-none" placeholder="Area (Sq Ft)" />
-              </div>
-
-              {/* UPLOAD SECTION (Stacked on mobile) */}
-              <div className="grid grid-cols-2 gap-3">
-                 <div onClick={()=>document.getElementById('img-up').click()} className="border border-dashed border-zinc-700 rounded-xl p-4 text-center hover:border-cyan-500 transition cursor-pointer">
-                    <input id="img-up" type="file" multiple hidden onChange={(e)=>setImages(Array.from(e.target.files).slice(0,3))} />
-                    <span className="text-[10px] font-bold text-gray-500">{images.length > 0 ? `✅ ${images.length} IMAGES` : "📸 PHOTOS (3)"}</span>
-                 </div>
-                 <div onClick={()=>document.getElementById('doc-up').click()} className="border border-dashed border-zinc-700 rounded-xl p-4 text-center hover:border-cyan-500 transition cursor-pointer">
-                    <input id="doc-up" type="file" hidden onChange={(e)=>setDocuments([e.target.files[0]])} />
-                    <span className="text-[10px] font-bold text-gray-500">{documents.length > 0 ? "✅ DOC READY" : "📄 PDF DOC"}</span>
-                 </div>
-              </div>
-
-              <button type="submit" disabled={isSubmitting || !isWalletConnected} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-black text-[11px] rounded-xl tracking-tighter transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                SUBMIT FOR VERIFICATION (0.001 ETH)
-              </button>
-
-              {status && !isSubmitting && (
-                <div className="text-[10px] font-bold text-center text-cyan-400 animate-pulse">{status}</div>
-              )}
-            </form>
-          </div>
+            {status && <div className="text-[10px] text-center font-bold text-cyan-400 animate-pulse">{status}</div>}
+          </form>
         </div>
       </div>
     </section>
   );
+};
+
+// Helper to update map view
+const MapController = ({ coords }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) map.setView([coords.lat, coords.lng], 16);
+  }, [coords, map]);
+  return null;
 };
 
 export default Blockchain;
