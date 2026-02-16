@@ -160,9 +160,20 @@ const Register = () => {
           </button>
         </form>
 
-        <p className="text-center text-zinc-600 text-[9px] mt-8 uppercase tracking-tighter italic">
-          *Blockchain Transaction complete hone ke baad Database save hoga.*
-        </p>
+        <div className="mt-8 pt-6 border-t border-white/5 text-center">
+          <p className="text-zinc-500 text-xs">
+            Already have a verified account?
+            <Link
+              to="/login"
+              className="text-cyan-500 font-black hover:text-cyan-400 ml-2 transition-colors underline underline-offset-4"
+            >
+              LOGIN HERE
+            </Link>
+          </p>
+          <p className="text-[8px] text-zinc-700 uppercase tracking-[0.2em] mt-4 italic">
+            * Identity will be synced with Neon DB after Blockchain confirmation *
+          </p>
+        </div>
       </div>
     </div>
   );
