@@ -17,21 +17,28 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);       
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
 
+  // 🛑 Check: Are we on Admin Page?
   const isAdminPage = location.pathname === "/admin";
+
+  // --- DUMMY USER DATA ---
+  const userProfile = currentUser || {
+    name: "User",
+    email: "user@example.com",
+    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+  };
+
+  const linkClasses = "text-sm font-medium text-gray-200 hover:text-cyan-400 transition-colors";
+  const mobileLinkClasses = "block text-base font-medium text-gray-300 hover:text-cyan-400 hover:bg-white/5 px-4 py-3 rounded-xl transition-all";
+
+  const shortAddress = walletAddress
+    ? walletAddress.slice(0, 6) + "..." + walletAddress.slice(-4)
+    : "";
+
+  // Dropdown close logic for Desktop Profile
   const dropdownRef = useRef(null);
-
-  // --- LOGIC: Sticky Effect ---
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // --- LOGIC: Dropdown Click Outside ---
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -42,183 +49,235 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
 
-  const userProfile = currentUser || {
-    name: "User",
-    email: "user@example.com",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-  };
-
-  const shortAddress = walletAddress
-    ? walletAddress.slice(0, 6) + "..." + walletAddress.slice(-4)
-    : "";
-
-  // --- LOGIC: Switch Wallet ---
+  // SWITCH WALLET LOGIC
   const handleSwitchWallet = async () => {
     appLogout();
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Close mobile menu if open
     try {
-      await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }],
-      });
-      navigate("/login");
+        await window.ethereum.request({
+            method: "wallet_requestPermissions",
+            params: [{ eth_accounts: {} }],
+        });
+        navigate("/login");
     } catch (e) {
-      console.log("User cancelled switch");
-      navigate("/login");
+        console.log("User cancelled switch");
+        navigate("/login");
     }
   };
 
   const handleLogout = () => {
-    appLogout();
-    setIsProfileOpen(false);
-    setIsMenuOpen(false);
-    navigate('/login');
+      appLogout();
+      setIsProfileOpen(false);
+      setIsMenuOpen(false);
+      navigate('/login');
   };
 
-  const linkClasses = ({ isActive }) => 
-    `relative text-[12px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-      isActive ? "text-cyan-400" : "text-gray-400 hover:text-white"
-    }`;
-
-  const mobileLinkClasses = "block text-2xl font-black uppercase tracking-tighter text-gray-300 hover:text-cyan-400 transition-all";
-
   return (
-    <>
-      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
-        scrolled ? "py-3 bg-black/60 backdrop-blur-2xl border-b border-white/5 shadow-[0_10px_40px_rgba(0,0,0,0.8)]" : "py-6 bg-transparent"
-      }`}>
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex items-center justify-between">
-          
-          {/* --- 1. LOGO --- */}
-          <div className="relative group cursor-pointer z-[110]" onClick={() => navigate('/')}>
-            <div className="absolute -inset-2 bg-cyan-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <img src={logo} alt="logo" className="relative h-9 lg:h-11 w-auto object-contain transition-transform duration-500 group-hover:scale-105" />
+    <nav className="w-full px-6 lg:px-8 py-4 flex items-center justify-between bg-black/80 backdrop-blur-lg border-b border-white/10 sticky top-0 z-[100]">
+
+      {/* --- 1. LEFT SECTION: LOGO --- */}
+      <div className="flex items-center gap-3 z-50">
+        <img src={logo} alt="logo" className="h-8 lg:h-10 w-auto object-contain cursor-pointer" onClick={() => navigate('/')} />
+      </div>
+
+      {/* --- 2. CENTER SECTION: DESKTOP LINKS --- */}
+      {!isAdminPage ? (
+        <div className="hidden lg:flex items-center gap-8">
+            <NavLink to="/" className={linkClasses}>Home</NavLink>
+            <NavLink to="/blockchain" className={linkClasses}>Blockchain</NavLink>
+            <NavLink to="/map" className={linkClasses}>Property-Map</NavLink>
+            <NavLink to="/about" className={linkClasses}>About</NavLink>
+            <NavLink to="/contact" className={linkClasses}>Contact</NavLink>
+        </div>
+      ) : (
+        <div className="hidden lg:flex items-center justify-center">
+            <span className="text-red-500 font-bold tracking-[0.2em] border border-red-500/30 px-6 py-2 rounded bg-red-500/5 animate-pulse">
+                GOVERNMENT ADMINISTRATION
+            </span>
+        </div>
+      )}
+
+      {/* --- 3. RIGHT SECTION: DESKTOP WALLET & PROFILE --- */}
+      <div className="hidden lg:flex items-center gap-4">
+
+        {/* Admin Panel Button */}
+        {isOfficer && !isAdminPage && (
+            <NavLink 
+                to="/admin" 
+                className="text-red-400 font-bold border border-red-500/50 px-4 py-1.5 rounded-full hover:bg-red-500/10 transition-all text-xs uppercase tracking-wider shadow-lg shadow-red-900/20"
+            >
+                👮‍♂️ Admin Panel
+            </NavLink>
+        )}
+
+        {/* Wallet Badge & Switcher */}
+        {isWalletConnected ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-700 hover:border-zinc-500 transition-colors">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-xs text-gray-300 font-mono">{shortAddress}</span>
+            <button 
+                onClick={handleSwitchWallet} 
+                title="Switch Wallet Account"
+                className="ml-2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/20 text-white transition-all"
+            >
+                🔁
+            </button>
           </div>
+        ) : (
+          <button
+            onClick={connectWallet}
+            className="px-5 py-2 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold transition-all shadow-lg shadow-cyan-500/20"
+          >
+            Connect Wallet
+          </button>
+        )}
 
-          {/* --- 2. DESKTOP NAVIGATION --- */}
-          <div className="hidden lg:flex items-center bg-white/[0.03] border border-white/10 px-10 py-3 rounded-full backdrop-blur-md shadow-inner">
-            {!isAdminPage ? (
-              <div className="flex items-center gap-10">
-                {['Home', 'Blockchain', 'Map', 'About', 'Contact'].map((item) => (
-                  <NavLink key={item} to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} className={linkClasses}>
-                    {({ isActive }) => (
-                      <>
-                        {item}
-                        {isActive && <span className="absolute -bottom-2 left-0 w-full h-[2px] bg-cyan-500 shadow-[0_0_12px_#06b6d4] rounded-full"></span>}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
+        {/* Profile Dropdown */}
+        {isUserLoggedIn && (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="flex items-center gap-2 focus:outline-none group"
+            >
+              <img
+                src={userProfile.photo}
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-zinc-700 group-hover:border-cyan-500 transition-all object-cover"
+              />
+              <div className="text-left">
+                <p className="text-[10px] text-gray-400 leading-none">Welcome,</p>
+                <p className="text-sm font-bold text-white group-hover:text-cyan-400 transition leading-tight">{userProfile.name.split(' ')[0]}</p>
               </div>
-            ) : (
-              <div className="flex items-center gap-4 px-4">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                <span className="text-red-500 font-black text-[11px] tracking-[0.4em] uppercase">Security Protocol: Active</span>
-              </div>
-            )}
-          </div>
+              <svg className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-          {/* --- 3. RIGHT SECTION: WALLET & PROFILE --- */}
-          <div className="hidden lg:flex items-center gap-6">
-            {isOfficer && !isAdminPage && (
-              <NavLink to="/admin" className="relative group px-6 py-2 rounded-full border border-red-500/50 overflow-hidden">
-                <span className="absolute inset-0 bg-red-500/10 group-hover:bg-red-500/20 transition-all"></span>
-                <span className="relative text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                   TERMINAL
-                </span>
-              </NavLink>
-            )}
-
-            {isWalletConnected ? (
-              <div className="flex items-center gap-3 bg-zinc-900/80 border border-white/10 p-1 pr-4 rounded-full group hover:border-cyan-500/50 transition-all">
-                <button onClick={handleSwitchWallet} className="bg-gradient-to-r from-cyan-600 to-blue-600 p-2 rounded-full shadow-lg shadow-cyan-500/20 hover:rotate-180 transition-transform duration-500">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </button>
-                <span className="text-[11px] font-mono text-gray-400 tracking-wider group-hover:text-white transition-colors">{shortAddress}</span>
-              </div>
-            ) : (
-              <button onClick={connectWallet} className="px-8 py-3 rounded-full bg-white text-black font-black text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-400 transition-all duration-500">
-                Init Wallet
-              </button>
-            )}
-
-            {isUserLoggedIn && (
-              <div className="relative" ref={dropdownRef}>
-                <div onClick={() => setIsProfileOpen(!isProfileOpen)} className="relative group cursor-pointer">
-                  <div className={`absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500 ${isProfileOpen ? 'opacity-100' : ''}`}></div>
-                  <img src={userProfile.photo} alt="User" className="relative w-11 h-11 rounded-full border border-white/20 object-cover" />
-                </div>
-
-                {/* PREMIUM DROPDOWN */}
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-6 w-72 origin-top-right rounded-3xl bg-black/90 backdrop-blur-3xl border border-white/10 shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                    <div className="p-6 border-b border-white/5 bg-gradient-to-br from-white/5 to-transparent">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-cyan-500 mb-1">Authenticated</p>
-                      <h4 className="text-white font-black text-lg truncate leading-tight">{userProfile.name}</h4>
-                      <p className="text-xs text-gray-500 truncate font-mono">{userProfile.email}</p>
-                    </div>
-                    <div className="p-2 space-y-1">
-                      <button onClick={() => { navigate('/profile'); setIsProfileOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 text-gray-300 text-xs font-black uppercase tracking-widest transition-all">
-                         Profile
-                      </button>
-                      <button onClick={() => { navigate('/dashboard'); setIsProfileOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 text-gray-300 text-xs font-black uppercase tracking-widest transition-all">
-                         Dashboard
-                      </button>
-                    </div>
-                    <div className="p-2 border-t border-white/5 bg-black/40">
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-red-500/10 text-red-500 text-xs font-black uppercase tracking-widest transition-all">
-                         Terminate Session
-                      </button>
+            {/* Desktop Dropdown Menu */}
+            {isProfileOpen && (
+              <div className="absolute right-0 mt-4 w-72 origin-top-right rounded-2xl bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                <div className="p-5 bg-gradient-to-br from-zinc-800/50 to-transparent border-b border-white/5">
+                  <div className="flex items-start gap-3">
+                    <img src={userProfile.photo} alt="User" className="w-12 h-12 rounded-full border-2 border-white/10 object-cover" />
+                    <div>
+                      <h4 className="text-white font-bold text-base truncate">{userProfile.name}</h4>
+                      <p className="text-xs text-cyan-400 font-mono truncate">{userProfile.email}</p>
                     </div>
                   </div>
-                )}
+                </div>
+                <div className="p-2 space-y-1">
+                  {!isAdminPage && (
+                      <button onClick={() => { navigate('/profile'); setIsProfileOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 text-gray-200 text-sm font-medium">
+                        👤 My Profile
+                      </button>
+                  )}
+                  {!isAdminPage && (
+                      <button onClick={() => { navigate('/dashboard'); setIsProfileOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 text-gray-200 text-sm font-medium">
+                        🏠 Owner Dashboard
+                      </button>
+                  )}
+                </div>
+                <div className="p-2 border-t border-white/5 mt-1">
+                  <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 text-sm font-bold">
+                    🚪 Sign Out
+                  </button>
+                </div>
               </div>
             )}
           </div>
+        )}
+      </div>
 
-          {/* --- MOBILE HAMBURGER --- */}
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden relative z-[110] w-10 h-10 flex flex-col items-center justify-center gap-1.5 bg-white/5 rounded-full border border-white/10">
-            <span className={`w-5 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}></span>
-            <span className={`w-5 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`}></span>
-            <span className={`w-5 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}></span>
-          </button>
-        </div>
-      </nav>
+      {/* --- 4. MOBILE HAMBURGER BUTTON --- */}
+      <div className="flex lg:hidden items-center gap-4 z-50">
+        {!isWalletConnected && !isUserLoggedIn && (
+            <button onClick={() => navigate("/login")} className="px-4 py-1.5 rounded-full bg-sky-500/65 text-white text-xs font-bold">
+                Login
+            </button>
+        )}
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-1 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+          </svg>
+        </button>
+      </div>
 
-      {/* --- MOBILE MENU OVERLAY --- */}
-      <div className={`fixed inset-0 z-[90] bg-black transition-all duration-700 lg:hidden ${isMenuOpen ? "opacity-100 pointer-events-auto translate-y-0" : "opacity-0 pointer-events-none -translate-y-10"}`}>
-        <div className="flex flex-col items-center justify-center h-full space-y-10 px-10 text-center">
-           {isUserLoggedIn && (
-             <div className="mb-4">
-               <img src={userProfile.photo} alt="User" className="w-20 h-20 rounded-full border-2 border-cyan-500 mx-auto mb-4" />
-               <h2 className="text-white text-2xl font-black uppercase tracking-tighter">{userProfile.name}</h2>
-             </div>
-           )}
-           
-           {['Home', 'Blockchain', 'Map', 'About', 'Contact'].map((item, idx) => (
-             <NavLink 
-               key={item} 
-               to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
-               onClick={() => setIsMenuOpen(false)}
-               className={mobileLinkClasses}
-               style={{ transitionDelay: `${idx * 50}ms` }}
-             >
-               {item}
-             </NavLink>
-           ))}
+      {/* --- 5. MOBILE FULL-SCREEN MENU (Slide down animation) --- */}
+      <div className={`absolute top-[100%] left-0 w-full bg-black/95 backdrop-blur-3xl border-b border-white/10 overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${
+          isMenuOpen ? "max-h-screen border-b border-white/10 shadow-2xl" : "max-h-0 border-transparent opacity-0"
+      }`}>
+        <div className="px-6 py-8 flex flex-col space-y-4 max-h-[85vh] overflow-y-auto">
+            
+            {/* Mobile Profile Card */}
+            {isUserLoggedIn && (
+                <div className="flex items-center gap-4 border-b border-white/10 pb-6 mb-2">
+                    <img src={userProfile.photo} alt="User" className="w-14 h-14 rounded-full border-2 border-cyan-500/50 object-cover" />
+                    <div>
+                        <p className="text-gray-400 text-xs uppercase tracking-wider">Logged In As</p>
+                        <h4 className="text-white font-bold text-lg">{userProfile.name}</h4>
+                        {isWalletConnected ? (
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-xs text-green-400 font-mono">{shortAddress}</span>
+                            </div>
+                        ) : (
+                            <span className="text-xs text-amber-500">Wallet Disconnected</span>
+                        )}
+                    </div>
+                </div>
+            )}
 
-           <div className="w-full h-px bg-white/10 my-4"></div>
+            {/* Mobile Admin Warning */}
+            {isAdminPage && (
+                <div className="text-center py-2 mb-2">
+                    <span className="text-red-500 font-bold text-xs tracking-[0.2em] border border-red-500/30 px-4 py-2 rounded-lg bg-red-500/5">
+                        ADMINISTRATION MODE
+                    </span>
+                </div>
+            )}
 
-           {isUserLoggedIn ? (
-             <button onClick={handleLogout} className="text-red-500 font-black uppercase tracking-[0.3em] text-xs">Terminate Session</button>
-           ) : (
-             <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="px-10 py-4 rounded-full bg-cyan-600 text-white font-black text-xs uppercase tracking-widest">Connect Identity</button>
-           )}
+            {/* Mobile Nav Links */}
+            {!isAdminPage && (
+                <div className="flex flex-col space-y-2">
+                    <NavLink to="/" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Home</NavLink>
+                    <NavLink to="/blockchain" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Blockchain</NavLink>
+                    <NavLink to="/map" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Property-Map</NavLink>
+                    <NavLink to="/about" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>About</NavLink>
+                    <NavLink to="/contact" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Contact</NavLink>
+                </div>
+            )}
+
+            <div className="h-[1px] bg-white/5 my-2"></div>
+
+            {/* Mobile Dashboard & Actions */}
+            {isOfficer && !isAdminPage && (
+                <NavLink to="/admin" className="text-red-400 font-bold uppercase tracking-wider text-sm px-4 py-3 hover:bg-red-500/10 rounded-xl transition-all" onClick={() => setIsMenuOpen(false)}>
+                    👮‍♂️ Open Admin Panel
+                </NavLink>
+            )}
+            
+            {isUserLoggedIn ? (
+                <div className="flex flex-col space-y-2">
+                    {!isAdminPage && <NavLink to="/profile" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>👤 My Profile</NavLink>}
+                    {!isAdminPage && <NavLink to="/dashboard" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>🏠 Owner Dashboard</NavLink>}
+                    
+                    <button onClick={handleSwitchWallet} className="text-left text-gray-300 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 text-base font-medium transition-all">
+                        🔁 Switch Wallet
+                    </button>
+                    
+                    <button onClick={handleLogout} className="text-left text-red-400 hover:text-red-300 font-bold text-base px-4 py-3 rounded-xl hover:bg-red-500/10 transition-all mt-2">
+                        🚪 Sign Out
+                    </button>
+                </div>
+            ) : (
+                <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="w-full py-4 mt-2 rounded-xl bg-sky-500/65 text-white font-bold shadow-lg">
+                    Login / Connect Wallet
+                </button>
+            )}
         </div>
       </div>
-    </>
+
+    </nav>
   );
 };
 
