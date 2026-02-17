@@ -98,7 +98,7 @@ const Blockchain = () => {
       <div className="w-full max-w-6xl mb-8 text-center lg:text-left">
         <p className="text-[10px] font-black tracking-[0.4em] text-cyan-400 uppercase mb-2">Immutable Protocol</p>
         <h1 className="text-3xl md:text-6xl font-black leading-tight">
-          Register a new land Property<span className="text-cyan-400">for Verified record</span>
+          Register a new land Property<span className="text-cyan-400"> for Verified record</span>
         </h1>
         <p className="text-[10px] font-black tracking-[0.4em] text-white-200 lowercase mb-2">Store details securely on IPFS & Blockchain</p>
       </div>

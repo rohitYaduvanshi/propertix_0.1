@@ -149,7 +149,7 @@ const Home = () => {
                         </div>
 
                         <p className="text-sm font-semibold tracking-[0.2em] text-cyan-400 mb-3">Securing Tomorrow's Assets Today</p>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">The Smartest Way to <span className="block text-cyan-400">Verify & Own Land</span></h1>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">The Smartest Way to Choose<span className="block text-cyan-400"> Verify & Own Land</span></h1>
                         <p className="text-gray-300 text-sm md:text-base mb-6">Skip the complex paperwork. Manage your property records on a secure,
                             tamper-proof digital ledger with 100% transparency.</p>
 
