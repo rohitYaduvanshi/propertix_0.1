@@ -17,7 +17,7 @@ const Home = () => {
     const { isWalletConnected, connectWallet } = useAuth();
     const cardRef = useRef(null);
 
-    // 3D Tilt Effect Logic
+    // --- 3D TILT EFFECT LOGIC ---
     const handleMouseMove = (e) => {
         if (!cardRef.current) return;
         const card = cardRef.current;
@@ -26,9 +26,8 @@ const Home = () => {
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
-
+        const rotateX = (centerY - y) / 10;
+        const rotateY = (x - centerX) / 10;
         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
     };
 
@@ -37,7 +36,7 @@ const Home = () => {
         cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     };
 
-    // Random Hash Animation
+    // Animation Effect (Original)
     useEffect(() => {
         const interval = setInterval(() => {
             const chars = "0123456789ABCDEF";
@@ -54,35 +53,42 @@ const Home = () => {
         setResult(null);
         setSearchedProperty(null);
         if (!hash.trim()) return;
-        setIsSearching(true);
-
+        const searchKey = hash.trim();
         try {
+            setIsSearching(true);
             if (!window.ethereum) { setResult("no-wallet"); return; }
             const provider = new BrowserProvider(window.ethereum);
-            const searchKey = hash.trim();
 
             if (searchKey.startsWith("0x") && searchKey.length > 42) {
                 const tx = await provider.getTransaction(searchKey);
                 setResult(tx ? "verified-only" : "not-found");
+                setIsSearching(false);
                 return;
             }
 
             const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, provider);
             const allRequests = await contract.getAllRequests();
-            const found = allRequests.find(req => req.ipfsMetadata && req.ipfsMetadata.includes(searchKey));
+            const found = allRequests.find((req) => req.ipfsMetadata && req.ipfsMetadata.includes(searchKey));
 
             if (found) {
-                const response = await fetch(found.ipfsMetadata);
-                const meta = await response.json();
+                let meta = { name: "Unknown", description: "No description", image: null, attributes: [] };
+                if (found.ipfsMetadata.startsWith("http")) {
+                    try {
+                        const response = await fetch(found.ipfsMetadata);
+                        const json = await response.json();
+                        meta = { ...meta, ...json };
+                    } catch (err) { console.warn("IPFS error", err); }
+                }
                 const getAttr = (key) => meta.attributes?.find(a => a.trait_type === key)?.value || "N/A";
-
                 setSearchedProperty({
                     id: found.id.toString(),
                     name: meta.name,
                     address: getAttr("Address"),
                     owner: found.requester,
+                    price: "Not Listed",
                     status: Number(found.status),
                     area: getAttr("Area"),
+                    ipfsHash: found.ipfsMetadata,
                     imageUrl: meta.image,
                     description: meta.description
                 });
@@ -91,164 +97,141 @@ const Home = () => {
         } catch (err) { setResult("error"); } finally { setIsSearching(false); }
     };
 
+    const getStatusLabel = (status) => ["⏳ Pending Survey", "📝 Surveyed", "✅ Verified", "❌ Rejected"][status] || "Unknown";
+
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-cyan-500 selection:text-black overflow-x-hidden">
-            {/* --- PREMIUM AURORA BACKGROUND --- */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/20 blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-[10%] right-[-5%] w-[35%] h-[35%] bg-purple-600/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="relative min-h-screen bg-[#000] overflow-x-hidden">
+            
+            {/* 💡 WEB3 HANGING BULB DESIGN (Unique Background) */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+                {/* Wire */}
+                <div className="absolute top-0 left-1/2 w-[2px] h-[150px] bg-gradient-to-b from-zinc-800 to-yellow-500/50 -translate-x-1/2"></div>
+                {/* Bulb Container */}
+                <div className="absolute top-[150px] left-1/2 -translate-x-1/2">
+                    {/* Glow Effect (This colors the whole page) */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-yellow-500/20 blur-[120px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[500px] bg-cyan-500/10 blur-[150px] rounded-full"></div>
+                    
+                    {/* Physical Bulb Hook */}
+                    <div className="w-8 h-10 bg-zinc-700 rounded-t-lg mx-auto border-b border-zinc-900 shadow-xl"></div>
+                    {/* Bulb Glass with Web3 Icon inside */}
+                    <div className="w-16 h-20 bg-gradient-to-b from-yellow-400/80 to-transparent rounded-full border-2 border-yellow-200/30 flex items-center justify-center shadow-[0_0_50px_rgba(234,179,8,0.5)]">
+                        <span className="text-xl font-black text-yellow-100">W3</span>
+                    </div>
+                </div>
+                {/* Original Moving Grid (Visible only where light hits) */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:54px_54px] [mask-image:radial-gradient(circle_at_50%_30%,#000_30%,transparent_70%)] animate-grid-move opacity-40"></div>
             </div>
 
-            <main className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
-                    
-                    {/* --- LEFT CONTENT: STARTUP VIBE --- */}
-                    <div className="space-y-8 animate-in fade-in slide-in-from-left-10 duration-1000">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                            <span className="text-[10px] font-bold tracking-widest uppercase text-zinc-400">Trusted by 10k+ Citizens</span>
+            <section className="relative z-10 flex flex-col items-center justify-center px-8 pt-24 pb-16 min-h-screen">
+                <div className="relative max-w-6xl w-full grid md:grid-cols-2 gap-12 items-center">
+
+                    {/* LEFT SIDE: (ORIGINAL CONTENT UNCHANGED) */}
+                    <div className="order-1"> {/* order-1 ensures it stays first on mobile */}
+                        <div className={`mb-6 rounded-xl border px-4 py-3 text-xs flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all duration-300 ${isWalletConnected ? "border-green-500/40 bg-green-500/10 text-green-100" : "border-amber-500/40 bg-amber-500/10 text-amber-100"}`}>
+                            {isWalletConnected ? (
+                                <div className="flex items-center gap-2"><span>🎉</span><span>Nice! You have connected your wallet.</span></div>
+                            ) : (
+                                <span>Connect wallet to verify on-chain records.</span>
+                            )}
+                            {!isWalletConnected && (
+                                <button onClick={connectWallet} className="px-3 py-1.5 rounded-full bg-amber-500 text-black text-xs font-semibold hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all">Connect Wallet</button>
+                            )}
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-white">
-                            India's First <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                                Digital Land Ledger
-                            </span>
-                        </h1>
+                        <p className="text-sm font-semibold tracking-[0.2em] text-cyan-400 mb-3 uppercase">BLOCKCHAIN POWERED REAL ESTATE</p>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Property Management <span className="block text-cyan-400">using Blockchain</span></h1>
+                        <p className="text-gray-300 text-sm md:text-base mb-6 font-medium">Verify ownership and track property records instantly.</p>
 
-                        <p className="text-lg text-zinc-400 max-w-lg leading-relaxed font-medium">
-                            Skip the paperwork. Verify, track, and manage property ownership on an immutable decentralized network. 
-                            <span className="text-white"> Secured by Cryptography.</span>
-                        </p>
-
-                        {/* PREMIUM SEARCH BOX */}
-                        <div className="relative group max-w-xl">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000" />
-                            <div className="relative flex flex-col md:flex-row gap-3 bg-black/40 p-2 rounded-2xl border border-white/10 backdrop-blur-xl">
-                                <input 
-                                    type="text" 
-                                    value={hash}
-                                    onChange={(e) => setHash(e.target.value)}
-                                    placeholder="Enter IPFS Link or Transaction Hash..."
-                                    className="flex-1 bg-transparent px-4 py-3 outline-none text-sm font-medium text-white"
-                                />
-                                <button 
-                                    onClick={handleSearch}
-                                    disabled={isSearching}
-                                    className="bg-white text-black px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-cyan-400 transition-all active:scale-95"
-                                >
-                                    {isSearching ? "Searching..." : "Verify Now"}
+                        {/* SEARCH BOX (ORIGINAL DESIGN) */}
+                        <div className="bg-black/70 border border-white/10 rounded-2xl p-5 shadow-xl shadow-amber-900/30 backdrop-blur-sm">
+                            <label className="block text-xs font-medium text-gray-300 mb-2 uppercase">Search Property by IPFS URL or TX Hash</label>
+                            <div className="flex flex-col md:flex-row gap-3">
+                                <input type="text" value={hash} onChange={(e) => setHash(e.target.value)} placeholder="Paste IPFS Link (to view) or Tx Hash (to verify)..."
+                                    className="flex-1 rounded-xl bg-zinc-900/80 border border-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all" />
+                                <button onClick={handleSearch} disabled={isSearching}
+                                    className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-semibold shadow-lg shadow-cyan-500/40 transition-all">
+                                    {isSearching ? "Searching..." : "Search"}
                                 </button>
                             </div>
-                        </div>
 
-                        {/* QUICK RESULT BADGES */}
-                        {result === "found" && (
-                            <div className="flex items-center gap-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-bounce">
-                                <div className="p-2 bg-emerald-500 rounded-full text-black">✓</div>
-                                <div>
-                                    <p className="text-sm font-bold text-white uppercase tracking-tight">Authenticity Confirmed</p>
-                                    <button onClick={() => setShowModal(true)} className="text-xs text-emerald-400 underline font-bold">View Digital Deed</button>
+                            {/* RESULTS (ORIGINAL) */}
+                            {result === "found" && (
+                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex justify-between items-center animate-in fade-in slide-in-from-bottom-2">
+                                    <div><p className="text-sm text-emerald-400 font-bold">✅ Property Found!</p></div>
+                                    <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg">View Full Details</button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                            {result === "not-found" && <p className="mt-4 text-sm text-red-400 font-bold">❌ Record Not Found</p>}
+                        </div>
                     </div>
 
-                    {/* --- RIGHT SIDE: 3D INTERACTIVE CARD --- */}
-                    <div className="flex justify-center items-center perspective-1000 order-first lg:order-last">
+                    {/* RIGHT SIDE: (3D DIGITAL DEED - Mobile order-2) */}
+                    <div className="order-2 flex justify-center items-center perspective-1000">
                         <div 
                             ref={cardRef}
                             onMouseMove={handleMouseMove}
                             onMouseLeave={handleMouseLeave}
-                            className="relative w-80 md:w-96 aspect-[3/4] bg-gradient-to-br from-zinc-800/40 to-black border border-white/20 rounded-[40px] p-8 shadow-2xl transition-all duration-200 ease-out cursor-pointer overflow-hidden group"
+                            className="relative w-80 bg-zinc-900/40 backdrop-blur-md border border-white/10 rounded-[32px] p-6 shadow-2xl overflow-hidden group cursor-pointer transition-all duration-200"
                             style={{ transformStyle: "preserve-3d" }}
                         >
-                            {/* Glass Shine */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {/* Scanning Light (Original Effect) */}
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)] z-20 animate-[scan_3s_ease-in-out_infinite]" />
                             
-                            {/* Card Content */}
-                            <div className="relative z-10 h-full flex flex-col justify-between" style={{ transform: "translateZ(50px)" }}>
-                                <div className="flex justify-between items-start">
-                                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">🇮🇳</div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Serial No.</p>
-                                        <p className="text-xs font-mono text-cyan-400">#PRP-2026-X8</p>
+                            <div className="relative z-10" style={{ transform: "translateZ(40px)" }}>
+                                <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center text-cyan-400">📜</div>
+                                        <div><p className="text-white text-sm font-semibold">Digital Deed</p><p className="text-[10px] text-gray-500 uppercase font-black">On-Chain Asset</p></div>
                                     </div>
+                                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                                    <div>
-                                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter mb-1">Asset Identity Hash</p>
-                                        <p className="text-[11px] font-mono text-white/80 break-all bg-black/40 p-3 rounded-xl border border-white/5">{scannedHash}</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 text-white">
-                                        <div>
-                                            <p className="text-[9px] font-black text-zinc-500 uppercase mb-1">Certified Owner</p>
-                                            <p className="text-xs font-bold">Rohit Kumar</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-black text-zinc-500 uppercase mb-1">Status</p>
-                                            <p className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> SECURED
-                                            </p>
-                                        </div>
+                                <div className="space-y-4 font-mono">
+                                    <div className="bg-black/40 p-3 rounded-xl border border-white/5"><p className="text-[10px] text-gray-500 mb-1">PROPERTY HASH</p><p className="text-cyan-400 text-[11px] truncate">{scannedHash}</p></div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5"><p className="text-[10px] text-gray-500 mb-1 font-bold">OWNER</p><p className="text-gray-300 text-xs font-bold uppercase">Rohit Kumar</p></div>
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5"><p className="text-[10px] text-gray-500 mb-1 font-bold">LOCATION</p><p className="text-gray-300 text-xs font-bold uppercase">Patna, IN</p></div>
                                     </div>
                                 </div>
-
-                                <div className="bg-white text-black p-4 rounded-3xl flex items-center justify-between shadow-xl">
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Ownership Deed</span>
-                                    <span className="text-lg">⚖️</span>
+                                <div className="mt-6 pt-3 border-t border-white/5 flex justify-between text-[10px] font-bold text-gray-500 uppercase">
+                                    <span>Status: <span className="text-green-400 tracking-widest">Verified</span></span>
+                                    <span>Block: #8921..</span>
                                 </div>
                             </div>
-
-                            {/* Floating Decorative Elements */}
-                            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/20 blur-2xl rounded-full" />
                         </div>
                     </div>
                 </div>
-            </main>
+            </section>
 
-            {/* --- SEARCH RESULT MODAL --- */}
+            {/* MODAL (UNCHANGED) */}
             {showModal && searchedProperty && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 animate-in fade-in duration-300">
-                    <div className="bg-zinc-900 border border-white/10 rounded-[40px] max-w-4xl w-full overflow-hidden flex flex-col md:flex-row shadow-3xl">
-                        <div className="md:w-1/2 bg-zinc-800 relative h-64 md:h-auto">
-                            {searchedProperty.imageUrl ? (
-                                <img src={searchedProperty.imageUrl} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-6xl opacity-20 text-white">🏘️</div>
-                            )}
-                            <button onClick={() => setShowModal(false)} className="absolute top-6 left-6 bg-black/50 p-2 rounded-full md:hidden text-white font-bold">✕</button>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
+                    <div className="relative w-full max-w-4xl bg-[#0a0a0a] border border-zinc-800 rounded-[40px] overflow-hidden flex flex-col md:flex-row h-auto max-h-[90vh] overflow-y-auto">
+                        <button onClick={() => setShowModal(false)} className="absolute top-6 right-6 z-20 p-2 bg-black/60 text-white rounded-full">✕</button>
+                        <div className="w-full md:w-1/2 min-h-[300px] bg-zinc-900">
+                            <img src={searchedProperty.imageUrl} alt="Property" className="w-full h-full object-cover" />
                         </div>
-                        <div className="md:w-1/2 p-8 md:p-12 space-y-6 text-white">
-                            <button onClick={() => setShowModal(false)} className="hidden md:block float-right text-zinc-500 hover:text-white font-bold">✕ Close</button>
-                            <h2 className="text-3xl font-black text-white">{searchedProperty.name}</h2>
-                            <p className="text-cyan-400 font-bold tracking-tight uppercase">📍 {searchedProperty.address}</p>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/5 p-4 rounded-3xl border border-white/5">
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1">Dimension</p>
-                                    <p className="text-lg font-bold text-white">{searchedProperty.area} SqFt</p>
-                                </div>
-                                <div className="bg-white/5 p-4 rounded-3xl border border-white/5">
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1">Registry</p>
-                                    <p className="text-lg font-bold text-emerald-400">Verified</p>
-                                </div>
+                        <div className="w-full md:w-1/2 p-8 flex flex-col">
+                            <h2 className="text-3xl font-black text-white mb-2">{searchedProperty.name}</h2>
+                            <p className="text-cyan-400 font-bold text-sm mb-6 uppercase">📍 {searchedProperty.address}</p>
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-white/5 p-4 rounded-3xl border border-white/5"><p className="text-[9px] text-gray-500 uppercase">Area</p><p className="text-xl font-bold">{searchedProperty.area} SQFT</p></div>
+                                <div className="bg-white/5 p-4 rounded-3xl border border-white/5"><p className="text-[9px] text-gray-500 uppercase">Status</p><p className="text-xl font-bold text-cyan-400">Verified</p></div>
                             </div>
-                            <p className="text-zinc-400 text-sm leading-relaxed">{searchedProperty.description}</p>
-                            <div className="pt-6 border-t border-white/5 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-[10px] font-black text-black">{searchedProperty.owner?.slice(2,4).toUpperCase()}</div>
-                                <p className="text-xs font-mono text-zinc-500 truncate">{searchedProperty.owner}</p>
-                            </div>
+                            <p className="text-sm text-gray-400 leading-relaxed bg-zinc-900/50 p-4 rounded-2xl">{searchedProperty.description}</p>
                         </div>
                     </div>
                 </div>
             )}
 
             <style>{`
+                @keyframes scan { 0%, 100% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+                @keyframes pulse-slow { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } }
+                @keyframes grid-move { 0% { transform: translateY(0); } 100% { transform: translateY(54px); } }
+                .animate-pulse-slow { animation: pulse-slow 5s ease-in-out infinite; }
+                .animate-grid-move { animation: grid-move 3s linear infinite; }
                 .perspective-1000 { perspective: 1000px; }
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
             `}</style>
         </div>
     );
