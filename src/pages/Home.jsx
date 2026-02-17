@@ -142,12 +142,12 @@ const Home = () => {
     return (
         <>
             {/* ✅ HERO SECTION: Background updated to 'Shocking' Grid, but Layout is Original */}
-            <section className="relative flex flex-col items-center justify-center px-8 pt-16 pb-10 overflow-hidden min-h-[90vh] bg-[#000000]">
+            <section className="relative flex flex-col items-center justify-center px-8 pt-16 pb-10 overflow-hidden min-h-screen bg-[#000000]">
 
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
 
-                    {/* 1. बड़े सॉफ्ट ग्लोइंग ऑर्ब्स (Mesh Orbs) */}
+                    
                     <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] animate-orb-move-1"></div>
                     <div className="absolute bottom-[0%] right-[-5%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] animate-orb-move-2"></div>
                     <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] animate-pulse"></div>
