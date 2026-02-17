@@ -218,7 +218,7 @@ const Home = () => {
 
                             <div className="space-y-6">
                                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase">Dynamic Hash Index</p>
+                                    <p className="text-[10px] text-zinc-500 font-bold uppercase">Dynamic Hash Index.</p>
                                     <p className="font-mono text-xs text-cyan-400 truncate">{scannedHash}</p>
                                 </div>
 
