@@ -171,7 +171,7 @@ const Register = () => {
             </Link>
           </p>
           <p className="text-[8px] text-zinc-700 uppercase tracking-[0.2em] mt-4 italic">
-            * Identity will be synced with Neon DB after Blockchain confirmation *
+            * Finalizing secure registration on the digital ledger *
           </p>
         </div>
       </div>
