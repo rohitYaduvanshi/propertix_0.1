@@ -270,7 +270,7 @@ const Navbar = () => {
                     </button>
                 </div>
             ) : (
-                <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="w-full py-4 mt-2 rounded-xl bg-cyan-600 text-white font-bold shadow-lg">
+                <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="w-full py-4 mt-2 rounded-xl bg-sky-500/75 text-white font-bold shadow-lg">
                     Login / Connect Wallet
                 </button>
             )}
