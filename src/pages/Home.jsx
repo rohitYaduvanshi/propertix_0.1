@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { BrowserProvider, Contract } from "ethers";
-import Matter from "matter-js"; // Run: npm install matter-js matter-attractors matter-wrap
-import "matter-attractors";
-import "matter-wrap";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
     PROPERTY_REGISTRY_ADDRESS,
@@ -10,106 +7,17 @@ import {
 } from "../blockchain/contractConfig.js";
 
 const Home = () => {
-    // --- States ---
     const [hash, setHash] = useState("");
     const [result, setResult] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
     const [scannedHash, setScannedHash] = useState("0x71C...9A21");
+
     const [searchedProperty, setSearchedProperty] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
     const { isWalletConnected, connectWallet } = useAuth();
 
-    // --- Refs ---
-    const cardRef = useRef(null);
-    const sceneCanvas = useRef(null);
-
-    // --- Matter.js Physics Background Logic ---
-    useEffect(() => {
-        const { Engine, Render, Runner, World, Bodies, Body, Mouse, Events, Common } = Matter;
-
-        const engine = Engine.create();
-        engine.world.gravity.y = 0;
-
-        const render = Render.create({
-            canvas: sceneCanvas.current,
-            engine: engine,
-            options: {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                wireframes: false,
-                background: "transparent",
-            },
-        });
-
-        // Invisible Attractor Body that follows mouse
-        const attractiveBody = Bodies.circle(
-            window.innerWidth / 2,
-            window.innerHeight / 2,
-            0,
-            {
-                isStatic: true,
-                render: { fillStyle: "transparent" },
-                plugin: {
-                    attractors: [
-                        (bodyA, bodyB) => ({
-                            x: (bodyA.position.x - bodyB.position.x) * 1e-6,
-                            y: (bodyA.position.y - bodyB.position.y) * 1e-6,
-                        }),
-                    ],
-                },
-            }
-        );
-
-        World.add(engine.world, attractiveBody);
-
-        // Add 60 random physical bodies (polygons and circles)
-        for (let i = 0; i < 60; i++) {
-            let x = Common.random(0, window.innerWidth);
-            let y = Common.random(0, window.innerHeight);
-            let s = Common.random() > 0.6 ? Common.random(10, 40) : Common.random(4, 25);
-            let sides = Math.floor(Common.random(3, 6));
-
-            const body = Bodies.polygon(x, y, sides, s, {
-                mass: s / 20,
-                frictionAir: 0.02,
-                render: {
-                    fillStyle: i % 3 === 0 ? "#111827" : "#0f172a",
-                    strokeStyle: "#1e293b",
-                    lineWidth: 1,
-                },
-            });
-            World.add(engine.world, body);
-        }
-
-        const mouse = Mouse.create(render.canvas);
-        Events.on(engine, "afterUpdate", () => {
-            if (!mouse.position.x) return;
-            Body.translate(attractiveBody, {
-                x: (mouse.position.x - attractiveBody.position.x) * 0.12,
-                y: (mouse.position.y - attractiveBody.position.y) * 0.12,
-            });
-        });
-
-        Render.run(render);
-        const runner = Runner.create();
-        Runner.run(runner, engine);
-
-        const handleResize = () => {
-            render.canvas.width = window.innerWidth;
-            render.canvas.height = window.innerHeight;
-        };
-        window.addEventListener("resize", handleResize);
-
-        return () => {
-            Render.stop(render);
-            World.clear(engine.world);
-            Engine.clear(engine);
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-
-    // --- Dynamic Hash Animation ---
+    // Animation Effect
     useEffect(() => {
         const interval = setInterval(() => {
             const chars = "0123456789ABCDEF";
@@ -125,153 +33,354 @@ const Home = () => {
     const handleSearch = async () => {
         setResult(null);
         setSearchedProperty(null);
+
         if (!hash.trim()) return;
+        const searchKey = hash.trim();
+
         try {
             setIsSearching(true);
-            if (!window.ethereum) { setResult("no-wallet"); return; }
+
+            if (!window.ethereum) {
+                setResult("no-wallet");
+                return;
+            }
+
             const provider = new BrowserProvider(window.ethereum);
-            if (hash.startsWith("0x") && hash.length > 42) {
-                const tx = await provider.getTransaction(hash);
-                setResult(tx ? "verified-only" : "not-found");
+
+            // LOGIC 1: TX HASH
+            if (searchKey.startsWith("0x") && searchKey.length > 42) {
+                const tx = await provider.getTransaction(searchKey);
+                if (tx) {
+                    setResult("verified-only");
+                } else {
+                    setResult("not-found");
+                }
                 setIsSearching(false);
                 return;
             }
+
+            // LOGIC 2: IPFS/CONTRACT
             const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, provider);
             const allRequests = await contract.getAllRequests();
-            const found = allRequests.find(req => req.ipfsMetadata?.includes(hash));
-            if (found) { setResult("found"); } else { setResult("not-found"); }
-        } catch (err) { setResult("error"); }
-        finally { setIsSearching(false); }
+
+            const found = allRequests.find(
+                (req) => req.ipfsMetadata && req.ipfsMetadata.includes(searchKey)
+            );
+
+            if (found) {
+                let meta = { name: "Unknown", description: "No description", image: null, attributes: [] };
+
+                if (found.ipfsMetadata.startsWith("http")) {
+                    try {
+                        const response = await fetch(found.ipfsMetadata);
+                        const json = await response.json();
+                        meta = { ...meta, ...json };
+                    } catch (err) {
+                        console.warn("Could not fetch IPFS metadata", err);
+                    }
+                }
+
+                const getAttr = (key) => meta.attributes?.find(a => a.trait_type === key)?.value || "N/A";
+
+                setSearchedProperty({
+                    id: found.id.toString(),
+                    name: meta.name,
+                    address: getAttr("Address"),
+                    owner: found.requester,
+                    price: "Not Listed",
+                    status: Number(found.status),
+                    area: getAttr("Area"),
+                    ipfsHash: found.ipfsMetadata,
+                    imageUrl: meta.image,
+                    description: meta.description
+                });
+
+                setResult("found");
+            } else {
+                setResult("not-found");
+            }
+
+        } catch (err) {
+            console.error("Search Error:", err);
+            setResult("error");
+        } finally {
+            setIsSearching(false);
+        }
     };
+
+    const cardRef = useRef(null);
 
     const handleMouseMove = (e) => {
         if (!cardRef.current) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        const rotateX = (rect.height / 2 - (e.clientY - rect.top)) / 15;
-        const rotateY = ((e.clientX - rect.left) - rect.width / 2) / 15;
-        cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        const card = cardRef.current;
+        const rect = card.getBoundingClientRect();
+
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+
+        const rotateX = (centerY - y) / 10;
+        const rotateY = (x - centerX) / 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
     };
 
+    const handleMouseLeave = () => {
+        if (!cardRef.current) return;
+
+        cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    };
+
+    const getStatusLabel = (status) =>
+        ["⏳ Pending Survey", "📝 Surveyed", "✅ Verified", "❌ Rejected"][status] || "Unknown";
+
     return (
-        <main className="relative bg-[#020203] min-h-screen overflow-hidden text-white selection:bg-cyan-500/30">
-            
-            {/* 🏗️ MATTER.JS BACKGROUND (Replacing Grid/Mesh) */}
-            <canvas 
-                ref={sceneCanvas} 
-                className="absolute inset-0 z-0 pointer-events-none opacity-50"
-            />
+        <>
+            {/* ✅ HERO SECTION: Background updated to 'Shocking' Grid, but Layout is Original */}
+            <section className="relative flex flex-col items-center justify-center px-8 pt-16 pb-10 overflow-hidden min-h-screen bg-[#000000]">
 
-            {/* Overlay for depth and focus */}
-            <div className="absolute inset-0 z-[1] pointer-events-none bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#020203_90%)]" />
+                {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
 
-            <section className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 pt-24 pb-20 min-h-screen flex items-center">
-                <div className="grid lg:grid-cols-2 gap-16 items-center w-full">
                     
-                    {/* LEFT SIDE: Content */}
-                    <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
-                        <div className="space-y-4">
-                            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest ${isWalletConnected ? 'text-green-400' : 'text-amber-400'}`}>
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
-                                </span>
-                                {isWalletConnected ? "System Integrated" : "Wallet Connection Required"}
-                            </div>
-                            
-                            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                                Decentralized <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                                    Land Registry.
-                                </span>
-                            </h1>
-                            <p className="text-zinc-400 text-lg max-w-lg leading-relaxed">
-                                Verify and secure property deeds on the Ethereum blockchain. Immutable, transparent, and fraud-proof.
-                            </p>
+                    <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] animate-orb-move-1"></div>
+                    <div className="absolute bottom-[0%] right-[-5%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] animate-orb-move-2"></div>
+                    <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] animate-pulse"></div>
+
+                    {/* 2. प्रीमियम ग्लास नॉइज़ इफ़ेक्ट (Texture) */}
+                    <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+
+                    {/* 3. सेंटर रेडियल लाइट (Focus Point) */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#020203_80%)]"></div>
+
+                </div>
+                {/* ✨ ULTRA-PREMIUM MESH BACKGROUND END */}
+
+                <div className="relative max-w-6xl w-full grid md:grid-cols-2 gap-12 items-center mb-16 z-10">
+
+                    {/* LEFT SIDE (AAPKA ORIGINAL CODE) */}
+                    <div>
+                        <div className={`mb-6 rounded-xl border px-4 py-3 text-xs flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all duration-300 ${isWalletConnected ? "border-green-500/40 bg-green-500/10 text-green-100" : "border-amber-500/40 bg-amber-500/10 text-amber-100"}`}>
+
+                            {isWalletConnected ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg">🎉</span>
+                                    <span>Nice! You have connected your wallet.</span>
+                                </div>
+                            ) : (
+                                <span>Connect wallet to verify on-chain records.</span>
+                            )}
+
+                            {!isWalletConnected && (
+                                <div className="flex items-center gap-2">
+                                    <button onClick={connectWallet} className="px-3 py-1.5 rounded-full bg-amber-500 text-black text-xs font-semibold hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all">Connect Wallet</button>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Search Box */}
-                        <div className="p-[1px] rounded-3xl bg-gradient-to-b from-white/20 to-transparent shadow-2xl">
-                            <div className="bg-[#0c0c0c]/80 backdrop-blur-xl rounded-[23px] p-6 space-y-4">
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    <input
-                                        type="text"
-                                        value={hash}
-                                        onChange={(e) => setHash(e.target.value)}
-                                        placeholder="Enter TX Hash or IPFS URL..."
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all"
-                                    />
-                                    <button
-                                        onClick={handleSearch}
-                                        className="bg-white text-black font-bold px-8 py-3 rounded-xl hover:bg-cyan-400 transition-all active:scale-95"
-                                    >
-                                        {isSearching ? "..." : "Verify"}
-                                    </button>
-                                </div>
-                                {result === "found" && (
-                                    <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-                                        <span>✓ Record Authenticated</span>
-                                        <button onClick={() => setShowModal(true)} className="bg-emerald-500 text-black px-3 py-1 rounded-lg">View</button>
-                                    </div>
-                                )}
+                        <p className="text-sm font-semibold tracking-[0.2em] text-cyan-400 mb-3">Securing Tomorrow's Assets Today</p>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">The Smartest Way to Choose<span className="block text-cyan-400">Verify & Own Land</span></h1>
+                        <p className="text-gray-300 text-sm md:text-base mb-6">Skip the complex paperwork. Manage your property records on a secure,
+                            tamper-proof digital ledger with 100% transparency.</p>
+
+                        {/* SEARCH BOX (AAPKA ORIGINAL DESIGN) */}
+                        <div className="bg-black/70 border border-white/10 rounded-2xl p-5 shadow-xl shadow-amber-900/30 backdrop-blur-sm">
+                            <label className="block text-xs font-medium text-gray-300 mb-2">SEARCH PROPERTY BY IPFS URL OR TX HASH</label>
+                            <div className="flex flex-col md:flex-row gap-3">
+                                <input
+                                    type="text"
+                                    value={hash}
+                                    onChange={(e) => setHash(e.target.value)}
+                                    placeholder="Paste IPFS Link (to view) or Tx Hash (to verify)..."
+                                    className="flex-1 rounded-xl bg-zinc-900/80 border border-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                                />
+                                <button
+                                    onClick={handleSearch}
+                                    disabled={isSearching}
+                                    className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-semibold shadow-lg shadow-cyan-500/40 transition-all"
+                                >
+                                    {isSearching ? "Searching..." : "Search"}
+                                </button>
                             </div>
+
+                            {/* RESULTS (AAPKA ORIGINAL CODE) */}
+                            {result === "found" && (
+                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">✅ Property Found!</p>
+                                            <p className="text-xs text-gray-400 mt-1">Authentic record found on blockchain.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+                                        >
+                                            View Full Details
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {result === "verified-only" && (
+                                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-blue-400 font-bold flex items-center gap-2">
+                                        <span className="text-xl">⛓️</span> Transaction Verified on Blockchain
+                                    </p>
+                                    <p className="text-xs text-gray-300 mt-1">
+                                        This transaction exists and is confirmed. <br />
+                                        <span className="text-gray-500 italic">(To view property photos/details, please search using the IPFS Link)</span>
+                                    </p>
+                                </div>
+                            )}
+
+                            {result === "not-found" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">❌ Record Not Found</p>
+                                    <p className="text-xs text-gray-400 mt-1">No property matches this hash.</p>
+                                </div>
+                            )}
+                            {result === "error" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">⚠ Search Error</p>
+                                    <p className="text-xs text-gray-400 mt-1">Something went wrong. Check console.</p>
+                                </div>
+                            )}
                         </div>
-                        
-                        {!isWalletConnected && (
-                            <button onClick={connectWallet} className="flex items-center gap-3 text-sm font-bold text-zinc-400 hover:text-white transition-colors">
-                                <span className="text-xl">🦊</span> Connect MetaMask to Proceed
-                            </button>
-                        )}
                     </div>
 
-                    {/* RIGHT SIDE: 3D Card */}
-                    <div className="flex justify-center lg:justify-end perspective-1000">
+                    {/* RIGHT SIDE (3D DIGITAL DEED) */}
+                    {/* 'flex' ensures it's visible on mobile, 'md:flex' handles desktop centering */}
+                    <div className="flex justify-center items-center relative perspective-1000 mt-12 md:mt-0">
                         <div
                             ref={cardRef}
                             onMouseMove={handleMouseMove}
-                            onMouseLeave={() => cardRef.current.style.transform = "rotateX(0) rotateY(0)"}
-                            className="relative w-full max-w-[350px] aspect-[3/4] bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-[2.5rem] p-8 shadow-3xl overflow-hidden group transition-transform duration-200"
+                            onMouseLeave={handleMouseLeave}
+                            className="relative w-72 sm:w-80 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
                             style={{ transformStyle: "preserve-3d" }}
                         >
-                            <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_15px_#22d3ee] animate-scan z-20" />
-                            
-                            <div className="h-full flex flex-col justify-between relative z-10" style={{ transform: "translateZ(50px)" }}>
-                                <div className="flex justify-between items-start">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944" /></svg>
+                            {/* Scanning Light Effect */}
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] z-20 animate-[scan_3s_ease-in-out_infinite]" />
+
+                            {/* Inner Content with Z-Translation for Parallax effect */}
+                            <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
+                                <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        </div>
+                                        <div><p className="text-white text-sm font-semibold uppercase tracking-tighter">Digital Deed</p><p className="text-[10px] text-gray-500">ERC-721 Secure</p></div>
                                     </div>
-                                    <span className="text-[8px] font-bold text-green-500 border border-green-500/30 px-2 py-0.5 rounded-full animate-pulse">ON-CHAIN</span>
+                                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"></div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                        <p className="text-[9px] text-zinc-500 font-bold uppercase mb-1">Asset Hash</p>
-                                        <p className="text-cyan-400 text-xs font-mono truncate">{scannedHash}</p>
+                                <div className="space-y-4 font-mono">
+                                    <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5 shadow-inner">
+                                        <p className="text-[10px] text-gray-500 mb-1">PROPERTY HASH</p>
+                                        <p className="text-cyan-400 text-[11px] truncate">{scannedHash}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                            <p className="text-[9px] text-zinc-500 font-bold mb-1">OWNER</p>
-                                            <p className="text-xs font-bold truncate">ROHIT K.</p>
+                                        <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
+                                            <p className="text-[10px] text-gray-500 mb-1 font-bold">OWNER</p>
+                                            <p className="text-gray-300 text-xs font-bold uppercase truncate">Rohit Kumar</p>
                                         </div>
-                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                            <p className="text-[9px] text-zinc-500 font-bold mb-1">LOC</p>
-                                            <p className="text-xs font-bold truncate">PATNA, IN</p>
+                                        <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
+                                            <p className="text-[10px] text-gray-500 mb-1 font-bold">LOCATION</p>
+                                            <p className="text-gray-300 text-xs font-bold uppercase">Patna, IN</p>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <p className="text-[10px] text-zinc-600 font-mono text-center tracking-widest uppercase italic">Tamper Proof Digital Deed</p>
+
+                                <div className="mt-6 pt-3 border-t border-white/5 flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <span>Status: <span className="text-green-400">Verified</span></span>
+                                    <span>Block: #8921..</span>
+                                </div>
+                            </div>
+
+                            {/* Decorative Glowing Circle */}
+                            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/10 blur-2xl rounded-full" />
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            {/* ✅ PROPERTY DETAILS MODAL (AAPKA ORIGINAL) */}
+            {showModal && searchedProperty && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="relative w-full max-w-4xl bg-[#0a0a0a] border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="absolute top-4 right-4 z-20 p-2 bg-black/60 text-white rounded-full hover:bg-zinc-800 transition backdrop-blur-md"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                        </button>
+
+                        {/* Left: Image */}
+                        <div className="w-full md:w-1/2 min-h-[300px] bg-zinc-900 relative">
+                            {searchedProperty.imageUrl ? (
+                                <img src={searchedProperty.imageUrl} alt="Property" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-600">
+                                    <span className="text-6xl mb-2">🏠</span>
+                                    <span className="text-sm">No Image Available</span>
+                                </div>
+                            )}
+                            <div className="absolute top-4 left-4">
+                                <span className={`px-3 py-1 text-xs font-bold text-white rounded-full shadow-lg backdrop-blur-md ${searchedProperty.status === 2 ? "bg-emerald-500/80" : "bg-blue-500/80"}`}>
+                                    {getStatusLabel(searchedProperty.status)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Right: Details */}
+                        <div className="w-full md:w-1/2 p-8 flex flex-col">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-white mb-1">{searchedProperty.name}</h2>
+                                <p className="text-sm text-cyan-400 flex items-center gap-1">
+                                    📍 {searchedProperty.address}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase">Area</p>
+                                    <p className="text-lg text-white font-medium">{searchedProperty.area} <span className="text-xs text-gray-400">Sq Ft</span></p>
+                                </div>
+                                <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase">Price</p>
+                                    <p className="text-lg text-white font-medium">{searchedProperty.price} <span className="text-xs text-cyan-400">ETH</span></p>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Description</p>
+                                <p className="text-sm text-gray-300 leading-relaxed bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50 max-h-32 overflow-y-auto custom-scrollbar">
+                                    {searchedProperty.description}
+                                </p>
+                            </div>
+
+                            <div className="mt-auto">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Owner Wallet</p>
+                                <div className="flex items-center gap-2 bg-black p-3 rounded-xl border border-zinc-800">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                                        {searchedProperty.owner ? searchedProperty.owner.slice(2, 4).toUpperCase() : "??"}
+                                    </div>
+                                    <p className="text-xs text-zinc-300 font-mono truncate">{searchedProperty.owner || "Unknown"}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            )}
 
-            <style>{`
-                @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-                .animate-scan { animation: scan 4s linear infinite; }
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-            `}</style>
-        </main>
+            {/* ✅ CSS (Only for Background Animation) */}
+        </>
     );
 };
 
