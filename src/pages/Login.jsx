@@ -52,7 +52,7 @@ const Login = () => {
             >
                 <div className="flex flex-col items-start">
                     <span className="text-sm text-gray-300 group-hover:text-cyan-400 transition-colors">Citizen Login</span>
-                    <span className="text-[10px] text-gray-600 font-normal mt-0.5 uppercase">Sync with Neon DB Identity</span>
+                    <span className="text-[10px] text-gray-600 font-normal mt-0.5 uppercase">For Property Owners & Buyers</span>
                 </div>
                 <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity">👤</span>
             </button>
