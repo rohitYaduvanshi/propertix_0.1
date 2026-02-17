@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
