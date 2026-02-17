@@ -253,13 +253,14 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* RIGHT SIDE (AAPKA ORIGINAL CARD) */}
-                    <div className="hidden md:flex justify-center relative perspective-1000">
+                    {/* RIGHT SIDE (3D DIGITAL DEED) */}
+                    {/* 'flex' ensures it's visible on mobile, 'md:flex' handles desktop centering */}
+                    <div className="flex justify-center items-center relative perspective-1000 mt-12 md:mt-0">
                         <div
                             ref={cardRef}
                             onMouseMove={handleMouseMove}
                             onMouseLeave={handleMouseLeave}
-                            className="relative w-80 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
+                            className="relative w-72 sm:w-80 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
                             style={{ transformStyle: "preserve-3d" }}
                         >
                             {/* Scanning Light Effect */}
@@ -285,7 +286,7 @@ const Home = () => {
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
                                             <p className="text-[10px] text-gray-500 mb-1 font-bold">OWNER</p>
-                                            <p className="text-gray-300 text-xs font-bold uppercase">Rohit Kumar</p>
+                                            <p className="text-gray-300 text-xs font-bold uppercase truncate">Rohit Kumar</p>
                                         </div>
                                         <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
                                             <p className="text-[10px] text-gray-500 mb-1 font-bold">LOCATION</p>
@@ -300,7 +301,7 @@ const Home = () => {
                                 </div>
                             </div>
 
-                            {/* Decorative Glowing Circle behind content */}
+                            {/* Decorative Glowing Circle */}
                             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/10 blur-2xl rounded-full" />
                         </div>
                     </div>
