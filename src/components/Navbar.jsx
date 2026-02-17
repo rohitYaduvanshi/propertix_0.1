@@ -73,7 +73,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full px-6 lg:px-8 py-4 flex items-center justify-between bg-black/80 backdrop-blur-lg border-b border-white/10 sticky top-0 z-[100]">
+    <nav className="w-full px-6 lg:px-8 py-4 flex items-center justify-between bg-black/10 backdrop-blur-lg border-b border-white/10 sticky top-0 z-[100]">
 
       {/* --- 1. LEFT SECTION: LOGO --- */}
       <div className="flex items-center gap-3 z-50">
