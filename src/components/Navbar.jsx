@@ -191,7 +191,7 @@ const Navbar = () => {
       {/* --- 4. MOBILE HAMBURGER BUTTON --- */}
       <div className="flex lg:hidden items-center gap-4 z-50">
         {!isWalletConnected && !isUserLoggedIn && (
-            <button onClick={() => navigate("/login")} className="px-4 py-1.5 rounded-full bg-sky-500/50 text-white text-xs font-bold">
+            <button onClick={() => navigate("/login")} className="px-4 py-1.5 rounded-full bg-sky-500/65 text-white text-xs font-bold">
                 Login
             </button>
         )}
@@ -270,7 +270,7 @@ const Navbar = () => {
                     </button>
                 </div>
             ) : (
-                <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="w-full py-4 mt-2 rounded-xl bg-sky-500/50 text-white font-bold shadow-lg">
+                <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }} className="w-full py-4 mt-2 rounded-xl bg-sky-500/65 text-white font-bold shadow-lg">
                     Login / Connect Wallet
                 </button>
             )}
