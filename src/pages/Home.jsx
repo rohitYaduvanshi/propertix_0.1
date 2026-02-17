@@ -202,7 +202,7 @@ const Home = () => {
                                 <button
                                     onClick={handleSearch}
                                     disabled={isSearching}
-                                    className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-semibold shadow-lg shadow-cyan-500/40 transition-all"
+                                    className="px-5 py-2 rounded-xl bg-white hover:bg-cyan-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-semibold shadow-lg shadow-cyan-500/40 transition-all"
                                 >
                                     {isSearching ? "Searching..." : "Search"}
                                 </button>
