@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserProvider, Contract, parseEther, id } from "ethers"; 
+import { BrowserProvider, Contract, parseEther, id } from "ethers";
 import {
   PROPERTY_REGISTRY_ADDRESS,
   PROPERTY_REGISTRY_ABI,
@@ -28,8 +28,8 @@ const Blockchain = () => {
 
   const [coordinates, setCoordinates] = useState({ lat: 20.5937, lng: 78.9629 });
   const [isLocationSelected, setIsLocationSelected] = useState(false);
-  const [images, setImages] = useState([]); 
-  const [docFile, setDocFile] = useState(null); 
+  const [images, setImages] = useState([]);
+  const [docFile, setDocFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [txHash, setTxHash] = useState("");
@@ -73,7 +73,7 @@ const Blockchain = () => {
       const docUrl = await uploadFileToIPFS(docFile);
       const metadata = { ...formData, purpose: registrationPurpose, images: imageUrls, document: docUrl, location: coordinates };
       const metadataURL = await uploadJSONToIPFS(metadata);
-      
+
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
@@ -82,10 +82,10 @@ const Blockchain = () => {
         formData.ownerName, metadataURL, id(formData.aadhaar), formData.area.toString(), formData.address,
         { value: parseEther("0.001") }
       );
-      
+
       setStatus("Mining Transaction...");
       await tx.wait();
-      
+
       setTxHash(tx.hash);
       setStatus("✅ Registered Successfully!");
     } catch (err) { setStatus("❌ Error: " + (err.reason || err.message)); }
@@ -97,11 +97,11 @@ const Blockchain = () => {
     <section className="relative flex flex-col items-center px-4 md:px-8 py-20 min-h-screen bg-[#000000] text-white overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
         {/* Subtle Glows */}
-          <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-cyan-500/5 blur-[100px] rounded-full"></div>
-          
-          {/* The "Shocking" Square Border from Image */}
-          <div className="absolute top-[15%] left-[5%] w-72 h-80 border border-cyan-500/20 rounded-[40px] rotate-[-10deg]"></div>
-          <div className="absolute top-[18%] left-[8%] w-72 h-80 border border-white/5 rounded-[40px] rotate-[-5deg]"></div>
+        <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-cyan-500/5 blur-[100px] rounded-full"></div>
+
+        {/* The "Shocking" Square Border from Image */}
+        <div className="absolute top-[15%] left-[5%] w-72 h-80 border border-cyan-500/20 rounded-[40px] rotate-[-10deg]"></div>
+        <div className="absolute top-[18%] left-[8%] w-72 h-80 border border-white/5 rounded-[40px] rotate-[-5deg]"></div>
       </div>
       {/* 🔥 SHOCKING GRID BACKGROUND END */}
 
@@ -114,29 +114,48 @@ const Blockchain = () => {
       </div>
 
       <div className="relative w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-start z-10">
-        
+
         {/* LEFT SIDE: Proofs & Info */}
         <div className="space-y-6 w-full order-2 lg:order-1 lg:sticky lg:top-24">
           <div className="p-8 bg-zinc-950/50 border border-white/5 rounded-[40px] backdrop-blur-xl shadow-2xl">
-             <h2 className="text-xl font-bold text-white mb-4">Registration Guidelines</h2>
-             <ul className="text-xs text-zinc-400 space-y-4">
-                <li className="flex gap-3"><span className="text-cyan-400">01</span> Ensure Aadhaar ID matches your wallet owner identity for faster verification.</li>
-                <li className="flex gap-3"><span className="text-cyan-400">02</span> Property images must be clear and show boundaries properly.</li>
-                <li className="flex gap-3"><span className="text-cyan-400">03</span> Legal documents should be in PDF format and verified by local authority.</li>
-             </ul>
+            <h2 className="text-xl font-bold text-white mb-4">Registration Guidelines</h2>
+            <ul className="text-xs text-zinc-400 space-y-4">
+              <li className="flex gap-3"><span className="text-cyan-400">01</span> Ensure Aadhaar ID matches your wallet owner identity for faster verification.</li>
+              <li className="flex gap-3"><span className="text-cyan-400">02</span> Property images must be clear and show boundaries properly.</li>
+              <li className="flex gap-3"><span className="text-cyan-400">03</span> Legal documents should be in PDF format and verified by local authority.</li>
+            </ul>
           </div>
 
           {txHash && (
             <div className="space-y-4 animate-in fade-in slide-in-from-left-8">
-              <div className="p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-[32px] backdrop-blur-xl shadow-emerald-500/10 shadow-lg">
-                <p className="text-[9px] font-bold text-emerald-400 uppercase mb-3 tracking-widest">🔗 Transaction Secured</p>
-                <div className="flex items-center gap-2 bg-black/60 p-3 rounded-2xl border border-white/5">
-                  <span className="text-[10px] font-mono text-zinc-400 flex-1 truncate">
-                    {txHash}
-                  </span>
-                  <button onClick={() => navigator.clipboard.writeText(txHash)} className="text-[10px] bg-emerald-600 px-4 py-2 rounded-xl font-black text-white hover:bg-emerald-500 transition-all">COPY</button>
+              <div className="p-5 sm:p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-[32px] backdrop-blur-xl shadow-emerald-500/10 shadow-lg">
+                <p className="text-[9px] font-bold text-emerald-400 uppercase mb-3 tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Transaction Secured
+                </p>
+
+                <div className="flex items-center gap-3 bg-black/60 p-2 sm:p-3 rounded-2xl border border-white/5 overflow-hidden">
+                  {/* 'min-w-0' is the secret for making truncate work inside flex */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-mono text-zinc-400 truncate pr-2">
+                      {txHash}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(txHash);
+                      // Optional: You can add a 'Copied' state here to change the icon
+                    }}
+                    className="flex-shrink-0 text-[10px] bg-emerald-600 px-4 py-2 rounded-xl font-black text-white hover:bg-emerald-400 active:scale-90 transition-all shadow-lg shadow-emerald-900/20"
+                  >
+                    COPY
+                  </button>
                 </div>
-                <p className="text-[8px] text-zinc-600 mt-3 italic">*Identity synced with Neon DB and Blockchain Ledger.</p>
+
+                <p className="text-[8px] text-zinc-600 mt-3 italic tracking-tight">
+                  *Identity synced with Neon DB and Blockchain Ledger.
+                </p>
               </div>
             </div>
           )}
@@ -157,44 +176,44 @@ const Blockchain = () => {
             <div className="space-y-4 p-6 bg-black/40 rounded-[32px] border border-zinc-800/50">
               <label className="text-[10px] uppercase text-cyan-400 font-black tracking-widest ml-1">Location Geometry</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <input type="text" placeholder="State" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e)=>setFormData({...formData, state: e.target.value})} />
-                <input type="text" placeholder="District" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e)=>setFormData({...formData, district: e.target.value})} />
-                <input type="text" placeholder="Village" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e)=>setFormData({...formData, village: e.target.value})} />
+                <input type="text" placeholder="State" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
+                <input type="text" placeholder="District" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e) => setFormData({ ...formData, district: e.target.value })} />
+                <input type="text" placeholder="Village" className="bg-zinc-900/80 text-sm p-4 rounded-2xl border border-zinc-700 outline-none focus:border-cyan-500/50 transition-all" onChange={(e) => setFormData({ ...formData, village: e.target.value })} />
               </div>
               <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-4 rounded-2xl text-[10px] font-black transition-all uppercase tracking-widest shadow-lg shadow-cyan-900/20">LOCATE ON MAP</button>
             </div>
 
             <div className="h-64 rounded-[32px] overflow-hidden border border-zinc-800 shadow-2xl relative z-0">
-               <MapContainer center={coordinates} zoom={13} style={{height: '100%', width: '100%'}}>
-                  <LayersControl position="topright">
-                    <LayersControl.BaseLayer checked name="Standard">
-                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    </LayersControl.BaseLayer>
-                    <LayersControl.BaseLayer name="Satellite">
-                      <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-                    </LayersControl.BaseLayer>
-                  </LayersControl>
-                  <MapController coords={coordinates} />
-                  <LocationMarker setCoords={setCoordinates} setIsSelected={setIsLocationSelected} />
-                  {isLocationSelected && <Marker position={[coordinates.lat, coordinates.lng]} />}
-               </MapContainer>
+              <MapContainer center={coordinates} zoom={13} style={{ height: '100%', width: '100%' }}>
+                <LayersControl position="topright">
+                  <LayersControl.BaseLayer checked name="Standard">
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  </LayersControl.BaseLayer>
+                  <LayersControl.BaseLayer name="Satellite">
+                    <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                  </LayersControl.BaseLayer>
+                </LayersControl>
+                <MapController coords={coordinates} />
+                <LocationMarker setCoords={setCoordinates} setIsSelected={setIsLocationSelected} />
+                {isLocationSelected && <Marker position={[coordinates.lat, coordinates.lng]} />}
+              </MapContainer>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" placeholder="Full Legal Name" value={formData.ownerName} disabled={registrationPurpose === "Government"} className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 disabled:opacity-30 transition-all" onChange={(e)=>setFormData({...formData, ownerName: e.target.value})} />
-              <input type="password" placeholder="Aadhaar Number" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 transition-all" onChange={(e)=>setFormData({...formData, aadhaar: e.target.value})} />
+              <input type="text" placeholder="Full Legal Name" value={formData.ownerName} disabled={registrationPurpose === "Government"} className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 disabled:opacity-30 transition-all" onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })} />
+              <input type="password" placeholder="Aadhaar Number" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 transition-all" onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })} />
             </div>
 
-            <textarea placeholder="Property Address & Landmarks" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm h-24 resize-none outline-none focus:border-cyan-500 transition-all" onChange={(e)=>setFormData({...formData, address: e.target.value})} />
-            <input type="number" placeholder="Total Area (Sq Ft)" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 transition-all" onChange={(e)=>setFormData({...formData, area: e.target.value})} />
+            <textarea placeholder="Property Address & Landmarks" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm h-24 resize-none outline-none focus:border-cyan-500 transition-all" onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+            <input type="number" placeholder="Total Area (Sq Ft)" className="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-cyan-500 transition-all" onChange={(e) => setFormData({ ...formData, area: e.target.value })} />
 
             <div className="grid grid-cols-2 gap-4">
-              <div onClick={()=>document.getElementById('img-up').click()} className={`border-2 border-dashed p-6 rounded-2xl text-center cursor-pointer transition-all ${images.length >= 3 ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800 hover:border-cyan-500 bg-zinc-900/30"}`}>
-                <input id="img-up" type="file" multiple hidden onChange={(e)=>setImages(Array.from(e.target.files).slice(0,3))} />
+              <div onClick={() => document.getElementById('img-up').click()} className={`border-2 border-dashed p-6 rounded-2xl text-center cursor-pointer transition-all ${images.length >= 3 ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800 hover:border-cyan-500 bg-zinc-900/30"}`}>
+                <input id="img-up" type="file" multiple hidden onChange={(e) => setImages(Array.from(e.target.files).slice(0, 3))} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{images.length >= 3 ? "✅ 3 Images Ready" : "📸 Upload 3 Photos"}</p>
               </div>
-              <div onClick={()=>document.getElementById('doc-up').click()} className={`border-2 border-dashed p-6 rounded-2xl text-center cursor-pointer transition-all ${docFile ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800 hover:border-cyan-500 bg-zinc-900/30"}`}>
-                <input id="doc-up" type="file" hidden onChange={(e)=>setDocFile(e.target.files[0])} />
+              <div onClick={() => document.getElementById('doc-up').click()} className={`border-2 border-dashed p-6 rounded-2xl text-center cursor-pointer transition-all ${docFile ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800 hover:border-cyan-500 bg-zinc-900/30"}`}>
+                <input id="doc-up" type="file" hidden onChange={(e) => setDocFile(e.target.files[0])} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{docFile ? "✅ PDF Document Ready" : "📄 Legal PDF Doc"}</p>
               </div>
             </div>
@@ -203,10 +222,10 @@ const Blockchain = () => {
               {isSubmitting ? "PROCESSING TRANSACTION..." : "SUBMIT TO BLOCKCHAIN (0.001 ETH)"}
             </button>
             {status && (
-                <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-cyan-400 animate-pulse uppercase tracking-[0.2em]">
-                    <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-ping"></span>
-                    {status}
-                </div>
+              <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-cyan-400 animate-pulse uppercase tracking-[0.2em]">
+                <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-ping"></span>
+                {status}
+              </div>
             )}
           </form>
         </div>
