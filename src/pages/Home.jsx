@@ -157,7 +157,7 @@ const Home = () => {
                     >
                         <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center pointer-events-none">
 
-                            {/* घूमने वाला टेक्स्ट */}
+                            {/* CIRCLE TEXT */}
                             <div className="absolute inset-0 animate-[spin_8s_linear_infinite] pointer-events-none">
                                 <svg className="w-full h-full" viewBox="0 0 100 100">
                                     <path
@@ -173,7 +173,7 @@ const Home = () => {
                                 </svg>
                             </div>
 
-                            {/* बीच वाला गोला - अब यह असली क्लिक रिसीव करेगा */}
+                            {/* ----------*/}
                             <div className="relative w-12 h-12 lg:w-16 lg:h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300 pointer-events-auto shadow-[0_0_20px_rgba(34,211,238,0.2)]">
                                 <span className="text-xl lg:text-2xl group-hover:animate-bounce">👆</span>
                             </div>
@@ -415,7 +415,17 @@ const Home = () => {
                 </div>
             )}
         </>
+        
     );
+    
 };
+<style>{`
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+`}</style>
 
 export default Home;
