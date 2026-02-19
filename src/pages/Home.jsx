@@ -305,6 +305,7 @@ const Home = () => {
                             style={{ transformStyle: "preserve-3d" }}
                         >
                             {/* --- SCANNING LINE CODE REMAINS SAME --- */}
+                            {/* --- SCANNING LINE CODE REMAINS SAME --- */}
                             <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-[40px]">
                                 <div className="absolute w-full h-[2px]" style={{ background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)', boxShadow: '0 0 20px #22d3ee', top: '0%', animation: 'finalScan 3s linear infinite' }} />
                                 {/* Global Keyframes for new animations */}
@@ -391,10 +392,10 @@ const Home = () => {
                         {/* 1. THE TRADITIONAL STRUGGLE (India's Reality) */}
                         <div className="text-center mb-16">
                             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                                Meet Mr. R: The <span className="text-red-500 underline decoration-wavy">Traditional Way</span>
+                                Meet Mr. Gopu Chand: The <span className="text-red-500">Traditional Way</span>
                             </h2>
                             <p className="text-zinc-400 max-w-2xl mx-auto italic">
-                                "Mr. R has all his documents ready, but he is stuck in a loop of offices, middle-men, and endless waiting."
+                                "Gopu Chand has all his documents ready, but he is stuck in a loop of offices, middle-men, and endless waiting."
                             </p>
                         </div>
 
