@@ -385,7 +385,7 @@ const Home = () => {
                                     <div className="relative z-10 animate-float-3d">
                                         {/* PNG Image */}
                                         <img
-                                            src="/mr-r-struggle.png" 
+                                            src={mrRStruggle} 
                                             className="w-80 md:w-[450px] object-contain drop-shadow-[0_35px_60px_rgba(239,68,68,0.3)] grayscale group-hover:grayscale-0 transition-all duration-1000 brightness-75 group-hover:brightness-105 transform group-hover:scale-105"
                                             alt="Mr. R Struggling with Papers"
                                         />
