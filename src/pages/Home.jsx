@@ -147,7 +147,14 @@ const Home = () => {
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
                     {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
-                    <div onClick={() => window.open('https://www.notion.so/Your-Adventure-on-Propertix-Starts-Here-30c04694264a80cfa04ad1119ea2bc0e', '_blank')} className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
+                    {/* 🎡 FIX: NOTION GUIDE BUTTON */}
+                    <div
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.open('https://www.notion.so/Your-Adventure-on-Propertix-Starts-Here-30c04694264a80cfa04ad1119ea2bc0e', '_blank', 'noopener,noreferrer');
+                        }}
+                        className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000"
+                    >
                         <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center">
 
                             {/* (Circular Text) */}
@@ -166,12 +173,12 @@ const Home = () => {
                                 </svg>
                             </div>
 
-                            {/* - Glassmorphism Touch */}
+                            {/* Glassmorphism Icon */}
                             <div className="relative w-10 h-10 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
-                                <span className="text-lg lg:text-xl group-hover:animate-bounce">👆</span>
+                                <span className="text-lg lg:text-xl group-hover:animate-bounce pointer-events-none">👆</span>
                             </div>
 
-                            {/* Glowing Effect underneath */}
+                            {/* Glow Effect */}
                             <div className="absolute inset-0 bg-cyan-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
                     </div>
