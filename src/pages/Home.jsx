@@ -147,25 +147,25 @@ const Home = () => {
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
                     {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
-                    {/* 🎡 FIX: NOTION GUIDE BUTTON */}
-                    <div
-                        onClick={(e) => {
-                            e.preventDefault();
-                            window.open('https://www.notion.so/Your-Adventure-on-Propertix-Starts-Here-30c04694264a80cfa04ad1119ea2bc0e', '_blank', 'noopener,noreferrer');
-                        }}
-                        className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000"
+                    {/* 🎡 ULTIMATE NOTION BUTTON FIX */}
+                    <a
+                        href="https://www.notion.so/Your-Adventure-on-Propertix-Starts-Here-30c04694264a80cfa04ad1119ea2bc0e"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[999] group block cursor-pointer"
+                        onClick={(e) => e.stopPropagation()} // रोकता है ताकि दूसरे क्लिक डिस्टर्ब न करें
                     >
-                        <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center">
+                        <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center pointer-events-none">
 
-                            {/* (Circular Text) */}
-                            <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
+                            {/* घूमने वाला टेक्स्ट */}
+                            <div className="absolute inset-0 animate-[spin_8s_linear_infinite] pointer-events-none">
                                 <svg className="w-full h-full" viewBox="0 0 100 100">
                                     <path
                                         id="circlePath"
                                         d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                                         fill="none"
                                     />
-                                    <text className="text-[10px] font-black uppercase fill-yellow-500 tracking-[0.25em] group-hover:fill-cyan-500 transition-colors">
+                                    <text className="text-[10px] font-black uppercase fill-yellow-500 tracking-[0.25em] group-hover:fill-cyan-400 transition-colors">
                                         <textPath href="#circlePath">
                                             • HOW TO START • GET VERIFIED •
                                         </textPath>
@@ -173,15 +173,15 @@ const Home = () => {
                                 </svg>
                             </div>
 
-                            {/* Glassmorphism Icon */}
-                            <div className="relative w-10 h-10 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
-                                <span className="text-lg lg:text-xl group-hover:animate-bounce pointer-events-none">👆</span>
+                            {/* बीच वाला गोला - अब यह असली क्लिक रिसीव करेगा */}
+                            <div className="relative w-12 h-12 lg:w-16 lg:h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300 pointer-events-auto shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                                <span className="text-xl lg:text-2xl group-hover:animate-bounce">👆</span>
                             </div>
 
-                            {/* Glow Effect */}
-                            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            {/* Glow Background */}
+                            <div className="absolute inset-0 bg-cyan-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                         </div>
-                    </div>
+                    </a>
 
 
                     <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] animate-orb-move-1"></div>
