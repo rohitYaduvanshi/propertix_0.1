@@ -299,10 +299,14 @@ const Home = () => {
                             style={{ transformStyle: "preserve-3d" }}
                         >
                             {/* 1. ⚡ THE SCANNING LASER LINE (The Fix) */}
+                            {/* 🔥 THE ULTIMATE MOVING LASER FIX */}
                             <div
-                                className="absolute left-0 w-full h-[2px] bg-cyan-400 z-30 pointer-events-none shadow-[0_0_15px_#22d3ee,0_0_5px_#ffffff]"
+                                className="absolute left-0 w-full h-[3px] z-50 pointer-events-none"
                                 style={{
-                                    animation: 'digital-scan 3s ease-in-out infinite',
+                                    background: 'linear-gradient(to right, transparent, #22d3ee, transparent)',
+                                    boxShadow: '0 0 15px #22d3ee, 0 0 5px #ffffff',
+                                    animation: 'scanAnimation 3s ease-in-out infinite',
+                                    top: '0%'
                                 }}
                             />
 
@@ -456,20 +460,13 @@ const Home = () => {
 
 };
 {/* 🛠️ IMPORTANT: Add this CSS to your global CSS or inside a <style> tag */ }
-<style>
-{`
-  @keyframes scan-line {
+<style dangerouslySetInnerHTML={{ __html: `
+  @keyframes scanAnimation {
     0% { top: 0%; opacity: 0; }
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { top: 100%; opacity: 0; }
   }
-
-  @keyframes scan-overlay {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(330%); }
-  }
-`}
-</style>
+` }} />
 
 export default Home;
