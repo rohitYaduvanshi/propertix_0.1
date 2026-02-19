@@ -6,6 +6,12 @@ import {
     PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig.js";
 import mrRStruggle from '../assets/mr-r-struggle.png';
+import img1 from '../assets/process-step-1.png';
+import img2 from '../assets/process-step-2.png';
+import img3 from '../assets/process-step-3.png';
+import img4 from '../assets/process-step-4.png';
+import img5 from '../assets/process-step-5.png';
+import img6 from '../assets/process-step-6.png';
 
 const Home = () => {
     const [hash, setHash] = useState("");
