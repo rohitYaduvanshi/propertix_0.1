@@ -147,8 +147,8 @@ const Home = () => {
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
                     {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
-                    <div className="fixed top-17 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
-                        <div className="relative w-17 h-17 lg:w-32 lg:h-32 flex items-center justify-center">
+                    <div className="fixed top-19 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
+                        <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center">
 
                             {/* घूमने वाला टेक्स्ट (Circular Text) */}
                             <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
