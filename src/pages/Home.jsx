@@ -555,7 +555,7 @@ const Home = () => {
                             </div>
 
                             <div className="mt-auto">
-                                <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Owner Wallet</p>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Owner Walle</p>
                                 <div className="flex items-center gap-2 bg-black p-3 rounded-xl border border-zinc-800">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
                                         {searchedProperty.owner ? searchedProperty.owner.slice(2, 4).toUpperCase() : "??"}
