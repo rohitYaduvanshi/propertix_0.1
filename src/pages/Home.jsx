@@ -168,7 +168,7 @@ const Home = () => {
 
                             {/* - Glassmorphism Touch */}
                             <div className="relative w-10 h-10 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
-                                <span className="text-lg lg:text-xl group-hover:animate-bounce">💡</span>
+                                <span className="text-lg lg:text-xl group-hover:animate-bounce">👆</span>
                             </div>
 
                             {/* Glowing Effect underneath */}
