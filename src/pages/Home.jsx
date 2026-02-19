@@ -5,7 +5,7 @@ import {
     PROPERTY_REGISTRY_ADDRESS,
     PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig.js";
-import mrRStruggle from '../assets/mr-r-struggle.gif';
+import mrRStruggle from '../assets/mr-r-struggle.png';
 
 const Home = () => {
     const [hash, setHash] = useState("");
