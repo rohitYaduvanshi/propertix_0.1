@@ -146,31 +146,33 @@ const Home = () => {
 
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
-                    {/* 🎡 CIRCULAR "HOW TO START" BUTTON */}
-                    <div className="fixed bottom-10 right-10 z-[60] group cursor-pointer">
-                        <div className="relative w-28 h-28 flex items-center justify-center">
+                    {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
+                    <div className="fixed top-28 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
+                        <div className="relative w-24 h-24 lg:w-32 lg:h-32 flex items-center justify-center">
 
-                            {/*  (Circular Text) */}
-                            <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                            {/* घूमने वाला टेक्स्ट (Circular Text) */}
+                            <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
                                 <svg className="w-full h-full" viewBox="0 0 100 100">
                                     <path
                                         id="circlePath"
                                         d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                                         fill="none"
                                     />
-                                    <text className="text-[5px] font-black uppercase fill-cyan-500 tracking-[0.1em]">
+                                    <text className="text-[10px] font-black uppercase fill-white/40 tracking-[0.25em] group-hover:fill-cyan-400 transition-colors">
                                         <textPath href="#circlePath">
-                                            Learn how to start • Learn how to start •
+                                            • HOW TO START • GET VERIFIED •
                                         </textPath>
                                     </text>
                                 </svg>
                             </div>
 
-                            {/* middle icon button  */}
-                            <div className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.4)] group-hover:scale-110 transition-transform duration-300">
-                                <span className="text-xl">👉</span>
+                            {/* बीच वाला आइकन - Glassmorphism Touch */}
+                            <div className="relative w-10 h-10 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
+                                <span className="text-lg lg:text-xl group-hover:animate-bounce">💡</span>
                             </div>
 
+                            {/* Glowing Effect underneath */}
+                            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
                     </div>
 
