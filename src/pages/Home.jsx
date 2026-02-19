@@ -146,6 +146,15 @@ const Home = () => {
     const getStatusLabel = (status) =>
         ["⏳ Pending Survey", "📝 Surveyed", "✅ Verified", "❌ Rejected"][status] || "Unknown";
 
+    const processSteps = [img1, img2, img3, img4, img5, img6];
+    const processData = [
+        { title: "Connect Wallet", desc: "Link your identity via MetaMask" },
+        { title: "Upload Data", desc: "Encrypt documents to IPFS" },
+        { title: "Verify Owner", desc: "ZKP Identity check on-chain" },
+        { title: "Smart Contract", desc: "Execute automated deed logic" },
+        { title: "Minting NFT", desc: "Generating unique property token" },
+        { title: "Digital Deed", desc: "Final secure record synced" }
+    ];
     return (
         <>
             {/* ✅ HERO SECTION: Background updated to 'Shocking' Grid, but Layout is Original */}
@@ -514,68 +523,90 @@ const Home = () => {
 
                             {/* Professional Screenshot Placeholder */}
                             <div className="mt-16 relative">
-                                {/* 📱 THE PROPERTIX PROCESS - 6 IMAGE GRID */}
-                                <div className="mt-16 relative w-full max-w-5xl mx-auto px-4">
+                                {/* 📱 THE PROPERTIX PROCESS - UPDATED GRID */}
+                                <div className="mt-24 relative w-full max-w-6xl mx-auto px-4 mb-32">
+
+                                    <div className="text-center mb-16">
+                                        <h3 className="text-3xl font-bold text-white mb-4">The Digital <span className="text-cyan-400">Workflow</span></h3>
+                                        <p className="text-zinc-500 text-sm">Automating trust in 6 simple steps</p>
+                                    </div>
 
                                     {/* Grid Container */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 relative z-10">
 
-                                        {/* Array of 6 images - You can replace these paths with your assets */}
-                                        {[1, 2, 3, 4, 5, 6].map((num) => (
-                                            <div key={num} className="group relative">
-                                                {/* 1. Background Glow for each card */}
-                                                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 blur-2xl rounded-3xl transition-all duration-500"></div>
+                                        {processData.map((step, index) => {
+                                            const num = index + 1;
+                                            return (
+                                                <div key={num} className="group relative">
+                                                    {/* Background Glow */}
+                                                    <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 blur-3xl rounded-[40px] transition-all duration-700"></div>
 
-                                                {/* 2. Image Wrapper with Floating Animation */}
-                                                <div className={`relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm group-hover:border-cyan-500/50 transition-all duration-500 group-hover:-translate-y-3 shadow-xl shadow-black/50 ${num % 2 === 0 ? 'animate-float-even' : 'animate-float-odd'}`}>
+                                                    {/* Card Container */}
+                                                    <div className={`relative rounded-[32px] border border-white/10 bg-black/40 backdrop-blur-md group-hover:border-cyan-500/40 transition-all duration-500 group-hover:-translate-y-4 shadow-2xl ${num % 2 === 0 ? 'animate-float-even' : 'animate-float-odd'}`}>
 
-                                                    {/* Header bar inside image (for that SaaS look) */}
-                                                    <div className="h-6 bg-white/5 border-b border-white/5 flex items-center px-3 gap-1">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500/50"></div>
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50"></div>
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></div>
-                                                        <span className="ml-2 text-[8px] text-zinc-500 font-mono">step-0{num}.exe</span>
-                                                    </div>
+                                                        {/* Browser-style Header */}
+                                                        <div className="h-8 bg-white/5 border-b border-white/5 flex items-center justify-between px-4">
+                                                            <div className="flex gap-1.5">
+                                                                <div className="w-2 h-2 rounded-full bg-red-500/40"></div>
+                                                                <div className="w-2 h-2 rounded-full bg-amber-500/40"></div>
+                                                                <div className="w-2 h-2 rounded-full bg-emerald-500/40"></div>
+                                                            </div>
+                                                            <span className="text-[10px] text-zinc-600 font-mono tracking-tighter">0{num}_PROTOCOL.sys</span>
+                                                        </div>
 
-                                                    <img
-                                                        src={`/assets/process-step-${num}.png`} // अपनी इमेजेस का नाम assets में process-step-1.png आदि रखें
-                                                        className="w-full h-auto object-cover brightness-75 group-hover:brightness-110 transition-all duration-700"
-                                                        alt={`Process Step ${num}`}
-                                                    />
+                                                        {/* Image Section */}
+                                                        <div className="p-2 overflow-hidden">
+                                                            <img
+                                                                src={`/assets/process-step-${num}.png`} // Ensure images are in public/assets/ OR use imports
+                                                                className="w-full h-auto rounded-2xl brightness-90 group-hover:brightness-110 transition-all duration-700"
+                                                                alt={step.title}
+                                                            />
+                                                        </div>
 
-                                                    {/* Overlay for "Success" badge */}
-                                                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <div className="bg-emerald-500 text-black px-2 py-1 rounded-lg font-black text-[8px] tracking-tighter shadow-[0_0_15px_#10b981]">
-                                                            VERIFIED
+                                                        {/* Caption Section */}
+                                                        <div className="p-6 pt-2">
+                                                            <div className="flex items-center gap-3 mb-2">
+                                                                <span className="text-cyan-500 font-mono text-xs font-bold">STEP 0{num}</span>
+                                                                <div className="h-[1px] flex-1 bg-gradient-to-r from-cyan-500/50 to-transparent"></div>
+                                                            </div>
+                                                            <h4 className="text-white font-bold text-lg mb-1 group-hover:text-cyan-400 transition-colors">{step.title}</h4>
+                                                            <p className="text-zinc-500 text-xs leading-relaxed">{step.desc}</p>
+                                                        </div>
+
+                                                        {/* Success Badge Overlay */}
+                                                        <div className="absolute top-12 right-6 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
+                                                            <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 px-3 py-1 rounded-full font-black text-[9px] backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                                                ● SECURED
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
-                                    {/* Big Glow behind the entire grid */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-500/5 blur-[150px] pointer-events-none"></div>
+                                    {/* Big Radial Background Glow */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[120%] bg-cyan-500/[0.03] blur-[160px] pointer-events-none rounded-full"></div>
                                 </div>
 
-                                {/* 🛠️ Required Animations */}
+                                {/* 🛠️ Updated Animations */}
                                 <style>{`
   @keyframes float-odd {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(0.5deg); }
   }
 
   @keyframes float-even {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-18px) rotate(-0.5deg); }
   }
 
   .animate-float-odd {
-    animation: float-odd 4s ease-in-out infinite;
+    animation: float-odd 4.5s ease-in-out infinite;
   }
 
   .animate-float-even {
-    animation: float-even 5s ease-in-out infinite;
+    animation: float-even 6s ease-in-out infinite;
   }
 `}</style>
                                 {/* Floating Elements on Screenshot */}
