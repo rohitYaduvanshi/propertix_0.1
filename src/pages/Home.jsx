@@ -5,6 +5,7 @@ import {
     PROPERTY_REGISTRY_ADDRESS,
     PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig.js";
+import mrRStruggle from '../assets/mr-r-struggle.gif';
 
 const Home = () => {
     const [hash, setHash] = useState("");
@@ -357,7 +358,7 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* 🟢 MR. R'S STORY SECTION (Starts after Digital Deed) */}
+                    {/* 🟢 MR. Gopu chand'S STORY SECTION (Starts after Digital Deed) */}
                     <div className="relative w-full max-w-5xl mt-32 px-4 flex flex-col items-center">
 
                         {/* 1. THE TRADITIONAL STRUGGLE (India's Reality) */}
@@ -374,11 +375,49 @@ const Home = () => {
                             {/* Visual Map & Mr. R */}
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                                <img
-                                    src="https://image.pollinations.ai/prompt/Indian%20man%20tired%20holding%20bundle%20of%20papers%20walking%20in%20dusty%20government%20office%20map%20overlay%20with%20red%20zigzag%20lines%20showing%20long%20process?width=500&height=500&seed=42"
-                                    className="relative z-10 rounded-3xl border border-white/10 shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-700"
-                                    alt="Traditional Process"
-                                />
+                                {/* 🟢 MR. R'S 3D FLOATING IMAGE FROM ASSETS */}
+                                <div className="relative group flex justify-center items-center py-10">
+
+                                    {/* 1. Background Glow (Red Pulse for Struggle) */}
+                                    <div className="absolute w-64 h-64 bg-red-600/20 blur-[100px] rounded-full animate-pulse group-hover:bg-red-500/30 transition-all duration-1000"></div>
+
+                                    {/* 2. Floating Container */}
+                                    <div className="relative z-10 animate-float-slow">
+                                        <img
+                                            src={mrRStruggle} // यहाँ Imported वेरिएबल यूज़ करें
+                                            className="w-72 md:w-96 rounded-[40px] drop-shadow-[0_20px_50px_rgba(239,68,68,0.4)] grayscale group-hover:grayscale-0 transition-all duration-700 brightness-90 group-hover:brightness-110"
+                                            alt="Mr. R Traditional Process Struggle"
+                                        />
+
+                                        {/* Floating Paper Icons for Depth */}
+                                        <div className="absolute -top-4 -right-4 text-2xl animate-bounce opacity-40">📄</div>
+                                        <div className="absolute -bottom-6 -left-8 text-2xl animate-pulse opacity-30">📜</div>
+                                    </div>
+
+                                    {/* 3. Shadow Underneath (Sync with Floating) */}
+                                    <div className="absolute -bottom-6 w-40 h-4 bg-black/60 blur-xl rounded-[100%] animate-shadow-scale"></div>
+                                </div>
+
+                                {/* 🛠️ Add these Animations to your <style> or CSS file */}
+                                <style>{`
+  @keyframes float-custom {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50% { transform: translateY(-20px) rotate(1deg); }
+  }
+
+  @keyframes shadow-scale {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(0.7); opacity: 0.2; }
+  }
+
+  .animate-float-slow {
+    animation: float-custom 5s ease-in-out infinite;
+  }
+
+  .animate-shadow-scale {
+    animation: shadow-scale 5s ease-in-out infinite;
+  }
+`}</style>
                                 {/* Moving Red Line (Traditional Path) */}
                                 <div className="absolute top-1/2 left-0 w-full h-[1px] bg-red-500/50 -rotate-12 animate-pulse"></div>
                             </div>
