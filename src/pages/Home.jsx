@@ -480,7 +480,7 @@ const Home = () => {
 
                         {/* 2. THE TRANSITION (The Hook) */}
                         <div className="text-center my-32 animate-bounce-slow">
-                            <h3 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter uppercase">
+                            <h3 className="text-4xl md:text-7xl premium-font text-white mb-6 tracking-tighter uppercase">
                                 Don't do <span className="text-red-600">like this!</span>
                             </h3>
                             <div className="bg-cyan-500 text-black px-6 py-2 inline-block font-black text-xl md:text-3xl rounded-full shadow-[0_0_30px_rgba(34,211,238,0.5)]">
