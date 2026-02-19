@@ -456,17 +456,20 @@ const Home = () => {
 
 };
 {/* 🛠️ IMPORTANT: Add this CSS to your global CSS or inside a <style> tag */ }
-<style>{`
-  @keyframes digital-scan {
+<style>
+{`
+  @keyframes scan-line {
     0% { top: 0%; opacity: 0; }
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { top: 100%; opacity: 0; }
   }
+
   @keyframes scan-overlay {
-    0% { top: -30%; }
-    100% { top: 100%; }
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(330%); }
   }
-`}</style>
+`}
+</style>
 
 export default Home;
