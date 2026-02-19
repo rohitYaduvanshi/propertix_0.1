@@ -147,8 +147,8 @@ const Home = () => {
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
                     {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
-                    <div className="fixed top-28 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
-                        <div className="relative w-24 h-24 lg:w-32 lg:h-32 flex items-center justify-center">
+                    <div className="fixed top-22 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
+                        <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center">
 
                             {/* घूमने वाला टेक्स्ट (Circular Text) */}
                             <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
@@ -158,7 +158,7 @@ const Home = () => {
                                         d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                                         fill="none"
                                     />
-                                    <text className="text-[10px] font-black uppercase fill-white/40 tracking-[0.25em] group-hover:fill-cyan-400 transition-colors">
+                                    <text className="text-[10px] font-black uppercase fill-cyan-500 tracking-[0.25em] group-hover:fill-white transition-colors">
                                         <textPath href="#circlePath">
                                             • HOW TO START • GET VERIFIED •
                                         </textPath>
