@@ -305,38 +305,9 @@ const Home = () => {
                             style={{ transformStyle: "preserve-3d" }}
                         >
                             {/* --- SCANNING LINE CODE REMAINS SAME --- */}
-                            {/* --- SCANNING LINE CODE REMAINS SAME --- */}
                             <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-[40px]">
                                 <div className="absolute w-full h-[2px]" style={{ background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)', boxShadow: '0 0 20px #22d3ee', top: '0%', animation: 'finalScan 3s linear infinite' }} />
-                                {/* Global Keyframes for new animations */}
-                                <style>{`
-                @keyframes bounce-slow {
-                    0%, 100% { transform: translateY(-5%); }
-                    50% { transform: translateY(5%); }
-                }
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-                @keyframes fade-in-up {
-                    0% { opacity: 0; transform: translateY(20px); }
-                    100% { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes bounce-in {
-                    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                    40% { transform: translateY(-30px); }
-                    60% { transform: translateY(-15px); }
-                }
-                @keyframes moveGrid {
-                    0% { background-position: 0 0; }
-                    100% { background-position: 30px 30px; } /* Should match backgroundSize */
-                }
-                @keyframes scale-up-bounce {
-                    0% { transform: scale(0.8); opacity: 0; }
-                    50% { transform: scale(1.1); opacity: 1; }
-                    100% { transform: scale(1); }
-                }
-            `}</style>
+                                <style>{`@keyframes finalScan { 0% { top: -5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 105%; opacity: 0; } }`}</style>
                             </div>
 
                             {/* --- CARD CONTENT (Keeping your exact design) --- */}
