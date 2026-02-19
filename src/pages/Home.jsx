@@ -290,7 +290,6 @@ const Home = () => {
                     </div>
 
                     {/* RIGHT SIDE (3D DIGITAL DEED) */}
-                    {/* 'flex' ensures it's visible on mobile, 'md:flex' handles desktop centering */}
                     <div className="flex justify-center items-center relative perspective-1000 mt-12 md:mt-0">
                         <div
                             ref={cardRef}
@@ -299,17 +298,26 @@ const Home = () => {
                             className="relative w-72 sm:w-80 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
                             style={{ transformStyle: "preserve-3d" }}
                         >
-                            {/* Scanning Light Effect */}
-                            <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] z-20 animate-[scan_3s_ease-in-out_infinite]" />
+                            {/* 🔥 FIXED SCANNING LINE */}
+                            <div
+                                className="absolute left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-20 pointer-events-none shadow-[0_0_15px_rgba(34,211,238,1)]"
+                                style={{
+                                    animation: 'scan 3s ease-in-out infinite',
+                                    top: '-5%'
+                                }}
+                            />
 
-                            {/* Inner Content with Z-Translation for Parallax effect */}
+                            {/* Inner Content with Z-Translation */}
                             <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
                                 <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <div className="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-lg">
+                                            📜
                                         </div>
-                                        <div><p className="text-white text-sm font-semibold uppercase tracking-tighter">Digital Deed</p><p className="text-[10px] text-gray-500">ERC-721 Secure</p></div>
+                                        <div>
+                                            <p className="text-white text-sm font-semibold uppercase tracking-tighter">Digital Deed</p>
+                                            <p className="text-[10px] text-gray-500">ERC-721 Secure</p>
+                                        </div>
                                     </div>
                                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"></div>
                                 </div>
@@ -415,9 +423,9 @@ const Home = () => {
                 </div>
             )}
         </>
-        
+
     );
-    
+
 };
 <style>{`
   @keyframes scan {
