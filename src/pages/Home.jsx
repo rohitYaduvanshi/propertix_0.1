@@ -375,47 +375,62 @@ const Home = () => {
                             {/* Visual Map & Mr. R */}
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                                {/* 🟢 MR. R'S 3D FLOATING IMAGE FROM ASSETS */}
-                                <div className="relative group flex justify-center items-center py-10">
+                                {/* 🟢 MR. R'S 3D FLOATING PNG SECTION */}
+                                <div className="relative group flex justify-center items-center py-20">
 
-                                    {/* 1. Background Glow (Red Pulse for Struggle) */}
-                                    <div className="absolute w-64 h-64 bg-red-600/20 blur-[100px] rounded-full animate-pulse group-hover:bg-red-500/30 transition-all duration-1000"></div>
+                                    {/* 1. Background Glow (The Red Aura of Struggle) */}
+                                    <div className="absolute w-72 h-72 bg-red-600/15 blur-[120px] rounded-full animate-pulse group-hover:bg-red-500/25 transition-all duration-1000"></div>
 
-                                    {/* 2. Floating Container */}
-                                    <div className="relative z-10 animate-float-slow">
+                                    {/* 2. Floating Image Container */}
+                                    <div className="relative z-10 animate-float-3d">
+                                        {/* PNG Image */}
                                         <img
-                                            src={mrRStruggle} // यहाँ Imported वेरिएबल यूज़ करें
-                                            className="w-72 md:w-96 rounded-[40px] drop-shadow-[0_20px_50px_rgba(239,68,68,0.4)] grayscale group-hover:grayscale-0 transition-all duration-700 brightness-90 group-hover:brightness-110"
-                                            alt="Mr. R Traditional Process Struggle"
+                                            src="/mr-r-struggle.png" 
+                                            className="w-80 md:w-[450px] object-contain drop-shadow-[0_35px_60px_rgba(239,68,68,0.3)] grayscale group-hover:grayscale-0 transition-all duration-1000 brightness-75 group-hover:brightness-105 transform group-hover:scale-105"
+                                            alt="Mr. R Struggling with Papers"
                                         />
 
-                                        {/* Floating Paper Icons for Depth */}
-                                        <div className="absolute -top-4 -right-4 text-2xl animate-bounce opacity-40">📄</div>
-                                        <div className="absolute -bottom-6 -left-8 text-2xl animate-pulse opacity-30">📜</div>
+                                        {/* Decorative Floating Elements (Papers) */}
+                                        <div className="absolute -top-10 -right-5 text-3xl animate-bounce-slow opacity-40 select-none">📄</div>
+                                        <div className="absolute top-1/2 -left-12 text-2xl animate-pulse opacity-30 select-none rotate-12">📜</div>
                                     </div>
 
-                                    {/* 3. Shadow Underneath (Sync with Floating) */}
-                                    <div className="absolute -bottom-6 w-40 h-4 bg-black/60 blur-xl rounded-[100%] animate-shadow-scale"></div>
+                                    {/* 3. Dynamic Shadow (Syncs with Float) */}
+                                    <div className="absolute -bottom-10 w-48 h-5 bg-black/50 blur-2xl rounded-[100%] animate-shadow-sync"></div>
                                 </div>
 
-                                {/* 🛠️ Add these Animations to your <style> or CSS file */}
+                                {/* 🛠️ CSS Animations (Add to your Style tag) */}
                                 <style>{`
-  @keyframes float-custom {
-    0%, 100% { transform: translateY(0px) rotate(-1deg); }
-    50% { transform: translateY(-20px) rotate(1deg); }
+  @keyframes float-3d {
+    0%, 100% { 
+        transform: translateY(0px) rotateX(5deg) rotateY(-5deg); 
+    }
+    50% { 
+        transform: translateY(-25px) rotateX(10deg) rotateY(5deg); 
+    }
   }
 
-  @keyframes shadow-scale {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
+  @keyframes shadow-sync {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
     50% { transform: scale(0.7); opacity: 0.2; }
   }
 
-  .animate-float-slow {
-    animation: float-custom 5s ease-in-out infinite;
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
   }
 
-  .animate-shadow-scale {
-    animation: shadow-scale 5s ease-in-out infinite;
+  .animate-float-3d {
+    animation: float-3d 6s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
+
+  .animate-shadow-sync {
+    animation: shadow-sync 6s ease-in-out infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 4s ease-in-out infinite;
   }
 `}</style>
                                 {/* Moving Red Line (Traditional Path) */}
