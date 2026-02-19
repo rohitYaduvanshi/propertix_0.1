@@ -158,7 +158,7 @@ const Home = () => {
                                         d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                                         fill="none"
                                     />
-                                    <text className="text-[10px] font-black uppercase fill-cyan-500 tracking-[0.2em]">
+                                    <text className="text-[5px] font-black uppercase fill-cyan-500 tracking-[0.1em]">
                                         <textPath href="#circlePath">
                                             Learn how to start • Learn how to start •
                                         </textPath>
