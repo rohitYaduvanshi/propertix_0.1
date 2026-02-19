@@ -43,7 +43,7 @@ const Footer = () => {
                 Navigation
               </p>
               <FooterLink to="/">Home</FooterLink>
-              <FooterLink to="/blockchain">Blockchain</FooterLink>
+              <FooterLink to="/registerAsset">RegisterAsset</FooterLink>
               <FooterLink to="/about">About project</FooterLink>
               <FooterLink to="/contact">Contact</FooterLink>
             </div>

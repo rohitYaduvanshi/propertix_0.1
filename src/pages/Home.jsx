@@ -150,7 +150,7 @@ const Home = () => {
                     <div className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[60] group cursor-pointer animate-in fade-in duration-1000">
                         <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center">
 
-                            {/* घूमने वाला टेक्स्ट (Circular Text) */}
+                            {/* (Circular Text) */}
                             <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
                                 <svg className="w-full h-full" viewBox="0 0 100 100">
                                     <path
@@ -166,7 +166,7 @@ const Home = () => {
                                 </svg>
                             </div>
 
-                            {/* बीच वाला आइकन - Glassmorphism Touch */}
+                            {/* - Glassmorphism Touch */}
                             <div className="relative w-10 h-10 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
                                 <span className="text-lg lg:text-xl group-hover:animate-bounce">💡</span>
                             </div>
@@ -407,8 +407,6 @@ const Home = () => {
                     </div>
                 </div>
             )}
-
-            {/* ✅ CSS (Only for Background Animation) */}
         </>
     );
 };

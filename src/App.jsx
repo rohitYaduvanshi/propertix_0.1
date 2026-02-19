@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
-import Blockchain from "./pages/Blockchain.jsx";
+import Blockchain from "./pages/RegisterAsset.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import Footer from "./components/Footer.jsx";
@@ -66,7 +66,7 @@ const App = () => {
         {/* PROTECTED ROUTES */}
         <Route path="/admin" element={<OfficerGuard><Layout><AdminPanel /></Layout></OfficerGuard>} />
         
-        <Route path="/blockchain" element={<UserGuard><Layout><Blockchain /></Layout></UserGuard>} />
+        <Route path="/registerAsset" element={<UserGuard><Layout><Blockchain /></Layout></UserGuard>} />
         <Route path="/map" element={<UserGuard><Layout><PropertyMap /></Layout></UserGuard>} />
         <Route path="/dashboard" element={<UserGuard><Layout><OwnerDashboard /></Layout></UserGuard>} />
         <Route path="/profile" element={<UserGuard><Layout><MyProfile /></Layout></UserGuard>} />
