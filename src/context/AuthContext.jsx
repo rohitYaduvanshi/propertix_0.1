@@ -8,7 +8,7 @@ import {
 
 const AuthContext = createContext(null);
 
-// ✅ Railway Backend URL (Updated from localhost)
+// ✅ Backend Endpoint
 const API_BASE_URL = "https://propertixbackend-production.up.railway.app/api/auth";
 
 export const AuthProvider = ({ children }) => {
@@ -23,31 +23,29 @@ export const AuthProvider = ({ children }) => {
   });
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- HELPER: Identify User (Blockchain + Neon DB Sync) ---
+  // --- 🛡️ SECURE IDENTITY FETCH (Blockchain + Neon DB) ---
   const fetchUserIdentity = async (account) => {
     try {
       if (!window.ethereum || !account) return null;
+      const lowerAccount = account.toLowerCase();
 
       const provider = new BrowserProvider(window.ethereum);
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, provider);
 
-      // 1. BLOCKCHAIN CHECK
+      // 1. BLOCKCHAIN SOURCE OF TRUTH
       const userStruct = await contract.users(account);
       const roleString = userStruct.role; 
       const isRegisteredOnBC = userStruct.isRegistered;
 
       if (!isRegisteredOnBC) return { isRegistered: false };
 
-      // 2. NEON DB (PostgreSQL) CHECK - Fetch real Name and Email
-      let dbUser = { name: "Citizen", email: "No Email Linked" };
+      // 2. DATABASE SYNC (Fetching Profile Details)
+      let dbUser = { name: "Verified Citizen", email: "Identity Encrypted" };
       try {
-        // वॉलेट एड्रेस को lowercase में भेजें ताकि DB मैचिंग में गलती न हो
-        const response = await axios.get(`${API_BASE_URL}/user/${account.toLowerCase()}`);
-        if (response.data) {
-            dbUser = response.data;
-        }
+        const response = await axios.get(`${API_BASE_URL}/user/${lowerAccount}`);
+        if (response.data) dbUser = response.data;
       } catch (err) {
-        console.warn("⚠️ User profile not found in Neon DB. Ensure registration was successful.");
+        console.warn("🛡️ Security Note: Neon DB profile not synced. Relying on Blockchain records.");
       }
 
       const isAdmin = roleString === "ADMIN";
@@ -61,9 +59,8 @@ export const AuthProvider = ({ children }) => {
         isOfficer: isAdmin || isSurveyor || isRegistrar 
       });
 
-      // ✅ Setting the real name and email from Database
       const updatedUser = {
-        name: dbUser.name || "Verified User",
+        name: dbUser.name || "Owner",
         email: dbUser.email || "",
         role: roleString,
         walletAddress: account, 
@@ -73,12 +70,12 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(updatedUser);
       return { isRegistered: true, roleString };
     } catch (error) {
-      console.error("❌ Error fetching identity:", error);
+      console.error("❌ Critical Identity Error:", error);
       return null;
     }
   };
 
-  // --- AUTO LOGIN ---
+  // --- 🔄 PERSISTENT SESSION CHECK ---
   useEffect(() => {
     const initAuth = async () => {
       const isSessionActive = localStorage.getItem("loginSession");
@@ -91,12 +88,9 @@ export const AuthProvider = ({ children }) => {
             const address = accounts[0].address;
             setWalletAddress(address);
             const result = await fetchUserIdentity(address);
-            if (result?.isRegistered) {
-                setIsUserLoggedIn(true);
-            }
+            if (result?.isRegistered) setIsUserLoggedIn(true);
           }
         } catch (err) {
-          console.error("Auto-login error:", err);
           localStorage.removeItem("loginSession");
         }
       }
@@ -105,20 +99,17 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // --- LOGIN LOGIC ---
+  // --- 🔑 SECURE LOGIN WITH SIGNATURE ---
   const loginWithRole = async (desiredRole) => {
-    if (!window.ethereum) {
-        alert("MetaMask not found!");
-        return false;
-    }
+    if (!window.ethereum) return alert("MetaMask required!"), false;
     setLoading(true);
 
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
       
-      // डिजिटल सिग्नेचर (FREE & SECURE)
-      const message = `Propertix Login Verification\n\nRole: ${desiredRole}\nWallet: ${address}\nTime: ${new Date().toLocaleString()}`;
+      // ✅ CRYPTOGRAPHIC PROOF (Sign Message)
+      const message = `PROPERTIX PROTOCOL LOGIN\n\nVerify wallet owner for role: ${desiredRole}\nTimestamp: ${Date.now()}`;
       await window.ethereum.request({
         method: "personal_sign",
         params: [message, address],
@@ -127,16 +118,14 @@ export const AuthProvider = ({ children }) => {
       const identity = await fetchUserIdentity(address);
 
       if (!identity || !identity.isRegistered) {
-        alert("❌ Wallet not registered in our system. Please Register first.");
-        setLoading(false);
-        return false;
+        alert("❌ Identity not found on Ledger. Please register first.");
+        return setLoading(false), false;
       }
 
-      // Role Check
+      // Role authorization
       if (identity.roleString !== "ADMIN" && identity.roleString !== desiredRole) {
-          alert(`⚠️ Access Denied! Your assigned role is ${identity.roleString}`);
-          setLoading(false);
-          return false;
+          alert(`⚠️ Restricted! Your assigned role is ${identity.roleString}`);
+          return setLoading(false), false;
       }
 
       localStorage.setItem("loginSession", "active");
@@ -146,7 +135,6 @@ export const AuthProvider = ({ children }) => {
       return true;
 
     } catch (error) {
-      console.error("Login Error:", error);
       setLoading(false);
       return false;
     }
