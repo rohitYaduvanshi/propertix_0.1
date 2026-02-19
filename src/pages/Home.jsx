@@ -557,7 +557,7 @@ const Home = () => {
                                                         {/* Image Section */}
                                                         <div className="p-2 overflow-hidden">
                                                             <img
-                                                                src={`/assets/process-step-${num}.png`} // Ensure images are in public/assets/ OR use imports
+                                                                src={processSteps[index]} 
                                                                 className="w-full h-auto rounded-2xl brightness-90 group-hover:brightness-110 transition-all duration-700"
                                                                 alt={step.title}
                                                             />
