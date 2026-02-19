@@ -158,7 +158,7 @@ const Home = () => {
                                         d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                                         fill="none"
                                     />
-                                    <text className="text-[10px] font-black uppercase fill-cyan-500 tracking-[0.25em] group-hover:fill-white transition-colors">
+                                    <text className="text-[10px] font-black uppercase fill-yellow-500 tracking-[0.25em] group-hover:fill-cyan-500 transition-colors">
                                         <textPath href="#circlePath">
                                             • HOW TO START • GET VERIFIED •
                                         </textPath>
