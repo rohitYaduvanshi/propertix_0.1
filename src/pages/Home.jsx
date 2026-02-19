@@ -225,7 +225,7 @@ const Home = () => {
                             The Smartest Way to Choose
                             <span className="block text-cyan-400">Verify & Own Land</span>
                         </h1>
-                        <p className="text-gray-300 text-sm md:text-lg max-w-2xl mx-auto">
+                        <p className="text-gray-300 text-sm md:text-lg max-w-3xl mx-auto">
                             Skip the complex paperwork. Manage your property records on a secure,
                             tamper-proof digital ledger with 100% transparency.
                         </p>
@@ -233,7 +233,7 @@ const Home = () => {
 
                     {/* 3. SEARCH BUTTON PORTION (Center) */}
                     <div className="w-full max-w-2xl bg-black/70 border border-white/10 rounded-2xl p-6 shadow-xl shadow-cyan-900/20 backdrop-blur-sm mb-16">
-                        <label className="block text-[10px] font-bold text-gray-400 mb-3 text-left uppercase tracking-widest">SEARCH PROPERTY BY IPFS URL OR TX HASH</label>
+                        <label className="block text-[10px] font-bold text-gray-400 mb-3 text-left uppercase tracking-widest">SEARCH PROPERTY BY TX HASH URL OR IPFS</label>
                         <div className="flex flex-col md:flex-row gap-3">
                             <input
                                 type="text"
@@ -251,19 +251,48 @@ const Home = () => {
                             </button>
                         </div>
 
-                        {/* Results inside search box stay same */}
-                        {result !== "idle" && (
-                            <div className="mt-4">
-                                {/* ... (आपका रिजल्ट रेंडरिंग कोड यहाँ रहेगा) ... */}
-                                {result === "found" && (
-                                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex justify-between items-center">
-                                        <p className="text-sm text-emerald-400 font-bold">✅ Property Found!</p>
-                                        <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg">View Full Details</button>
+                        {/* RESULTS (AAPKA ORIGINAL CODE) */}
+                            {result === "found" && (
+                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">✅ Property Found!</p>
+                                            <p className="text-xs text-gray-400 mt-1">Authentic record found on blockchain.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+                                        >
+                                            View Full Details
+                                        </button>
                                     </div>
-                                )}
-                                {/* बाकी रिजल्ट कंडीशंस भी यहाँ रहेंगी */}
-                            </div>
-                        )}
+                                </div>
+                            )}
+
+                            {result === "verified-only" && (
+                                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-blue-400 font-bold flex items-center gap-2">
+                                        <span className="text-xl">⛓️</span> Transaction Verified on Blockchain
+                                    </p>
+                                    <p className="text-xs text-gray-300 mt-1">
+                                        This transaction exists and is confirmed. <br />
+                                        <span className="text-gray-500 italic">(To view property photos/details, please search using the IPFS Link)</span>
+                                    </p>
+                                </div>
+                            )}
+
+                            {result === "not-found" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">❌ Record Not Found</p>
+                                    <p className="text-xs text-gray-400 mt-1">No property matches this hash.</p>
+                                </div>
+                            )}
+                            {result === "error" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">⚠ Search Error</p>
+                                    <p className="text-xs text-gray-400 mt-1">Something went wrong. Check console.</p>
+                                </div>
+                            )}
                     </div>
 
                     {/* 4. DIGITAL DEED (Bottom - Floating & Large) */}
