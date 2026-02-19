@@ -153,7 +153,7 @@ const Home = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="fixed top-18 right-4 lg:top-auto lg:bottom-10 lg:right-10 z-[999] group block cursor-pointer"
-                        onClick={(e) => e.stopPropagation()} // रोकता है ताकि दूसरे क्लिक डिस्टर्ब न करें
+                        onClick={(e) => e.stopPropagation()} 
                     >
                         <div className="relative w-18 h-18 lg:w-32 lg:h-32 flex items-center justify-center pointer-events-none">
 
@@ -252,47 +252,47 @@ const Home = () => {
                         </div>
 
                         {/* RESULTS (AAPKA ORIGINAL CODE) */}
-                        {result === "found" && (
-                            <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">✅ Property Found!</p>
-                                        <p className="text-xs text-gray-400 mt-1">Authentic record found on blockchain.</p>
+                            {result === "found" && (
+                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">✅ Property Found!</p>
+                                            <p className="text-xs text-gray-400 mt-1">Authentic record found on blockchain.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+                                        >
+                                            View Full Details
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => setShowModal(true)}
-                                        className="px-4 py-2 bg-emerald-500 text-black text-xs font-bold rounded-lg hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
-                                    >
-                                        View Full Details
-                                    </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {result === "verified-only" && (
-                            <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
-                                <p className="text-sm text-blue-400 font-bold flex items-center gap-2">
-                                    <span className="text-xl">⛓️</span> Transaction Verified on Blockchain
-                                </p>
-                                <p className="text-xs text-gray-300 mt-1">
-                                    This transaction exists and is confirmed. <br />
-                                    <span className="text-gray-500 italic">(To view property photos/details, please search using the IPFS Link)</span>
-                                </p>
-                            </div>
-                        )}
+                            {result === "verified-only" && (
+                                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-blue-400 font-bold flex items-center gap-2">
+                                        <span className="text-xl">⛓️</span> Transaction Verified on Blockchain
+                                    </p>
+                                    <p className="text-xs text-gray-300 mt-1">
+                                        This transaction exists and is confirmed. <br />
+                                        <span className="text-gray-500 italic">(To view property photos/details, please search using the IPFS Link) </span>
+                                    </p>
+                                </div>
+                            )}
 
-                        {result === "not-found" && (
-                            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
-                                <p className="text-sm text-red-400 font-bold">❌ Record Not Found</p>
-                                <p className="text-xs text-gray-400 mt-1">No property matches this hash.</p>
-                            </div>
-                        )}
-                        {result === "error" && (
-                            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
-                                <p className="text-sm text-red-400 font-bold">⚠ Search Error</p>
-                                <p className="text-xs text-gray-400 mt-1">Something went wrong. Check console.</p>
-                            </div>
-                        )}
+                            {result === "not-found" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">❌ Record Not Found</p>
+                                    <p className="text-xs text-gray-400 mt-1">No property matches this hash.</p>
+                                </div>
+                            )}
+                            {result === "error" && (
+                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-sm text-red-400 font-bold">⚠ Search Error</p>
+                                    <p className="text-xs text-gray-400 mt-1">Something went wrong. Check console.</p>
+                                </div>
+                            )}
                     </div>
 
                     {/* 4. DIGITAL DEED (Bottom - Floating & Large) */}
@@ -307,35 +307,7 @@ const Home = () => {
                             {/* --- SCANNING LINE CODE REMAINS SAME --- */}
                             <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-[40px]">
                                 <div className="absolute w-full h-[2px]" style={{ background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)', boxShadow: '0 0 20px #22d3ee', top: '0%', animation: 'finalScan 3s linear infinite' }} />
-                                {/* Global Keyframes for new animations */}
-                                <style>{`
-                @keyframes bounce-slow {
-                    0%, 100% { transform: translateY(-5%); }
-                    50% { transform: translateY(5%); }
-                }
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-                @keyframes fade-in-up {
-                    0% { opacity: 0; transform: translateY(20px); }
-                    100% { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes bounce-in {
-                    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                    40% { transform: translateY(-30px); }
-                    60% { transform: translateY(-15px); }
-                }
-                @keyframes moveGrid {
-                    0% { background-position: 0 0; }
-                    100% { background-position: 30px 30px; } /* Should match backgroundSize */
-                }
-                @keyframes scale-up-bounce {
-                    0% { transform: scale(0.8); opacity: 0; }
-                    50% { transform: scale(1.1); opacity: 1; }
-                    100% { transform: scale(1); }
-                }
-            `}</style>
+                                <style>{`@keyframes finalScan { 0% { top: -5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 105%; opacity: 0; } }`}</style>
                             </div>
 
                             {/* --- CARD CONTENT (Keeping your exact design) --- */}
@@ -382,115 +354,6 @@ const Home = () => {
                             </div>
                             {/* Bottom Glow stays */}
                             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full" />
-                        </div>
-                    </div>
-                    {/* 🟢 MR. R'S STORY SECTION (Starts after Digital Deed) */}
-                    <div className="relative w-full max-w-5xl mt-32 px-4 flex flex-col items-center">
-
-                        {/* 1. THE TRADITIONAL STRUGGLE (India's Reality) */}
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                                Meet Mr. R: The <span className="text-red-500 underline decoration-wavy">Traditional Way</span>
-                            </h2>
-                            <p className="text-zinc-400 max-w-2xl mx-auto italic">
-                                "Mr. R has all his documents ready, but he is stuck in a loop of offices, middle-men, and endless waiting."
-                            </p>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-10 items-center bg-zinc-900/30 border border-white/5 p-8 rounded-[40px] backdrop-blur-md mb-20">
-                            {/* Visual Map & Mr. R */}
-                            <div className="relative group">
-                                <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                                <img
-                                    src="https://image.pollinations.ai/prompt/Indian%20man%20tired%20holding%20bundle%20of%20papers%20walking%20in%20dusty%20government%20office%20map%20overlay%20with%20red%20zigzag%20lines%20showing%20long%20process?width=500&height=500&seed=42"
-                                    className="relative z-10 rounded-3xl border border-white/10 shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-700"
-                                    alt="Traditional Process"
-                                />
-                                {/* Moving Red Line (Traditional Path) */}
-                                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-red-500/50 -rotate-12 animate-pulse"></div>
-                            </div>
-
-                            {/* The Pain Points (Timeline) */}
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-black text-red-400 uppercase tracking-tighter">The 90-Day Marathon</h3>
-                                <div className="space-y-4 text-left border-l border-red-500/30 pl-6">
-                                    <div className="relative">
-                                        <span className="absolute -left-[31px] top-1 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_red]"></span>
-                                        <p className="text-white font-bold text-sm">Day 1-15: Document Gathering</p>
-                                        <p className="text-zinc-500 text-[10px]">Registry, Khatauni, No-Objection Certificates...</p>
-                                    </div>
-                                    <div className="relative">
-                                        <span className="absolute -left-[31px] top-1 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_red]"></span>
-                                        <p className="text-white font-bold text-sm">Day 16-45: Verification & Bribes</p>
-                                        <p className="text-zinc-500 text-[10px]">Multiple visits to the Sub-Registrar office.</p>
-                                    </div>
-                                    <div className="relative">
-                                        <span className="absolute -left-[31px] top-1 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_red]"></span>
-                                        <p className="text-white font-bold text-sm">Day 46-90: Final Stamp & Mutation</p>
-                                        <p className="text-zinc-500 text-[10px]">Still waiting for the official name transfer.</p>
-                                    </div>
-                                </div>
-                                <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 text-red-200 text-xs font-mono">
-                                    RESULT: User is Exhausted & Record is still at risk of forgery.
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 2. THE TRANSITION (The Hook) */}
-                        <div className="text-center my-32 animate-bounce-slow">
-                            <h3 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter uppercase">
-                                Don't do <span className="text-red-600">like this!</span>
-                            </h3>
-                            <div className="bg-cyan-500 text-black px-6 py-2 inline-block font-black text-xl md:text-3xl rounded-full shadow-[0_0_30px_rgba(34,211,238,0.5)]">
-                                Here is the BAAP of Trust!
-                            </div>
-                            <p className="mt-8 text-cyan-400 font-mono text-sm tracking-widest animate-pulse">
-                                QUICK VERIFICATION • BLOCKCHAIN IMMUTABILITY • 100% TRANSPARENT
-                            </p>
-                        </div>
-
-                        {/* 3. THE PROPERTIX WAY (Professional Step-by-Step) */}
-                        <div className="w-full bg-zinc-900/50 border border-cyan-500/20 rounded-[50px] p-8 md:p-16 backdrop-blur-xl relative overflow-hidden mb-32">
-                            {/* Professional React Design Background */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[120px] rounded-full"></div>
-
-                            <h3 className="text-2xl md:text-4xl font-bold text-white mb-12 text-center">
-                                How Propertix <span className="text-cyan-400">Works</span> (The Digital Journey)
-                            </h3>
-
-                            <div className="grid md:grid-cols-3 gap-8 relative z-10">
-                                {/* Step 1 */}
-                                <div className="bg-black/40 p-6 rounded-3xl border border-white/5 hover:border-cyan-500/50 transition-all group">
-                                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform inline-block">🦊</div>
-                                    <h4 className="text-white font-bold mb-2">Connect Identity</h4>
-                                    <p className="text-zinc-500 text-xs leading-relaxed">Securely link your MetaMask wallet as your unique digital signature.</p>
-                                </div>
-                                {/* Step 2 */}
-                                <div className="bg-black/40 p-6 rounded-3xl border border-white/5 hover:border-cyan-500/50 transition-all group">
-                                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform inline-block">📂</div>
-                                    <h4 className="text-white font-bold mb-2">Upload to IPFS</h4>
-                                    <p className="text-zinc-500 text-xs leading-relaxed">Property images and PDFs are pinned to decentralized storage forever.</p>
-                                </div>
-                                {/* Step 3 */}
-                                <div className="bg-black/40 p-6 rounded-3xl border border-white/5 hover:border-cyan-500/50 transition-all group">
-                                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform inline-block">⛓️</div>
-                                    <h4 className="text-white font-bold mb-2">Mint on Ledger</h4>
-                                    <p className="text-zinc-500 text-xs leading-relaxed">Finalize your deed on the blockchain with a single transaction. Done!</p>
-                                </div>
-                            </div>
-
-                            {/* Professional Screenshot Placeholder */}
-                            <div className="mt-16 relative">
-                                <img
-                                    src="https://image.pollinations.ai/prompt/Modern%20clean%20SaaS%20dashboard%20UI%20showing%20blockchain%20transaction%20success%20dark%20theme%20cyan%20accents%20professional%20web%20design?width=1000&height=600&seed=99"
-                                    className="rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                                    alt="Propertix App Screenshot"
-                                />
-                                {/* Floating Elements on Screenshot */}
-                                <div className="absolute -top-6 -right-6 bg-emerald-500 text-black px-4 py-2 rounded-xl font-black text-[10px] animate-bounce">
-                                    SUCCESS: MINTED
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
