@@ -295,58 +295,87 @@ const Home = () => {
                             ref={cardRef}
                             onMouseMove={handleMouseMove}
                             onMouseLeave={handleMouseLeave}
-                            className="relative w-72 sm:w-80 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
+                            className="relative w-72 sm:w-80 bg-black/90 backdrop-blur-md border border-cyan-500/20 rounded-2xl p-6 shadow-[0_0_50px_rgba(34,211,238,0.1)] overflow-hidden group transition-all duration-200 ease-out cursor-pointer"
                             style={{ transformStyle: "preserve-3d" }}
                         >
-                            {/* 🔥 FIXED SCANNING LINE */}
-                            <div
-                                className="absolute left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-20 pointer-events-none shadow-[0_0_15px_rgba(34,211,238,1)]"
+                            {/* 1. ⚡ DIGITAL SCANNER GRID BACKGROUND */}
+                            <div className="absolute inset-0 opacity-20 pointer-events-none"
                                 style={{
-                                    animation: 'scan 3s ease-in-out infinite',
-                                    top: '-5%'
+                                    backgroundImage: `linear-gradient(to right, #22d3ee 1px, transparent 1px), linear-gradient(to bottom, #22d3ee 1px, transparent 1px)`,
+                                    backgroundSize: '20px 20px',
+                                    maskImage: 'radial-gradient(ellipse at center, black, transparent 80%)'
+                                }}>
+                            </div>
+
+                            {/* 2. 🟦 MOVING SCANNER OVERLAY */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                                style={{
+                                    animation: 'scan-overlay 3s ease-in-out infinite',
+                                    height: '30%'
                                 }}
                             />
 
-                            {/* Inner Content with Z-Translation */}
-                            <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
+                            {/* 3. 🔥 THE LASER LINE */}
+                            <div
+                                className="absolute left-0 w-full h-[2px] bg-cyan-400 z-20 pointer-events-none shadow-[0_0_15px_rgba(34,211,238,1)]"
+                                style={{
+                                    animation: 'scan-line 3s ease-in-out infinite',
+                                }}
+                            />
+
+                            {/* Content Section */}
+                            <div style={{ transform: "translateZ(60px)" }} className="relative z-10">
                                 <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-lg">
-                                            📜
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                         </div>
                                         <div>
-                                            <p className="text-white text-sm font-semibold uppercase tracking-tighter">Digital Deed</p>
-                                            <p className="text-[10px] text-gray-500">ERC-721 Secure</p>
+                                            <p className="text-white text-[11px] font-black uppercase tracking-widest">Digital Deed</p>
+                                            <p className="text-[9px] text-cyan-500/60 font-mono">SECURE-BLOCK-721</p>
                                         </div>
                                     </div>
-                                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"></div>
+                                    <div className="flex gap-1">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-ping"></div>
+                                        <div className="h-1.5 w-1.5 rounded-full bg-cyan-500"></div>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4 font-mono">
-                                    <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5 shadow-inner">
-                                        <p className="text-[10px] text-gray-500 mb-1">PROPERTY HASH</p>
-                                        <p className="text-cyan-400 text-[11px] truncate">{scannedHash}</p>
+                                    <div className="bg-black/60 p-3 rounded-xl border border-cyan-500/20 shadow-inner group-hover:border-cyan-500/50 transition-colors">
+                                        <p className="text-[9px] text-zinc-500 mb-1 flex justify-between">
+                                            <span>DATA HASH</span>
+                                            <span className="text-cyan-500/40">ENC-v2</span>
+                                        </p>
+                                        <p className="text-cyan-400 text-[10px] break-all leading-tight">
+                                            {scannedHash || "0x7c12...3a72cc16"}
+                                        </p>
                                     </div>
+
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
-                                            <p className="text-[10px] text-gray-500 mb-1 font-bold">OWNER</p>
-                                            <p className="text-gray-300 text-xs font-bold uppercase truncate">Rohit Kumar</p>
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <p className="text-[8px] text-zinc-500 mb-1 font-bold">OWNER_ID</p>
+                                            <p className="text-zinc-300 text-[10px] font-bold uppercase truncate">Rohit Kumar</p>
                                         </div>
-                                        <div className="bg-zinc-900/50 p-3 rounded-xl border border-white/5">
-                                            <p className="text-[10px] text-gray-500 mb-1 font-bold">LOCATION</p>
-                                            <p className="text-gray-300 text-xs font-bold uppercase">Patna, IN</p>
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <p className="text-[8px] text-zinc-500 mb-1 font-bold">LOC_COORD</p>
+                                            <p className="text-zinc-300 text-[10px] font-bold uppercase">25.59, 85.13</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-6 pt-3 border-t border-white/5 flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                                    <span>Status: <span className="text-green-400">Verified</span></span>
-                                    <span>Block: #8921..</span>
+                                <div className="mt-6 pt-3 border-t border-white/5 flex justify-between items-center text-[9px] font-bold text-zinc-500 uppercase tracking-tighter">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-emerald-500">●</span> Verified Ledger
+                                    </div>
+                                    <div className="text-zinc-400">Node: 0042-X</div>
                                 </div>
                             </div>
 
-                            {/* Decorative Glowing Circle */}
-                            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/10 blur-2xl rounded-full" />
+                            {/* Subtle Light Reflection */}
+                            <div className="absolute -top-20 -left-20 w-40 h-40 bg-cyan-500/5 blur-[80px] rounded-full group-hover:bg-cyan-500/10 transition-colors" />
                         </div>
                     </div>
                 </div>
@@ -428,11 +457,15 @@ const Home = () => {
 
 };
 <style>{`
-  @keyframes scan {
+  @keyframes scan-line {
     0% { top: 0%; opacity: 0; }
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { top: 100%; opacity: 0; }
+  }
+  @keyframes scan-overlay {
+    0% { top: -30%; }
+    100% { top: 100%; }
   }
 `}</style>
 
