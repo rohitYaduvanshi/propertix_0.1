@@ -385,7 +385,7 @@ const Home = () => {
                                     <div className="relative z-10 animate-float-3d">
                                         {/* PNG Image */}
                                         <img
-                                            src={mrRStruggle} 
+                                            src={mrRStruggle}
                                             className="w-80 md:w-[450px] object-contain drop-shadow-[0_35px_60px_rgba(239,68,68,0.3)] grayscale group-hover:grayscale-0 transition-all duration-1000 brightness-75 group-hover:brightness-105 transform group-hover:scale-105"
                                             alt="Mr. R Struggling with Papers"
                                         />
@@ -508,11 +508,70 @@ const Home = () => {
 
                             {/* Professional Screenshot Placeholder */}
                             <div className="mt-16 relative">
-                                <img
-                                    src="https://image.pollinations.ai/prompt/Modern%20clean%20SaaS%20dashboard%20UI%20showing%20blockchain%20transaction%20success%20dark%20theme%20cyan%20accents%20professional%20web%20design?width=1000&height=600&seed=99"
-                                    className="rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                                    alt="Propertix App Screenshot"
-                                />
+                                {/* 📱 THE PROPERTIX PROCESS - 6 IMAGE GRID */}
+                                <div className="mt-16 relative w-full max-w-5xl mx-auto px-4">
+
+                                    {/* Grid Container */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+
+                                        {/* Array of 6 images - You can replace these paths with your assets */}
+                                        {[1, 2, 3, 4, 5, 6].map((num) => (
+                                            <div key={num} className="group relative">
+                                                {/* 1. Background Glow for each card */}
+                                                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 blur-2xl rounded-3xl transition-all duration-500"></div>
+
+                                                {/* 2. Image Wrapper with Floating Animation */}
+                                                <div className={`relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm group-hover:border-cyan-500/50 transition-all duration-500 group-hover:-translate-y-3 shadow-xl shadow-black/50 ${num % 2 === 0 ? 'animate-float-even' : 'animate-float-odd'}`}>
+
+                                                    {/* Header bar inside image (for that SaaS look) */}
+                                                    <div className="h-6 bg-white/5 border-b border-white/5 flex items-center px-3 gap-1">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500/50"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></div>
+                                                        <span className="ml-2 text-[8px] text-zinc-500 font-mono">step-0{num}.exe</span>
+                                                    </div>
+
+                                                    <img
+                                                        src={`/assets/process-step-${num}.png`} // अपनी इमेजेस का नाम assets में process-step-1.png आदि रखें
+                                                        className="w-full h-auto object-cover brightness-75 group-hover:brightness-110 transition-all duration-700"
+                                                        alt={`Process Step ${num}`}
+                                                    />
+
+                                                    {/* Overlay for "Success" badge */}
+                                                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="bg-emerald-500 text-black px-2 py-1 rounded-lg font-black text-[8px] tracking-tighter shadow-[0_0_15px_#10b981]">
+                                                            VERIFIED
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Big Glow behind the entire grid */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-500/5 blur-[150px] pointer-events-none"></div>
+                                </div>
+
+                                {/* 🛠️ Required Animations */}
+                                <style>{`
+  @keyframes float-odd {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes float-even {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .animate-float-odd {
+    animation: float-odd 4s ease-in-out infinite;
+  }
+
+  .animate-float-even {
+    animation: float-even 5s ease-in-out infinite;
+  }
+`}</style>
                                 {/* Floating Elements on Screenshot */}
                                 <div className="absolute -top-6 -right-6 bg-emerald-500 text-black px-4 py-2 rounded-xl font-black text-[10px] animate-bounce">
                                     SUCCESS: MINTED
