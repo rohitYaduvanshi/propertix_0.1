@@ -299,16 +299,30 @@ const Home = () => {
                             style={{ transformStyle: "preserve-3d" }}
                         >
                             {/* 1. ⚡ THE SCANNING LASER LINE (The Fix) */}
-                            {/* 🔥 THE ULTIMATE MOVING LASER FIX */}
-                            <div
-                                className="absolute left-0 w-full h-[3px] z-50 pointer-events-none"
-                                style={{
-                                    background: 'linear-gradient(to right, transparent, #22d3ee, transparent)',
-                                    boxShadow: '0 0 15px #22d3ee, 0 0 5px #ffffff',
-                                    animation: 'scanAnimation 3s ease-in-out infinite',
-                                    top: '0%'
-                                }}
-                            />
+                            {/* 🔥 THE FINAL GUARANTEED SCANNER FIX */}
+                            <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-2xl">
+                                <div
+                                    className="absolute w-full h-[2px]"
+                                    style={{
+                                        background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)',
+                                        boxShadow: '0 0 20px #22d3ee',
+                                        top: '0%',
+                                        animation: 'finalScan 3s linear infinite'
+                                    }}
+                                />
+
+                                {/* CSS Keyframes directly in a style tag */}
+                                <style>
+                                    {`
+            @keyframes finalScan {
+                0% { top: -5%; opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { top: 105%; opacity: 0; }
+            }
+        `}
+                                </style>
+                            </div>
 
                             {/* 2. 🟦 MOVING SCANNER GLOW (Adds Depth) */}
                             <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -459,14 +473,4 @@ const Home = () => {
     );
 
 };
-{/* 🛠️ IMPORTANT: Add this CSS to your global CSS or inside a <style> tag */ }
-<style dangerouslySetInnerHTML={{ __html: `
-  @keyframes scanAnimation {
-    0% { top: 0%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
-  }
-` }} />
-
 export default Home;
