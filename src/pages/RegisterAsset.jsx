@@ -127,17 +127,19 @@ const Blockchain = () => {
           </div>
 
           {txHash && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-left-8">
-              <div className="p-5 sm:p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-[32px] backdrop-blur-xl shadow-emerald-500/10 shadow-lg">
+            <div className="space-y-4 animate-in fade-in slide-in-from-left-8 w-full">
+              <div className="p-4 sm:p-6 bg-emerald-500/5 border border-emerald-500/30 rounded-[32px] backdrop-blur-xl shadow-emerald-500/10 shadow-lg">
                 <p className="text-[9px] font-bold text-emerald-400 uppercase mb-3 tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Transaction Secured
                 </p>
 
-                <div className="flex items-center gap-3 bg-black/60 p-2 sm:p-3 rounded-2xl border border-white/5 overflow-hidden">
-                  {/* 'min-w-0' is the secret for making truncate work inside flex */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-mono text-zinc-400 truncate pr-2">
+                {/* 🛠️ Main Fix: Added 'w-full' and 'overflow-hidden' */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-black/60 p-3 rounded-2xl border border-white/5 w-full overflow-hidden">
+
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    {/* 🛠️ Text Fix: Added 'break-all' for mobile wrapping and 'truncate' for desktop */}
+                    <p className="text-[10px] font-mono text-zinc-400 break-all sm:truncate leading-relaxed">
                       {txHash}
                     </p>
                   </div>
@@ -145,9 +147,9 @@ const Blockchain = () => {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(txHash);
-                      // Optional: You can add a 'Copied' state here to change the icon
+                      // logic for toast or "Copied!" text
                     }}
-                    className="flex-shrink-0 text-[10px] bg-emerald-600 px-4 py-2 rounded-xl font-black text-white hover:bg-emerald-400 active:scale-90 transition-all shadow-lg shadow-emerald-900/20"
+                    className="flex-shrink-0 text-[10px] bg-emerald-600 px-4 py-3 sm:py-2 rounded-xl font-black text-white hover:bg-emerald-400 active:scale-95 transition-all shadow-lg"
                   >
                     COPY
                   </button>
