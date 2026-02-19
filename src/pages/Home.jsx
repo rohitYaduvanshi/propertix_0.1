@@ -146,16 +146,43 @@ const Home = () => {
 
                 {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
+                    {/* 🎡 CIRCULAR "HOW TO START" BUTTON */}
+                    <div className="fixed bottom-10 right-10 z-[60] group cursor-pointer">
+                        <div className="relative w-28 h-28 flex items-center justify-center">
 
-                    
+                            {/*  (Circular Text) */}
+                            <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                                <svg className="w-full h-full" viewBox="0 0 100 100">
+                                    <path
+                                        id="circlePath"
+                                        d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+                                        fill="none"
+                                    />
+                                    <text className="text-[10px] font-black uppercase fill-cyan-500 tracking-[0.2em]">
+                                        <textPath href="#circlePath">
+                                            Learn how to start • Learn how to start •
+                                        </textPath>
+                                    </text>
+                                </svg>
+                            </div>
+
+                            {/* बीच वाला आइकन/बटन */}
+                            <div className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.4)] group-hover:scale-110 transition-transform duration-300">
+                                <span className="text-xl">👉</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+
                     <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] animate-orb-move-1"></div>
                     <div className="absolute bottom-[0%] right-[-5%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] animate-orb-move-2"></div>
                     <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] animate-pulse"></div>
 
-                    {/* 2. प्रीमियम ग्लास नॉइज़ इफ़ेक्ट (Texture) */}
+                    {/* 2.(Texture) */}
                     <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
 
-                    {/* 3. सेंटर रेडियल लाइट (Focus Point) */}
+                    {/* 3.(Focus Point) */}
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#020203_80%)]"></div>
 
                 </div>
