@@ -322,7 +322,7 @@ const Home = () => {
                         >
                             {/* --- SCANNING LINE CODE REMAINS SAME --- */}
                             <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-[40px]">
-                                <div className="absolute w-full h-[2px]" style={{ background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)', boxShadow: '0 0 20px #22d3ee', top: '0%', animation: 'finalScan 3s linear infinite' }} />
+                                <div className="absolute w-full h-[2px]" style={{ background: 'linear-gradient(to right, transparent, #22d3ee, #fff, #22d3ee, transparent)', top: '0%', animation: 'finalScan 3s linear infinite' }} />
                                 <style>{`@keyframes finalScan { 0% { top: -5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 105%; opacity: 0; } }`}</style>
                             </div>
 
