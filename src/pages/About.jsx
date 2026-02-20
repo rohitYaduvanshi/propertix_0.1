@@ -83,7 +83,7 @@ const About = () => {
           <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-[60px] p-10 md:p-20 overflow-hidden group">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
               <div className="order-2 lg:order-1">
-                <div className="inline-block px-4 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest mb-6">Founder & Lead</div>
+                <div className="inline-block px-4 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest mb-6">Project Lead</div>
                 <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 italic transform -skew-x-6">The Architect</h2>
                 <p className="text-zinc-400 text-lg mb-8">
                   Hey, I'm <span className="text-white font-bold border-b-2 border-cyan-500">Rohit Yaduvanshi</span>.
