@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="relative bg-black pt-20 pb-10 overflow-hidden">
       {/* 1. Background Decor (Modern Accents) */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto px-6 relative z-10">
