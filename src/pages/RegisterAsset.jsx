@@ -94,7 +94,7 @@ const Blockchain = () => {
 
   return (
     // 🌌 Added Background Wrapper to match Home.jsx
-    <section className="relative flex flex-col items-center px-4 md:px-8 py-20 min-h-screen bg-[#000000] text-white overflow-hidden">
+    <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
         {/* Subtle Glows */}
         <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-cyan-500/5 blur-[100px] rounded-full"></div>

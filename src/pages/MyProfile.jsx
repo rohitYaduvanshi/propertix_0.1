@@ -95,7 +95,7 @@ const MyProfile = () => {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white pt-8 pb-12 px-4 relative overflow-hidden">
       {/* Dynamic Background Glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px]" />
