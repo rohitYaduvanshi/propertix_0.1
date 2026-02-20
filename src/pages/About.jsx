@@ -95,7 +95,7 @@ const About = () => {
                 </div>
                 <div className="flex gap-4">
                   <SocialBtn label="GitHub" href="https://github.com/rohitYaduvanshi" />
-                  <SocialBtn label="LinkedIn" href="https://www.linkedin.com/in/r-yaduvanshi/"/>
+                  <SocialBtn label="LinkedIn" href="https://www.linkedin.com/in/r-yaduvanshi/" />
                 </div>
               </div>
               <div className="order-1 lg:order-2">
@@ -118,10 +118,10 @@ const About = () => {
             <MemberCard name="Partner 2" role="DevOps" img={m2} />
             <MemberCard name="Partner 3" role="Researcher" img={m3} />
             <MemberCard name="Partner 4" role="Quality Assurance" img={m4} />
-          </div>
-          <div className="flex gap-4">
-            <SocialBtn label="GitHub" href="#" />
-            <SocialBtn label="LinkedIn" href="#" />
+            <div className="flex gap-4">
+              <SocialBtn label="GitHub" href="#" />
+              <SocialBtn label="LinkedIn" href="#" />
+            </div>
           </div>
         </section>
 
