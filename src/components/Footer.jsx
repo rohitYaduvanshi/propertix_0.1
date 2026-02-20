@@ -22,8 +22,8 @@ const Footer = () => {
                   <img src={logo} alt="Propertix" className="h-8 w-auto brightness-110" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white tracking-tighter uppercase font-trench">
-                    Propertix
+                  <h2 className="text-2xl font-black text-white font-trench">
+                    Dream..!
                   </h2>
                   <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.3em]">
                     The Dad of Trust
