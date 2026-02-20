@@ -60,7 +60,7 @@ const About = () => {
               <div className="relative bg-zinc-900 border border-white/10 rounded-[40px] overflow-hidden aspect-[4/3]">
                 <img src={profImg} alt="Mentor" className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-1000" />
                 <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black to-transparent">
-                  <h2 className="text-3xl font-black uppercase tracking-tighter italic">Prof. Jayanta Basak</h2>
+                  <h2 className="text-2xl font-black uppercase">Prof. Jayanta Basak</h2>
                   <p className="text-cyan-500 text-[10px] font-bold tracking-widest uppercase">Strategic Advisor</p>
                 </div>
               </div>
