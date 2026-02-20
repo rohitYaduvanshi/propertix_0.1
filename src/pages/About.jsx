@@ -86,8 +86,8 @@ const About = () => {
                 <div className="inline-block px-4 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest mb-6">Founder & Lead</div>
                 <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 italic transform -skew-x-6">The Architect</h2>
                 <p className="text-zinc-400 text-lg mb-8">
-                  Hey, I'm <span className="text-white font-bold border-b-2 border-cyan-500">Your Name</span>.
-                  I bridge the gap between complex blockchain logic and high-performance user interfaces.
+                  Hey, I'm <span className="text-white font-bold border-b-2 border-cyan-500">Rohit Yaduvanshi</span>.
+                  I started Propertix with a single goal: to kill corruption in real estate through code. As the Lead Architect, I handle the Smart Contracts and Core Protocol. I bridge the gap between complex blockchain logic and high-performance user interfaces.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-10">
                   <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Role</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Core Architecture</p></div>
