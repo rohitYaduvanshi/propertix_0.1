@@ -9,7 +9,7 @@ import m4 from "../assets/m1.png";
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-[#020202] text-white py-24 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#020202] text-white py-8 px-6 relative overflow-hidden">
 
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
