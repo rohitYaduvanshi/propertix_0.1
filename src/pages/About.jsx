@@ -31,7 +31,7 @@ const About = () => {
               {/* Photo Frame with Cyber Edges */}
               <div className="absolute -inset-4 bg-gradient-to-tr from-cyan-500/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-700 blur-xl"></div>
               <div className="relative bg-zinc-900 border-2 border-white/10 rounded-[40px] overflow-hidden aspect-[4/3] transform group-hover:scale-[1.02] transition-all duration-700">
-                <img src="/assets/professor.png" alt="Mentor" className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-700" />
+                <img src="/assets/my-photo.png" alt="Mentor" className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-700" />
                 <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black to-transparent">
                   <p className="text-cyan-400 font-black text-[10px] tracking-widest uppercase mb-1 underline decoration-cyan-500/50 underline-offset-4">Primary Consultant</p>
                   <h2 className="text-3xl font-black uppercase tracking-tighter">Prof. Mentor Name</h2>
@@ -77,7 +77,7 @@ const About = () => {
                    <div className="relative aspect-square max-w-md mx-auto">
                       <div className="absolute inset-0 bg-cyan-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
                       <div className="relative h-full w-full rounded-[50px] border-4 border-white/5 overflow-hidden rotate-3 group-hover:rotate-0 transition-transform duration-700">
-                         <img src="/assets/me.png" alt="Architect" className="w-full h-full object-cover grayscale brightness-110 group-hover:grayscale-0 transition-all duration-700" />
+                         <img src="/assets/my-photo.png" alt="Architect" className="w-full h-full object-cover grayscale brightness-110 group-hover:grayscale-0 transition-all duration-700" />
                       </div>
                    </div>
                 </div>
