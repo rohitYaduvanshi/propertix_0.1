@@ -112,16 +112,46 @@ const About = () => {
 
         {/* --- SECTION 3: THE COLLABORATORS --- */}
         <section className="pb-20">
-          <h2 className="font-trench text-4xl md:text-6xl uppercase tracking-tighter italic mb-16">Technical <span className="text-cyan-500">Unit</span></h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <h2 className="font-trench text-4xl md:text-6xl uppercase tracking-tighter italic">
+              Technical <span className="text-cyan-500">Unit</span>
+            </h2>
+            <span className="text-zinc-700 font-mono text-[10px] uppercase tracking-widest">Active_Core_Contributors</span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MemberCard name="Partner 1" role="UI/UX Lead" img={m1} />
-            <MemberCard name="Partner 2" role="DevOps" img={m2} />
-            <MemberCard name="Partner 3" role="Researcher" img={m3} />
-            <MemberCard name="Partner 4" role="Quality Assurance" img={m4} />
-            <div className="flex gap-4">
-              <SocialBtn label="GitHub" href="#" />
-              <SocialBtn label="LinkedIn" href="#" />
-            </div>
+            <MemberCard
+              name="Partner 1"
+              role="UI/UX Lead"
+              img={m1}
+              speak="I believe a decentralized web should be as beautiful as it is secure. Design is the bridge to trust."
+              github="#"
+              linkedin="#"
+            />
+            <MemberCard
+              name="Partner 2"
+              role="DevOps"
+              img={m2}
+              speak="Scaling the unscalable. My goal is to ensure Propertix remains fast and resilient under any load."
+              github="#"
+              linkedin="#"
+            />
+            <MemberCard
+              name="Partner 3"
+              role="Researcher"
+              img={m3}
+              speak="Cryptography isn't just math; it's a social contract. I hunt for the most secure ways to store data."
+              github="#"
+              linkedin="#"
+            />
+            <MemberCard
+              name="Partner 4"
+              role="Security QA"
+              img={m4}
+              speak="Breaking things so our users don't have to. Security is not an option; it's our core foundation."
+              github="#"
+              linkedin="#"
+            />
           </div>
         </section>
 
@@ -138,13 +168,39 @@ const SocialBtn = ({ label, href }) => (
   </a>
 );
 
-const MemberCard = ({ name, role, img }) => (
-  <div className="group relative bg-zinc-950 border border-white/5 p-6 rounded-[32px] hover:border-cyan-500/50 transition-all duration-500 hover:-translate-y-2">
-    <div className="relative aspect-square rounded-2xl overflow-hidden mb-6 border border-white/5">
-      <img src={img} alt={name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100" />
+const MemberCard = ({ name, role, img, github, linkedin, speak }) => (
+  <div className="group relative bg-zinc-950 border border-white/5 p-6 rounded-[32px] hover:border-cyan-500/30 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full">
+    {/* Image Section */}
+    <div className="relative aspect-square rounded-2xl overflow-hidden mb-6 border border-white/5 shadow-2xl">
+      <img
+        src={img}
+        alt={name}
+        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+      />
     </div>
-    <h4 className="text-lg font-black uppercase tracking-tight text-white mb-1">{name}</h4>
-    <p className="text-cyan-500 text-[9px] font-black uppercase tracking-[0.2em]">{role}</p>
+
+    {/* Info Section */}
+    <div className="mb-4">
+      <h4 className="text-lg font-black uppercase tracking-tight text-white mb-1">{name}</h4>
+      <p className="text-cyan-500 text-[9px] font-black uppercase tracking-[0.2em]">{role}</p>
+    </div>
+
+    {/* Speak Paragraph (Unique Color & Style) ✅ */}
+    <div className="flex-grow">
+      <p className="text-[11px] leading-relaxed text-zinc-500 group-hover:text-cyan-200/70 transition-colors duration-500 italic">
+        "{speak}"
+      </p>
+    </div>
+
+    {/* Social Links ✅ */}
+    <div className="flex gap-4 border-t border-white/5 mt-6 pt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+      <a href={github} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-zinc-500 hover:text-white transition-colors uppercase tracking-[0.2em]">
+        GitHub
+      </a>
+      <a href={linkedin} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-zinc-500 hover:text-cyan-400 transition-colors uppercase tracking-[0.2em]">
+        LinkedIn
+      </a>
+    </div>
   </div>
 );
 
