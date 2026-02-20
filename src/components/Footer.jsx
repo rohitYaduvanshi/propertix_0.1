@@ -11,13 +11,13 @@ const Footer = () => {
       <div className="max-w-[1400px] mx-auto px-6 relative z-10">
         {/* Main Glass Card */}
         <div className="rounded-[40px] bg-white/[0.02] backdrop-blur-3xl border border-white/10 p-8 md:p-12 shadow-2xl">
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
-            
+
             {/* --- BRAND COLUMN (4 Cols) --- */}
             <div className="lg:col-span-5 space-y-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)]">
+                <div className="p-3 bg-blue-600 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)]">
                   <img src={logo} alt="Propertix" className="h-8 w-auto brightness-110" />
                 </div>
                 <div>
@@ -25,15 +25,15 @@ const Footer = () => {
                     Propertix
                   </h2>
                   <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.3em]">
-                    The Baap of Trust
+                    The Dad of Trust
                   </p>
                 </div>
               </div>
               <p className="text-zinc-400 text-sm md:text-base leading-relaxed max-w-sm">
-                Next-generation blockchain layer for land records. Turning legacy 
+                Next-generation blockchain layer for land records. Turning legacy
                 paperwork into immutable digital assets.
               </p>
-              
+
               {/* Status Indicator */}
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/5">
                 <span className="relative flex h-2 w-2">
@@ -71,18 +71,22 @@ const Footer = () => {
             {/* --- SOCIAL & NEWSLETTER (3 Cols) --- */}
             <div className="lg:col-span-3 space-y-8">
               <div className="space-y-4">
-                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50 md:text-right">Join Community</h3>
+                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50 md:text-right">
+                  Join Community
+                </h3>
                 <div className="flex lg:justify-end gap-3">
-                  <SocialIcon label="Github" icon="Gi" />
-                  <SocialIcon label="Twitter" icon="Tw" />
-                  <SocialIcon label="Discord" icon="Di" />
+                  {/* Link */}
+                  <SocialIcon label="Github" icon="Gi" href="https://github.com/rohitYaduvanshi/propertix_0.1" />
+                  <SocialIcon label="Twitter" icon="Tw" href="https://twitter.com/your-handle" />
+                  <SocialIcon label="Discord" icon="Di" href="https://discord.gg/your-invite" />
                 </div>
               </div>
+
               <div className="lg:text-right">
-                 <p className="text-[11px] text-zinc-500 font-medium">
-                   &copy; {new Date().getFullYear()} PROPERTIX LABS.<br />
-                   SECURED BY SMART CONTRACTS.
-                 </p>
+                <p className="text-[11px] text-zinc-500 font-bold">
+                  &copy; {new Date().getFullYear()} PROPERTIX LABS.<br />
+                  SECURED BY SMART CONTRACTS.
+                </p>
               </div>
             </div>
 
@@ -118,13 +122,19 @@ const FooterLink = ({ to, children }) => (
   </li>
 );
 
-const SocialIcon = ({ label, icon }) => (
-  <button className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group">
+// ✅ Updated SocialIcon with href support
+const SocialIcon = ({ label, icon, href }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group relative no-underline"
+  >
     <span className="text-xs font-black uppercase">{icon}</span>
-    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold">
+    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap">
       {label}
     </div>
-  </button>
+  </a>
 );
 
 export default Footer;
