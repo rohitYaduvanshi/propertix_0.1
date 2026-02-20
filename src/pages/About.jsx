@@ -60,7 +60,7 @@ const About = () => {
               <div className="relative bg-zinc-900 border border-white/10 rounded-[40px] overflow-hidden aspect-[4/3]">
                 <img src={profImg} alt="Mentor" className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-1000" />
                 <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black to-transparent">
-                  <h2 className="text-3xl font-black uppercase tracking-tighter italic">Prof. Mentor Name</h2>
+                  <h2 className="text-3xl font-black uppercase tracking-tighter italic">Prof. Jayanta Basak</h2>
                   <p className="text-cyan-500 text-[10px] font-bold tracking-widest uppercase">Strategic Advisor</p>
                 </div>
               </div>
@@ -68,7 +68,8 @@ const About = () => {
             <div className="space-y-6">
               <FaFingerprint className="text-5xl text-cyan-500 opacity-20" />
               <h3 className="text-2xl font-bold italic text-zinc-300">"Truth is code, and code is law."</h3>
-              <p className="text-zinc-500 text-lg">Under his guidance, we ensured every smart contract aligns with real-world legalities.</p>
+              <p className="text-zinc-500 text-lg">Blockchain technology is not merely a tool for finance; it is the foundation for a more 
+                equitable legal system. Propertix is the first step toward that reality.</p>
               <div className="flex gap-4 pt-4">
                 <SocialBtn label="LinkedIn" href="#" />
                 <SocialBtn label="Twitter" href="#" />
