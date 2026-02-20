@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/propertix.png";
+import { FaGithub, FaTwitter, FaDiscord } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -68,17 +69,15 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* --- SOCIAL & NEWSLETTER (3 Cols) --- */}
+            {/* SOCIAL COLUMN - Icons Added Here ✅ */}
             <div className="lg:col-span-3 space-y-8">
               <div className="space-y-4">
-                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50 md:text-right">
-                  Join Community
-                </h3>
+                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50 md:text-right">Join Community</h3>
                 <div className="flex lg:justify-end gap-3">
-                  {/* Link */}
-                  <SocialIcon label="Github" icon="Gi" href="https://github.com/rohitYaduvanshi/propertix_0.1" />
-                  <SocialIcon label="Twitter" icon="Tw" href="https://twitter.com/your-handle" />
-                  <SocialIcon label="Discord" icon="Di" href="https://discord.gg/your-invite" />
+                  {/* अब हम सीधे Icon Component पास कर रहे हैं */}
+                  <SocialIcon label="Github" icon={<FaGithub />} href="https://github.com/rohitYaduvanshi/propertix_0.1" />
+                  <SocialIcon label="Twitter" icon={<FaTwitter />} href="https://twitter.com/..." />
+                  <SocialIcon label="Discord" icon={<FaDiscord />} href="https://discord.gg/..." />
                 </div>
               </div>
 
@@ -122,16 +121,18 @@ const FooterLink = ({ to, children }) => (
   </li>
 );
 
-// ✅ Updated SocialIcon with href support
+// 2. Updated SocialIcon to accept Icon Components ✅
 const SocialIcon = ({ label, icon, href }) => (
-  <a
+  <a 
     href={href}
-    target="_blank"
+    target="_blank" 
     rel="noopener noreferrer"
-    className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group relative no-underline"
+    className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl text-zinc-400 hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group relative no-underline shadow-lg"
   >
-    <span className="text-xs font-black uppercase">{icon}</span>
-    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap">
+    {/* Icon यहाँ रेंडर होगा */}
+    {icon}
+    
+    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap shadow-xl">
       {label}
     </div>
   </a>
