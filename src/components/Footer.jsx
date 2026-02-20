@@ -1,85 +1,105 @@
-// src/components/Footer.jsx
 import { Link } from "react-router-dom";
 import logo from "../assets/propertix.png";
 
 const Footer = () => {
   return (
-    <footer className=" bg-gradient-to-t from-black via-zinc-950 to-black border-t ">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-10">
-        {/* Glassmorphism wrapper */}
-        <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_18px_70px_rgba(0,0,0,0.85)] px-5 md:px-7 py-6 md:py-7 flex flex-col md:flex-row gap-8 md:gap-10 md:items-center md:justify-between">
-          {/* Brand + tagline */}
-          <div className="flex items-start gap-4 md:gap-5">
-            <div className="flex-shrink-0">
-              <div className="relative h-10 w-10 md:h-11 md:w-11 rounded-2xl bg-gradient-to-br from-purple-500 via-violet-500 to-cyan-400 p-[2px] shadow-[0_0_25px_rgba(129,140,248,0.7)]">
-                <div className="h-full w-full rounded-2xl bg-black flex items-center justify-center">
-                  <img
-                    src={logo}
-                    alt="Propertix logo"
-                    className="h-7 w-auto object-contain"
-                  />
+    <footer className="relative bg-black pt-20 pb-10 overflow-hidden">
+      {/* 1. Background Decor (Modern Accents) */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+        {/* Main Glass Card */}
+        <div className="rounded-[40px] bg-white/[0.02] backdrop-blur-3xl border border-white/10 p-8 md:p-12 shadow-2xl">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+            
+            {/* --- BRAND COLUMN (4 Cols) --- */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)]">
+                  <img src={logo} alt="Propertix" className="h-8 w-auto brightness-110" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-tighter uppercase font-trench">
+                    Propertix
+                  </h2>
+                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.3em]">
+                    The Baap of Trust
+                  </p>
                 </div>
               </div>
-            </div>
-            <div>
-              <h4 className="text-base md:text-lg font-semibold text-white">
-                Propertix
-                <span className="ml-1 text-xs font-normal text-cyan-300/80 tracking-wide">
-                  / Property on-chain
-                </span>
-              </h4>
-              <p className="mt-1 text-[12px] md:text-[13px] text-gray-300 leading-relaxed max-w-md">
-                A blockchain‑powered layer for property records, turning
-                traditional documents into verifiable on‑chain proofs that are
-                transparent and tamper‑resistant.
+              <p className="text-zinc-400 text-sm md:text-base leading-relaxed max-w-sm">
+                Next-generation blockchain layer for land records. Turning legacy 
+                paperwork into immutable digital assets.
               </p>
+              
+              {/* Status Indicator */}
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                  Mainnet Beta v1.0
+                </span>
+              </div>
+            </div>
+
+            {/* --- NAVIGATION LINKS (4 Cols) --- */}
+            <div className="lg:col-span-4 grid grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50">Protocol</h3>
+                <ul className="space-y-3">
+                  <FooterLink to="/">Ecosystem</FooterLink>
+                  <FooterLink to="/registerAsset">Asset Mint</FooterLink>
+                  <FooterLink to="/blockchain">Ledger</FooterLink>
+                  <FooterLink to="/about">Whitepaper</FooterLink>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50">Support</h3>
+                <ul className="space-y-3">
+                  <FooterLink to="/contact">Help Desk</FooterLink>
+                  <FooterLink to="/docs">API Docs</FooterLink>
+                  <FooterLink to="/terms">Legal</FooterLink>
+                  <FooterLink to="/privacy">Privacy</FooterLink>
+                </ul>
+              </div>
+            </div>
+
+            {/* --- SOCIAL & NEWSLETTER (3 Cols) --- */}
+            <div className="lg:col-span-3 space-y-8">
+              <div className="space-y-4">
+                <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] opacity-50 md:text-right">Join Community</h3>
+                <div className="flex lg:justify-end gap-3">
+                  <SocialIcon label="Github" icon="Gi" />
+                  <SocialIcon label="Twitter" icon="Tw" />
+                  <SocialIcon label="Discord" icon="Di" />
+                </div>
+              </div>
+              <div className="lg:text-right">
+                 <p className="text-[11px] text-zinc-500 font-medium">
+                   &copy; {new Date().getFullYear()} PROPERTIX LABS.<br />
+                   SECURED BY SMART CONTRACTS.
+                 </p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Banner */}
+          <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex gap-6 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+              <span>Security Audited</span>
+              <span>Open Source</span>
+              <span>Decentralized</span>
+            </div>
+            <div className="text-[10px] text-zinc-500 font-mono">
+              Network ID: 0x8545_LOCALHOST_DEV
             </div>
           </div>
 
-          {/* Navigation columns */}
-          <div className="flex-1 grid grid-cols-2 gap-6 text-[12px] md:text-[13px] text-gray-300">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold text-gray-100 uppercase tracking-[0.18em]">
-                Navigation
-              </p>
-              <FooterLink to="/">Home</FooterLink>
-              <FooterLink to="/registerAsset">RegisterAsset</FooterLink>
-              <FooterLink to="/about">About project</FooterLink>
-              <FooterLink to="/contact">Contact</FooterLink>
-            </div>
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold text-gray-100 uppercase tracking-[0.18em]">
-                Resources
-              </p>
-              <FooterLink to="/blockchain">Smart contracts</FooterLink>
-              <span className="block text-gray-500">
-                Whitepaper
-                <span className="ml-1 text-[11px] text-gray-600">
-                  (coming soon)
-                </span>
-              </span>
-              <FooterLink to="/blockchain">Developer docs</FooterLink>
-              <FooterLink to="/contact">Support</FooterLink>
-            </div>
-          </div>
-
-          {/* Social + status */}
-          <div className="flex flex-col items-start md:items-end gap-3">
-            {/* Social icons */}
-            <div className="flex items-center gap-3">
-              <SocialDot label="GitHub" />
-              <SocialDot label="LinkedIn" />
-              <SocialDot label="X" />
-            </div>
-            {/* Status pill */}
-            <div className="flex items-center gap-2 text-[11px] md:text-[12px] text-gray-300">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_18px_rgba(52,211,153,0.9)]" />
-              <span>Testnet prototype · Not for real transactions</span>
-            </div>
-            <p className="text-[11px] md:text-[12px] text-gray-500">
-              &copy; {new Date().getFullYear()} Propertix. All rights reserved.
-            </p>
-          </div>
         </div>
       </div>
     </footer>
@@ -87,25 +107,23 @@ const Footer = () => {
 };
 
 const FooterLink = ({ to, children }) => (
-  <Link
-    to={to}
-    className="block text-gray-300 hover:text-cyan-300 transition-colors duration-200"
-  >
-    {children}
-  </Link>
+  <li>
+    <Link
+      to={to}
+      className="text-zinc-400 hover:text-cyan-400 text-sm transition-all duration-300 flex items-center group"
+    >
+      <span className="w-0 group-hover:w-2 h-[1px] bg-cyan-400 mr-0 group-hover:mr-2 transition-all"></span>
+      {children}
+    </Link>
+  </li>
 );
 
-// Simple glowing circular icons (placeholder – later real links de sakta hai)
-const SocialDot = ({ label }) => (
-  <button
-    type="button"
-    aria-label={label}
-    className="relative h-8 w-8 rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-[11px] text-gray-200 shadow-[0_0_18px_rgba(148,163,184,0.35)] hover:border-cyan-400/80 hover:text-cyan-300 hover:shadow-[0_0_22px_rgba(34,211,238,0.75)] transition-all duration-200"
-  >
-    {/* first letter as icon */}
-    <span className="font-medium">
-      {label.charAt(0)}
-    </span>
+const SocialIcon = ({ label, icon }) => (
+  <button className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group">
+    <span className="text-xs font-black uppercase">{icon}</span>
+    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold">
+      {label}
+    </div>
   </button>
 );
 
