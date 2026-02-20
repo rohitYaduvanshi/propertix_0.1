@@ -10,20 +10,20 @@ import m4 from "../assets/m1.png";
 const About = () => {
   return (
     <div className="min-h-screen bg-[#020202] text-white py-24 px-6 relative overflow-hidden">
-      
+
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-500/10 blur-[120px] rounded-full" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        
+
         {/* --- HEADER: ULTRA MODERN & BOLD --- */}
         <header className="relative mb-40 group">
           <div className="flex items-center gap-3 mb-6">
-             <div className="h-[2px] w-12 bg-cyan-500"></div>
-             <span className="text-cyan-500 font-mono text-[10px] uppercase tracking-[0.6em] font-black">
-               0x_Digital_Manifesto
-             </span>
+            <div className="h-[2px] w-12 bg-cyan-500"></div>
+            <span className="text-cyan-500 font-mono text-[10px] uppercase tracking-[0.6em] font-black">
+              0x_Digital_Manifesto
+            </span>
           </div>
 
           <h1 className="font-trench text-7xl md:text-[11rem] uppercase tracking-tighter leading-[0.85] italic mb-10">
@@ -37,17 +37,17 @@ const About = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
             <div className="lg:col-span-7">
-               <p className="text-zinc-400 text-xl md:text-2xl font-light leading-snug max-w-2xl border-l border-zinc-800 pl-8">
-                We are engineering an <span className="text-white font-bold">Immutable Ledger</span> for the real world. 
+              <p className="text-zinc-400 text-xl md:text-2xl font-light leading-snug max-w-2xl border-l border-zinc-800 pl-8">
+                We are engineering an <span className="text-white font-bold">Immutable Ledger</span> for the real world.
                 Bridging the gap between physical land ownership and cryptographic certainty.
-               </p>
+              </p>
             </div>
             <div className="lg:col-span-5 flex lg:justify-end">
-               <div className="text-[10px] font-mono text-zinc-600 uppercase leading-loose border border-white/5 p-4 rounded-xl backdrop-blur-sm">
-                  System_Status: <span className="text-emerald-500">Online</span> <br />
-                  Protocol_v: 1.0.4_Stable <br />
-                  Network: On-Chain_Records
-               </div>
+              <div className="text-[10px] font-mono text-zinc-600 uppercase leading-loose border border-white/5 p-4 rounded-xl backdrop-blur-sm">
+                System_Status: <span className="text-emerald-500">Online</span> <br />
+                Protocol_v: 1.0.4_Stable <br />
+                Network: On-Chain_Records
+              </div>
             </div>
           </div>
         </header>
@@ -77,26 +77,36 @@ const About = () => {
           </div>
         </section>
 
-        {/* --- SECTION 2: THE ARCHITECT --- */}
+        {/* --- SECTION 2: THE ARCHITECT (The Engine) --- */}
         <section className="mb-48 relative">
-           <div className="bg-white/[0.02] border border-white/5 rounded-[60px] p-10 md:p-20 group backdrop-blur-3xl">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div className="order-2 lg:order-1">
-                  <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-6 italic transform -skew-x-6">The Architect</h2>
-                  <p className="text-zinc-400 text-lg mb-8">Hey, I'm <span className="text-white font-bold border-b-2 border-cyan-500">Your Name</span>. I handle the Protocol Architecture and Core Security.</p>
-                  <div className="flex gap-4">
-                    <SocialBtn label="GitHub" href="#" />
-                    <SocialBtn label="LinkedIn" href="#" />
-                  </div>
+          <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-[60px] p-10 md:p-20 overflow-hidden group">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+              <div className="order-2 lg:order-1">
+                <div className="inline-block px-4 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest mb-6">Founder & Lead</div>
+                <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 italic transform -skew-x-6">The Architect</h2>
+                <p className="text-zinc-400 text-lg mb-8">
+                  Hey, I'm <span className="text-white font-bold border-b-2 border-cyan-500">Your Name</span>.
+                  I bridge the gap between complex blockchain logic and high-performance user interfaces.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-10">
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Role</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Core Architecture</p></div>
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Focus</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Smart Contracts & Security</p></div>
                 </div>
-                <div className="order-1 lg:order-2">
-                   <div className="relative aspect-square max-w-sm mx-auto">
-                      <div className="absolute inset-0 bg-cyan-500 rounded-full blur-[100px] opacity-10"></div>
-                      <img src={myImg} alt="Architect" className="relative h-full w-full rounded-[40px] object-cover grayscale hover:grayscale-0 transition-all duration-700 rotate-2 group-hover:rotate-0 border border-white/10" />
-                   </div>
+                <div className="flex gap-4">
+                  <SocialBtn label="GitHub" href="#" />
+                  <SocialBtn label="LinkedIn" href="#" />
                 </div>
               </div>
-           </div>
+              <div className="order-1 lg:order-2">
+                <div className="relative aspect-square max-w-md mx-auto">
+                  <div className="absolute inset-0 bg-cyan-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                  <div className="relative h-full w-full rounded-[50px] border-4 border-white/5 overflow-hidden rotate-3 group-hover:rotate-0 transition-transform duration-700">
+                    <img src={myImg} alt="Architect" className="w-full h-full object-cover grayscale brightness-110 group-hover:grayscale-0 transition-all duration-700" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* --- SECTION 3: THE COLLABORATORS --- */}
