@@ -68,10 +68,10 @@ const About = () => {
             <div className="space-y-6">
               <FaFingerprint className="text-5xl text-cyan-500 opacity-20" />
               <h3 className="text-2xl font-bold italic text-zinc-300">"Truth is code, and code is law."</h3>
-              <p className="text-zinc-500 text-lg">Blockchain technology is not merely a tool for finance; it is the foundation for a more 
+              <p className="text-zinc-500 text-lg">Blockchain technology is not merely a tool for finance; it is the foundation for a more
                 equitable legal system. Propertix is the first step toward that reality.</p>
               <div className="flex gap-4 pt-4">
-                <SocialBtn label="LinkedIn" href="#" />
+                <SocialBtn label="LinkedIn" href="https://www.linkedin.com/in/aboutjayanta/" />
                 <SocialBtn label="Twitter" href="#" />
               </div>
             </div>
@@ -90,12 +90,12 @@ const About = () => {
                   I started Propertix with a single goal: to kill corruption in real estate through code. As the Lead Architect, I handle the Smart Contracts and Core Protocol. I bridge the gap between complex blockchain logic and high-performance user interfaces.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-10">
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Role</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Core Architecture</p></div>
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Role</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Core Architecture and Development</p></div>
                   <div className="p-4 bg-white/5 border border-white/5 rounded-2xl"><span className="text-[10px] text-zinc-600 uppercase font-black block mb-1">Focus</span><p className="text-xs font-bold text-zinc-300 tracking-wide">Smart Contracts & Security</p></div>
                 </div>
                 <div className="flex gap-4">
-                  <SocialBtn label="GitHub" href="#" />
-                  <SocialBtn label="LinkedIn" href="#" />
+                  <SocialBtn label="GitHub" href="https://github.com/rohitYaduvanshi" />
+                  <SocialBtn label="LinkedIn" href="https://www.linkedin.com/in/r-yaduvanshi/"/>
                 </div>
               </div>
               <div className="order-1 lg:order-2">
@@ -118,6 +118,10 @@ const About = () => {
             <MemberCard name="Partner 2" role="DevOps" img={m2} />
             <MemberCard name="Partner 3" role="Researcher" img={m3} />
             <MemberCard name="Partner 4" role="Quality Assurance" img={m4} />
+          </div>
+          <div className="flex gap-4">
+            <SocialBtn label="GitHub" href="#" />
+            <SocialBtn label="LinkedIn" href="#" />
           </div>
         </section>
 
