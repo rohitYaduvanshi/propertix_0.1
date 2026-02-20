@@ -126,7 +126,7 @@ const Navbar = () => {
         ) : (
           <button
             onClick={connectWallet}
-            className="px-5 py-2 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold transition-all shadow-lg shadow-cyan-500/20"
+            className="px-5 py-2 rounded-full bg-blue-600 hover:bg-cyan-500 text-white text-sm font-bold transition-all shadow-lg shadow-cyan-500/20"
           >
             Connect Wallet
           </button>
@@ -191,7 +191,7 @@ const Navbar = () => {
       {/* --- 4. MOBILE HAMBURGER BUTTON --- */}
       <div className="flex lg:hidden items-center gap-4 z-50">
         {!isWalletConnected && !isUserLoggedIn && (
-            <button onClick={() => navigate("/login")} className="px-4 py-1.5 rounded-full bg-sky-500/65 text-white text-xs font-bold">
+            <button onClick={() => navigate("/login")} className="px-4 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold">
                 Login
             </button>
         )}
