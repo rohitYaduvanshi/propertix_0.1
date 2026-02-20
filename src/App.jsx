@@ -37,7 +37,7 @@ const App = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-500"></div>
-        <span className="ml-4 text-xl font-bold">Connecting to Blockchain...</span>
+        <span className="ml-4 text-xl font-bold">Connecting to Propertix...</span>
       </div>
     );
   }
