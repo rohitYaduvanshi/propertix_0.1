@@ -137,7 +137,7 @@ const About = () => {
               linkedin="#"
             />
             <MemberCard
-              name="Partner 3"
+              name="Rajashree Das"
               role="Researcher"
               img={m3}
               speak="Cryptography isn't just math; it's a social contract. I hunt for the most secure ways to store data."
