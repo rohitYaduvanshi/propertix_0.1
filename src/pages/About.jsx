@@ -5,7 +5,7 @@ import myImg from "../assets/my-photo.png";
 import m1 from "../assets/m1.png";
 import m2 from "../assets/m2.png";
 import m3 from "../assets/m3.png";
-import m4 from "../assets/m.png";
+import m4 from "../assets/m4.png";
 
 const About = () => {
   return (
@@ -125,7 +125,7 @@ const About = () => {
               role="UI/UX Guider"
               img={m1}
               speak="I believe a decentralized web should be as beautiful as it is secure. Design is the bridge to trust."
-              github="#"
+              github="https://github.com/snehomoyghosh"
               linkedin="#"
             />
             <MemberCard
@@ -147,7 +147,7 @@ const About = () => {
             <MemberCard
               name="Asesh Jana"
               role="Security QA"
-              img={m}
+              img={m4}
               speak="Breaking things so our users don't have to. Security is not an option; it's our core foundation."
               github="#"
               linkedin="#"
