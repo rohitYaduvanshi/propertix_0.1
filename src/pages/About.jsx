@@ -175,7 +175,7 @@ const MemberCard = ({ name, role, img, github, linkedin, speak }) => (
       <img
         src={img}
         alt={name}
-        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+        className="w-full h-full object-cover"
       />
     </div>
 
