@@ -126,7 +126,7 @@ const About = () => {
               img={m1}
               speak="I believe a decentralized web should be as beautiful as it is secure. Design is the bridge to trust."
               github="https://github.com/snehomoyghosh"
-              linkedin="#"
+              linkedin="https://www.linkedin.com/in/snehomoy-ghosh-60a6b0257?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
             />
             <MemberCard
               name="Soumyadeep Nath"
@@ -149,8 +149,8 @@ const About = () => {
               role="Security QA"
               img={m4}
               speak="Breaking things so our users don't have to. Security is not an option; it's our core foundation."
-              github="#"
-              linkedin="#"
+              github="https://github.com/asesh0208"
+              linkedin="https://www.linkedin.com/in/asesh-jana-14328b21b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             />
           </div>
         </section>
