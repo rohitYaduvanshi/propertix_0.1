@@ -3,9 +3,9 @@ import { FaLinkedin, FaGithub, FaTwitter, FaFingerprint } from "react-icons/fa";
 import profImg from "../assets/professor.png";
 import myImg from "../assets/my-photo.png";
 import m1 from "../assets/m1.png";
-import m2 from "../assets/m1.png";
+import m2 from "../assets/m2.png";
 import m3 from "../assets/m3.png";
-import m4 from "../assets/m1.png";
+import m4 from "../assets/m.png";
 
 const About = () => {
   return (
@@ -121,15 +121,15 @@ const About = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <MemberCard
-              name="Partner 1"
-              role="UI/UX Lead"
+              name="Snehomoy Ghosh"
+              role="UI/UX Guider"
               img={m1}
               speak="I believe a decentralized web should be as beautiful as it is secure. Design is the bridge to trust."
               github="#"
               linkedin="#"
             />
             <MemberCard
-              name="Partner 2"
+              name="Soumyadeep Nath"
               role="DevOps"
               img={m2}
               speak="Scaling the unscalable. My goal is to ensure Propertix remains fast and resilient under any load."
@@ -145,9 +145,9 @@ const About = () => {
               linkedin="#"
             />
             <MemberCard
-              name="Partner 4"
+              name="Asesh Jana"
               role="Security QA"
-              img={m4}
+              img={m}
               speak="Breaking things so our users don't have to. Security is not an option; it's our core foundation."
               github="#"
               linkedin="#"
