@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react"; // 1. Hooks इम्पोर्ट करें
-import emailjs from "@emailjs/browser"; // 2. Library इम्पोर्ट करें
+import React, { useRef, useState } from "react"; // 1. Hooks 
+import emailjs from "@emailjs/browser"; // 2. Library 
 import { FaLinkedin, FaGithub, FaTwitter, FaEnvelope, FaMapMarkerAlt, FaDiscord } from "react-icons/fa";
 
 const Contact = () => {
-  const form = useRef(); // फॉर्म को रेफरेंस देने के लिए
-  const [status, setStatus] = useState(""); // मैसेज भेजने का स्टेटस दिखाने के लिए
+  const form = useRef(); // reference to form
+  const [status, setStatus] = useState(""); 
 
   const sendEmail = (e) => {
     e.preventDefault();
@@ -12,15 +12,15 @@ const Contact = () => {
 
     emailjs
       .sendForm(
-        "YOUR_SERVICE_ID", // अपनी Service ID यहाँ डालें
-        "YOUR_TEMPLATE_ID", // अपनी Template ID यहाँ डालें
+        "service_zlnnqfw", 
+        "template_huxwic8", 
         form.current,
-        "YOUR_PUBLIC_KEY" // अपनी Public Key यहाँ डालें
+        "MunMXdR76LZsdl2d8" 
       )
       .then(
         () => {
           setStatus("Message Transmitted Successfully!");
-          form.current.reset(); // फॉर्म क्लियर कर दें
+          form.current.reset(); 
         },
         (error) => {
           setStatus("Failed to send. Please try again.");
@@ -74,7 +74,7 @@ const Contact = () => {
             <div className="bg-white/[0.02] border border-white/10 rounded-[40px] p-8 md:p-12 backdrop-blur-3xl relative">
               <div className="absolute top-6 right-8 text-[10px] font-mono text-zinc-700 tracking-[0.3em] uppercase italic">Secure_Transmission_v1.0</div>
               
-              {/* 3. Form में ref और onSubmit जोड़ें */}
+              {/* 3. */}
               <form ref={form} onSubmit={sendEmail} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <InputGroup label="Your Name" name="user_name" placeholder="Rohit" type="text" />
@@ -86,7 +86,7 @@ const Contact = () => {
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Message</label>
                   <textarea 
-                    name="message" // name वही रखें जो EmailJS टेम्पलेट में है
+                    name="message" 
                     required
                     rows="5" 
                     placeholder="Write your encrypted message here..."
@@ -101,7 +101,7 @@ const Contact = () => {
                   Transmit Message
                 </button>
 
-                {/* स्टेटस मैसेज */}
+                {/* Status Msg */}
                 {status && <p className="text-center text-[10px] font-mono tracking-widest uppercase text-cyan-400 mt-4 animate-pulse">{status}</p>}
               </form>
             </div>
