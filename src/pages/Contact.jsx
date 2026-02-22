@@ -25,7 +25,7 @@ const Contact = () => {
           {/* --- LEFT SIDE: CONTACT INFO --- */}
           <div className="lg:col-span-5 space-y-12">
             <div>
-              <h3 className="text-2xl font-black uppercase tracking-tight mb-6 italic">Connect with the Lab</h3>
+              <h3 className="text-2xl font-medium uppercase tracking-tight mb-6 italic">Connect with the Lab</h3>
               <p className="text-zinc-500 text-lg leading-relaxed max-w-sm">
                 Have a question about the protocol or want to partner with us? Our encrypted channels are open.
               </p>
@@ -35,11 +35,11 @@ const Contact = () => {
               <ContactMethod 
                 icon={<FaEnvelope className="text-cyan-500" />} 
                 label="Official Email" 
-                value="labs@propertix.onchain" 
+                value="propertixweb@gmail.com" 
               />
               <ContactMethod 
                 icon={<FaMapMarkerAlt className="text-cyan-500" />} 
-                label="HQ Location" 
+                label="BBIT" 
                 value="Decentralized / Remote" 
               />
               <ContactMethod 
