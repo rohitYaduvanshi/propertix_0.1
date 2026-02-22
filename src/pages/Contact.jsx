@@ -31,7 +31,7 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-8 font-medium">
               <ContactMethod 
                 icon={<FaEnvelope className="text-gray-500" />} 
                 label="Official Email" 
@@ -64,8 +64,8 @@ const Contact = () => {
               
               <form className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputGroup label="Your Name" placeholder="John Doe" type="text" />
-                  <InputGroup label="Email Address" placeholder="john@example.com" type="email" />
+                  <InputGroup label="Your Name" placeholder="Rohit" type="text" />
+                  <InputGroup label="Email Address" placeholder="rohit@example.com" type="email" />
                 </div>
                 
                 <InputGroup label="Subject" placeholder="Inquiry about Asset Minting" type="text" />
