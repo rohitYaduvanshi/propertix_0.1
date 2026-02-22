@@ -93,7 +93,7 @@ const Blockchain = () => {
   };
 
   return (
-    // 🌌 Added Background Wrapper to match Home.jsx
+    //  Added Background Wrapper to match Home.jsx
     <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
         {/* Subtle Glows */}
@@ -103,7 +103,7 @@ const Blockchain = () => {
         <div className="absolute top-[15%] left-[5%] w-72 h-80 border border-cyan-500/20 rounded-[40px] rotate-[-10deg]"></div>
         <div className="absolute top-[18%] left-[8%] w-72 h-80 border border-white/5 rounded-[40px] rotate-[-5deg]"></div>
       </div>
-      {/* 🔥 SHOCKING GRID BACKGROUND END */}
+      {/*  SHOCKING GRID BACKGROUND END */}
 
       <div className="w-full max-w-6xl mb-12 text-center lg:text-left relative z-10">
         <p className="text-[10px] font-black tracking-[0.4em] text-cyan-400 uppercase mb-2">Immutable Protocol</p>
@@ -134,11 +134,11 @@ const Blockchain = () => {
                   Transaction Secured
                 </p>
 
-                {/* 🛠️ Main Fix: Added 'w-full' and 'overflow-hidden' */}
+                {/*  Main Fix: Added 'w-full' and 'overflow-hidden' */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-black/60 p-3 rounded-2xl border border-white/5 w-full overflow-hidden">
 
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    {/* 🛠️ Text Fix: Added 'break-all' for mobile wrapping and 'truncate' for desktop */}
+                    {/*  Text Fix: Added 'break-all' for mobile wrapping and 'truncate' for desktop */}
                     <p className="text-[10px] font-mono text-zinc-400 break-all sm:truncate leading-relaxed">
                       {txHash}
                     </p>
@@ -233,7 +233,7 @@ const Blockchain = () => {
         </div>
       </div>
 
-      {/* ✅ CSS (Exactly same as Home.jsx for consistency) */}
+      {/*  CSS (Exactly same as Home.jsx for consistency) */}
       <style>{`
         @keyframes pulse-slow {
             0%, 100% { opacity: 0.3; transform: scale(1); }

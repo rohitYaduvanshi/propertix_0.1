@@ -8,7 +8,7 @@ import {
 
 const AuthContext = createContext(null);
 
-// ✅ Backend Endpoint
+//Backend Endpoint
 const API_BASE_URL = "https://propertixbackend-production.up.railway.app/api/auth";
 
 export const AuthProvider = ({ children }) => {
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- 🛡️ SECURE IDENTITY FETCH (Blockchain + Neon DB) ---
+  // --- SECURE IDENTITY FETCH (Blockchain + Neon DB) ---
   const fetchUserIdentity = async (account) => {
     try {
       if (!window.ethereum || !account) return null;
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- 🔄 PERSISTENT SESSION CHECK ---
+  //  PERSISTENT SESSION CHECK ---
   useEffect(() => {
     const initAuth = async () => {
       const isSessionActive = localStorage.getItem("loginSession");
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // --- 🔑 SECURE LOGIN WITH SIGNATURE ---
+  // ---SECURE LOGIN WITH SIGNATURE ---
   const loginWithRole = async (desiredRole) => {
     if (!window.ethereum) return alert("MetaMask required!"), false;
     setLoading(true);
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
       
-      // ✅ CRYPTOGRAPHIC PROOF (Sign Message)
+      // CRYPTOGRAPHIC PROOF (Sign Message)
       const message = `PROPERTIX PROTOCOL LOGIN\n\nVerify wallet owner for role: ${desiredRole}\nTimestamp: ${Date.now()}`;
       await window.ethereum.request({
         method: "personal_sign",

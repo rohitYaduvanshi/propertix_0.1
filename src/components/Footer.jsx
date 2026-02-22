@@ -121,7 +121,7 @@ const FooterLink = ({ to, children }) => (
   </li>
 );
 
-// 2. Updated SocialIcon to accept Icon Components ✅
+// 2. Updated SocialIcon to accept Icon Components 
 const SocialIcon = ({ label, icon, href }) => (
   <a 
     href={href}
@@ -129,7 +129,6 @@ const SocialIcon = ({ label, icon, href }) => (
     rel="noopener noreferrer"
     className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl text-zinc-400 hover:bg-cyan-500 hover:text-black hover:-translate-y-1 transition-all duration-500 group relative no-underline shadow-lg"
   >
-    {/* Icon यहाँ रेंडर होगा */}
     {icon}
     
     <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-white text-black text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap shadow-xl">

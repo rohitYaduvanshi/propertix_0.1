@@ -12,7 +12,7 @@ const AdminPanel = () => {
   const [contractBalance, setContractBalance] = useState("0");
   const [loading, setLoading] = useState(false);
   
-  // 🔥 NEW: Search State for Property Lineage (Ancestry Trace)
+  // NEW: Search State for Property Lineage (Ancestry Trace)
   const [searchId, setSearchId] = useState(""); 
 
   // --- FETCH DATA ---
@@ -40,7 +40,7 @@ const AdminPanel = () => {
     }
   };
 
-  // --- FETCH HISTORY LOGIC (WITH ACTUAL DEED NAMES) ---
+  //FETCH HISTORY LOGIC (WITH ACTUAL DEED NAMES) ---
   const fetchHistory = async (contract, provider) => {
       try {
           const soldFilter = contract.filters.PropertySold();
@@ -271,7 +271,7 @@ const AdminPanel = () => {
     </div>
   );
 
-  // --- 🔥 UPDATED: HISTORY TABLE UI WITH PROPERTY TRACER ---
+  //  UPDATED: HISTORY TABLE UI WITH PROPERTY TRACER ---
   const HistorySection = () => {
       // 🟢 Filter logic: if searchId exists, show only that property's history
       const filteredHistory = searchId 

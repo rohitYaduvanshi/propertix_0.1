@@ -15,14 +15,13 @@ const Login = () => {
       const success = await loginWithRole(role);
       
       if (success) {
-        // Role के हिसाब से सही डैशबोर्ड पर भेजें
+        // According to ROLE
         if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
             navigate("/admin");
         } else {
             navigate("/home");
         }
       } else {
-        // अगर success false है, तो इसका मतलब यूजर रजिस्टर्ड नहीं है
         alert("Login failed! This wallet is not registered in our database. Please create an account first.");
       }
     } catch (err) {

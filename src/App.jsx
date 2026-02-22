@@ -32,7 +32,7 @@ const UserGuard = ({ children }) => {
 const App = () => {
   const { isUserLoggedIn, isOfficer, loading } = useAuth(); 
 
-  // 🛑 FIX: Agar Loading hai, to Router ko mat chalne do
+  // FIX: Agar Loading hai, to Router ko mat chalne do
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white">
@@ -43,7 +43,7 @@ const App = () => {
   }
 
   return (
-    // ✅ FIX 1: Outer div ko `flex flex-col min-h-screen` diya gaya hai
+    // FIX 1: Outer div ko `flex flex-col min-h-screen` diya gaya hai
     <div className="flex flex-col min-h-screen bg-black text-white w-full">
       <Routes>
         
@@ -77,7 +77,7 @@ const App = () => {
   );
 };
 
-// ✅ FIX 2: Layout me 'flex-1' aur 'mt-auto' ka combination use kiya hai (Footer bottom me fix karne ke liye)
+// FIX 2: Layout me 'flex-1' aur 'mt-auto' ka combination use kiya hai (Footer bottom me fix karne ke liye)
 const Layout = ({ children }) => (
   <div className="flex flex-col flex-1 w-full min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
     <Navbar />

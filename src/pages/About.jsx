@@ -1,5 +1,5 @@
 import { FaLinkedin, FaGithub, FaTwitter, FaFingerprint } from "react-icons/fa";
-// --- 1. Images Import (प्रोफेशनल तरीका) ---
+// --- 1. Images Import 
 import profImg from "../assets/professor.png";
 import myImg from "../assets/my-photo.png";
 import m1 from "../assets/m1.png";

@@ -157,13 +157,13 @@ const Home = () => {
     ];
     return (
         <>
-            {/* ✅ HERO SECTION: Background updated to 'Shocking' Grid, but Layout is Original */}
+            {/* HERO SECTION: Background updated to 'Shocking' Grid, but Layout is Original */}
             <section className="relative flex flex-col items-center justify-center px-8 pt-5 pb-10 overflow-hidden min-h-screen bg-[#000000]">
 
-                {/* ✨ ULTRA-PREMIUM MESH BACKGROUND START */}
+                {/* ULTRA-PREMIUM MESH BACKGROUND START */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
-                    {/* 🎡 RESPONSIVE "HOW TO START" BUTTON */}
-                    {/* 🎡 ULTIMATE NOTION BUTTON FIX */}
+                    {/* RESPONSIVE "HOW TO START" BUTTON */}
+                    {/* ULTIMATE NOTION BUTTON FIX */}
                     <a
                         href="https://www.notion.so/Your-Adventure-on-Propertix-Starts-Here-30c04694264a80cfa04ad1119ea2bc0e"
                         target="_blank"
@@ -211,9 +211,9 @@ const Home = () => {
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,#020203_80%)]"></div>
 
                 </div>
-                {/* ✨ ULTRA-PREMIUM MESH BACKGROUND END */}
+                {/*ULTRA-PREMIUM MESH BACKGROUND END */}
 
-                {/* 🟢 MAIN CONTAINER: Everything centered vertically */}
+                {/*MAIN CONTAINER: Everything centered vertically */}
                 <div className="relative max-w-4xl w-full flex flex-col items-center text-center z-10 mb-16 px-4">
 
                     {/* 1. WALLET MESSAGE PORTION (Top) */}
@@ -373,7 +373,7 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* 🟢 MR. Gopu chand'S STORY SECTION (Starts after Digital Deed) */}
+                    {/*MR. Gopu chand'S STORY SECTION (Starts after Digital Deed) */}
                     <div className="relative w-full max-w-5xl mt-32 px-4 flex flex-col items-center">
 
                         {/* 1. THE TRADITIONAL STRUGGLE (India's Reality) */}
@@ -414,7 +414,7 @@ const Home = () => {
                                     <div className="absolute -bottom-10 w-48 h-5 bg-black/50 blur-2xl rounded-[100%] animate-shadow-sync"></div>
                                 </div>
 
-                                {/* 🛠️ CSS Animations (Add to your Style tag) */}
+                                {/* CSS Animations (Add to your Style tag) */}
                                 <style>{`
   @keyframes float-3d {
     0%, 100% { 
@@ -589,7 +589,7 @@ const Home = () => {
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[120%] bg-cyan-500/[0.03] blur-[160px] pointer-events-none rounded-full"></div>
                                 </div>
 
-                                {/* 🛠️ Updated Animations */}
+                                {/*Updated Animations */}
                                 <style>{`
   @keyframes float-odd {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -620,7 +620,7 @@ const Home = () => {
 
             </section>
 
-            {/* ✅ PROPERTY DETAILS MODAL (AAPKA ORIGINAL) */}
+            {/* PROPERTY DETAILS MODAL (AAPKA ORIGINAL) */}
             {showModal && searchedProperty && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="relative w-full max-w-4xl bg-[#0a0a0a] border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
