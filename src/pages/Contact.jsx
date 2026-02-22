@@ -33,7 +33,7 @@ const Contact = () => {
 
             <div className="space-y-8">
               <ContactMethod 
-                icon={<FaEnvelope className="text-cyan-500" />} 
+                icon={<FaEnvelope className="text-gray-500" />} 
                 label="Official Email" 
                 value="propertixweb@gmail.com" 
               />
