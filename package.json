@@ -13,6 +13,8 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@neondatabase/serverless": "^1.0.2",
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
     "@types/react-leaflet": "^2.8.3",
@@ -29,6 +31,7 @@
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet-geosearch": "^4.2.2",
     "leaflet.markercluster": "^1.5.3",
+    "lucide-react": "^0.575.0",
     "matter-attractors": "^0.1.6",
     "matter-js": "^0.20.0",
     "matter-wrap": "^0.2.0",
