@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -7,21 +6,22 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title PropertyRegistry_v3_Secure
- * @dev Identity Linking, Govt Verification, and Multi-stage Approval System.
+ * @title PropertyRegistry_v4_Final
+ * @dev 4-Role System: Identity Linking, Govt Verification, Surveyor Audit, and Registrar Minting.
  */
 contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     
     // ==========================================
-    // 🎭 ROLES (Adhikariyo ke Post)
+    // 🎭 ROLES (Permissions)
     // ==========================================
     bytes32 public constant GOVT_OFFICER_ROLE = keccak256("GOVT_OFFICER_ROLE");
     bytes32 public constant SURVEYOR_ROLE = keccak256("SURVEYOR_ROLE");
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
     // ==========================================
-    // 🔐 IDENTITY BINDING (Aadhaar/PAN to Wallet)
+    // 🔐 IDENTITY BINDING (Interlinking)
     // ==========================================
+    // Aadhaar/PAN hash linked to Wallet
     mapping(bytes32 => address) public identityToWallet; 
     mapping(address => bytes32) public walletToIdentity;
 
@@ -37,39 +37,26 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     uint256 private _tokenIds;                    
 
     // ==========================================
-    // 📢 EVENTS
-    // ==========================================
-    event RequestSubmitted(uint256 indexed requestId, address indexed user);
-    event StatusUpdated(uint256 indexed requestId, Status newStatus);
-    event PropertyMinted(uint256 indexed tokenId, address indexed owner);
-    event PropertySold(uint256 indexed tokenId, address from, address to, uint256 price, uint256 timestamp);
-    event PropertyRented(uint256 indexed tokenId, address tenant, uint256 duration, uint256 price, uint256 timestamp);
-    event PropertyStatusChanged(uint256 indexed tokenId, string newStatus, uint256 price);
-    event IdentityLinked(address indexed user, bytes32 indexed identityHash);
-
-    // ==========================================
-    // 📜 ENUMS
+    // 📜 ENUMS (Stages)
     // ==========================================
     enum Status { Pending, GovtVerified, Surveyed, Approved, Rejected }
     enum SaleStatus { NotForSale, ForSale, ForLease, Occupied } 
 
     // ==========================================
-    // 🏠 PROPERTY DATA
+    // 🏠 PROPERTY STRUCTURE
     // ==========================================
     struct PropertyRequest {
         uint256 id;              
         address requester;       
         string ownerName;        
-        string ipfsMetadata;     // Photo and Doc files (Surveyor sees this)
-        string identityRefId;    // Aadhaar/PAN (Only Govt/Registrar see this)
+        string ipfsMetadata;     
+        string identityRefId;    // Aadhaar Hash Reference
         string landArea;         
         string landLocation;     
-        string khasraNumber;     // Survey/Plot Number
-        
+        string khasraNumber;     
         Status status;           
         SaleStatus saleStatus;   
         uint256 price;           
-        
         uint256 leasePrice;      
         uint256 leaseDuration;   
         uint256 leaseEndTime;    
@@ -79,18 +66,29 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
 
     mapping(uint256 => PropertyRequest) public requests;
 
+    // ==========================================
+    // 📢 EVENTS
+    // ==========================================
+    event RequestSubmitted(uint256 indexed requestId, address indexed user);
+    event StatusUpdated(uint256 indexed requestId, Status newStatus);
+    event PropertyMinted(uint256 indexed tokenId, address indexed owner);
+    event PropertySold(uint256 indexed tokenId, address from, address to, uint256 price);
+    event PropertyRented(uint256 indexed tokenId, address tenant, uint256 duration, uint256 price, uint256 timestamp);
+    event PropertyStatusChanged(uint256 indexed tokenId, string newStatus, uint256 price);
+    event IdentityLinked(address indexed user, bytes32 indexed identityHash);
+
+    // ==========================================
+    // 🏗️ CONSTRUCTOR
+    // ==========================================
     constructor() ERC721("IndiaLandRecord", "ILR") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         users[msg.sender] = UserProfile("Super Admin", "admin@gov.in", "ADMIN", true);
     }
 
     // ==========================================
-    // 📝 1. SECURE REGISTRATION & LINKING
+    // 📝 1. USER REGISTRATION & IDENTITY LINKING
     // ==========================================
 
-    /**
-     * @dev User register hote waqt Aadhaar/PAN hash ko wallet se bind karega.
-     */
     function registerUser(
         string memory _name, 
         string memory _email, 
@@ -99,11 +97,10 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
         string memory _aadhaarPAN
     ) public {
         require(!users[msg.sender].isRegistered, "Wallet already linked!");
-
+        
         bytes32 idHash = keccak256(bytes(_aadhaarPAN));
-        require(identityToWallet[idHash] == address(0), "Identity already used by another wallet!");
+        require(identityToWallet[idHash] == address(0), "Identity already linked to another wallet!");
 
-        // Linking
         identityToWallet[idHash] = msg.sender;
         walletToIdentity[msg.sender] = idHash;
 
@@ -122,21 +119,20 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
         emit IdentityLinked(msg.sender, idHash);
     }
 
-    // Nayi Property Request
+    // Property Application
     function requestRegistration(
         string memory _ownerName, 
         string memory _ipfsMetadata, 
-        string memory _identityRefId, 
         string memory _landArea, 
         string memory _landLocation,
         string memory _khasraNumber
     ) public payable nonReentrant {
-        require(users[msg.sender].isRegistered, "Must link Identity first!");
-        require(msg.value >= registrationFee, "Fee too low");
+        require(users[msg.sender].isRegistered, "Must link Identity/Aadhaar first!");
+        require(msg.value >= registrationFee, "Insufficient Fee");
         
         _tokenIds++;
         requests[_tokenIds] = PropertyRequest(
-            _tokenIds, msg.sender, _ownerName, _ipfsMetadata, _identityRefId,
+            _tokenIds, msg.sender, _ownerName, _ipfsMetadata, "LINKED_ID",
             _landArea, _landLocation, _khasraNumber, Status.Pending, SaleStatus.NotForSale, 
             0, 0, 0, 0, address(0), block.timestamp
         );
@@ -145,24 +141,24 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     }
 
     // ==========================================
-    // ⚖️ 2. VERIFICATION PIPELINE
+    // ⚖️ 2. SEQUENTIAL VERIFICATION PIPELINE
     // ==========================================
 
-    // Phase 1: Govt Officer (Checks Aadhaar, PAN, Khasra)
+    // Phase 1: Govt Officer (Checks ID & Khasra)
     function verifyByGovt(uint256 _requestId) public onlyRole(GOVT_OFFICER_ROLE) {
-        require(requests[_requestId].status == Status.Pending, "Stage mismatch");
+        require(requests[_requestId].status == Status.Pending, "Stage Error");
         requests[_requestId].status = Status.GovtVerified;
         emit StatusUpdated(_requestId, Status.GovtVerified);
     }
 
     // Phase 2: Surveyor (Checks Photos & Location)
     function completeSurvey(uint256 _requestId) public onlyRole(SURVEYOR_ROLE) {
-        require(requests[_requestId].status == Status.GovtVerified, "Govt must verify first");
+        require(requests[_requestId].status == Status.GovtVerified, "Not verified by Govt yet");
         requests[_requestId].status = Status.Surveyed;
         emit StatusUpdated(_requestId, Status.Surveyed);
     }
 
-    // Phase 3: Registrar (Final Approval & NFT Minting)
+    // Phase 3: Registrar (Final Approval & NFT Mint)
     function approveAndMint(uint256 _requestId) public onlyRole(REGISTRAR_ROLE) {
         PropertyRequest storage req = requests[_requestId];
         require(req.status == Status.Surveyed, "Must be surveyed first");
@@ -180,14 +176,13 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     }
 
     // ==========================================
-    // 💰 3. MARKET LOGIC
+    // 💰 3. MARKETPLACE LOGIC
     // ==========================================
 
     function listPropertyForSale(uint256 _tokenId, uint256 _priceInWei) public {
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
-        require(requests[_tokenId].status == Status.Approved, "Not Fully Verified");
+        require(requests[_tokenId].status == Status.Approved, "Not Approved");
         
-        // Identity Challenge: Yahan frontend par test dena hoga
         requests[_tokenId].saleStatus = SaleStatus.ForSale;
         requests[_tokenId].price = _priceInWei;
         emit PropertyStatusChanged(_tokenId, "For Sale", _priceInWei);
@@ -197,9 +192,9 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
         PropertyRequest storage prop = requests[_tokenId];
         address seller = ownerOf(_tokenId);
 
-        require(users[msg.sender].isRegistered, "Buyer must have linked Identity!");
+        require(users[msg.sender].isRegistered, "Buyer must link Aadhaar!");
         require(prop.saleStatus == SaleStatus.ForSale, "Not for sale");
-        require(msg.value >= prop.price, "Insufficient Funds");
+        require(msg.value >= prop.price, "Low funds");
 
         payable(seller).transfer(msg.value);
         _transfer(seller, msg.sender, _tokenId); 
@@ -208,132 +203,53 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
         prop.requester = msg.sender; 
         prop.saleStatus = SaleStatus.NotForSale;
 
-        emit PropertySold(_tokenId, seller, msg.sender, msg.value, block.timestamp);
+        emit PropertySold(_tokenId, seller, msg.sender, msg.value);
     }
 
-    // ... (Old Lease Logic remains same but ensures status is Approved)
-        // ==========================================
-    // 🔑 3. LEASE LOGIC (Kiraye par Dena)
-    // ==========================================
-    
-    // ==========================================
-    // 🔑 3. LEASE LOGIC (Kiraye par Dena)
-    // ==========================================
-    
-    // Property ko Lease (Kiraye) ke liye Market me list karna
-    function listPropertyForLease(uint256 _tokenId, uint256 _leasePrice, uint256 _durationSeconds) public {
+    function listPropertyForLease(uint256 _tokenId, uint256 _leasePrice, uint256 _duration) public {
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
-        
-        // 🚨 Anti-Scam: Time over hone se pehle wapas lease pe nahi laga sakte
-        if (requests[_tokenId].saleStatus == SaleStatus.Occupied && requests[_tokenId].tenant != address(0)) {
-            require(block.timestamp > requests[_tokenId].leaseEndTime, "Cannot re-list: Tenant time not over!");
-        }
-        
         requests[_tokenId].saleStatus = SaleStatus.ForLease;
         requests[_tokenId].leasePrice = _leasePrice;
-        requests[_tokenId].leaseDuration = _durationSeconds;
-        requests[_tokenId].price = 0; 
-        
-        // Naye kirayedar ke aane ke liye purane kirayedar ka data hatao
-        requests[_tokenId].tenant = address(0);
-        requests[_tokenId].leaseEndTime = 0;
-        
+        requests[_tokenId].leaseDuration = _duration;
         emit PropertyStatusChanged(_tokenId, "For Lease", _leasePrice);
     }
 
-    // Koi user ETH dekar property kiraye par leta hai
     function rentProperty(uint256 _tokenId) public payable nonReentrant {
         PropertyRequest storage prop = requests[_tokenId];
-        address owner = ownerOf(_tokenId);
-
+        require(users[msg.sender].isRegistered, "Tenant must link Aadhaar!");
         require(prop.saleStatus == SaleStatus.ForLease, "Not for lease");
-        require(msg.value >= prop.leasePrice, "Insufficient Rent");
-        require(msg.sender != owner, "Owner cant rent");
+        require(msg.value >= prop.leasePrice, "Low Rent");
 
-        // Double check: Property khali hai ya nahi
-        if (prop.tenant != address(0)) {
-            require(block.timestamp > prop.leaseEndTime, "Property Occupied!");
-        }
-
-        // Paisa Malik ko bhejo
-        payable(owner).transfer(msg.value);
-
-        // Naye kirayedar ki entry aur time chalu
+        payable(ownerOf(_tokenId)).transfer(msg.value);
         prop.tenant = msg.sender;
         prop.leaseEndTime = block.timestamp + prop.leaseDuration;
         prop.saleStatus = SaleStatus.Occupied;
-
         emit PropertyRented(_tokenId, msg.sender, prop.leaseDuration, msg.value, block.timestamp);
     }
 
-    // Property ko market se hatana (Unlist/Private karna)
     function makePropertyPrivate(uint256 _tokenId) public {
-        require(ownerOf(_tokenId) == msg.sender, "Only Owner can unlist!");
-        
-        // 🚨 Anti-Scam: Jabardasti tenant ko evict nahi kar sakte
-        if (requests[_tokenId].saleStatus == SaleStatus.Occupied && requests[_tokenId].tenant != address(0)) {
-            require(block.timestamp > requests[_tokenId].leaseEndTime, "Cannot unlist: Lease is active!");
-        }
-
+        require(ownerOf(_tokenId) == msg.sender, "Not Owner");
         requests[_tokenId].saleStatus = SaleStatus.NotForSale;
-        requests[_tokenId].price = 0;
-        
-        // Pura Lease Data Zero (0) kar do
-        requests[_tokenId].leasePrice = 0;
-        requests[_tokenId].leaseDuration = 0;
-        requests[_tokenId].leaseEndTime = 0; 
-        requests[_tokenId].tenant = address(0);
-        
         emit PropertyStatusChanged(_tokenId, "Private", 0);
     }
 
     // ==========================================
-    // 🛠️ 4. ADMIN & VIEW FUNCTIONS (Data dekhne ke liye)
+    // 🛠️ 4. VIEW & ADMIN
     // ==========================================
-    
-    // Registration se aayi hui fees Government (Admin) nikal sakti hai
+
     function withdrawFunds() public onlyRole(DEFAULT_ADMIN_ROLE) {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    // Dashboard me sabhi properties dikhane ke liye
     function getAllRequests() public view returns (PropertyRequest[] memory) {
-        PropertyRequest[] memory allRequests = new PropertyRequest[](_tokenIds);
+        PropertyRequest[] memory all = new PropertyRequest[](_tokenIds);
         for (uint256 i = 1; i <= _tokenIds; i++) {
-            allRequests[i - 1] = requests[i];
+            all[i-1] = requests[i];
         }
-        return allRequests;
+        return all;
     }
 
-    // Kisi ek property ki details nikalne ke liye (Map par click karne pe)
-    function getPropertyDetails(uint256 _tokenId) public view returns (
-        uint256 id,
-        string memory ownerName,  
-        address ownerWallet,
-        string memory area,       
-        string memory location,
-        bool isRented
-    ) {
-        PropertyRequest memory req = requests[_tokenId];
-        address currentOwner = ownerOf(_tokenId); 
-        
-        return (
-            req.id,
-            req.ownerName, 
-            currentOwner,
-            req.landArea,
-            req.landLocation,
-            (req.tenant != address(0) && block.timestamp < req.leaseEndTime)
-        );
-    }
-
-    // ERC721 standard function
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721URIStorage, AccessControl)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
