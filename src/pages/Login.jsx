@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, User, HardHat, Scale, Gavel } from "lucide-react"; // Icons for better UI
+import { ShieldCheck, User, HardHat, Scale, Gavel } from "lucide-react"; // Icons based on your previous input
 
 const Login = () => {
   const { loginWithRole, loading } = useAuth();
@@ -15,20 +15,20 @@ const Login = () => {
       const success = await loginWithRole(role);
       
       if (success) {
-        // ✅ ROLE BASED REDIRECTION
+        // ✅ ROLE BASED REDIRECTION (Updated Logic)
         if (role === "GOVT_OFFICER") {
-            navigate("/government-portal"); // ✅ Government Officer का अलग पेज
+            navigate("/government-portal"); 
         } else if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
             navigate("/admin");
         } else {
             navigate("/home");
         }
       } else {
-        alert("Login failed! This wallet is not registered as " + role + ". Please check your role or register first.");
+        alert("Login failed! Identity not found for role: " + role);
       }
     } catch (err) {
       console.error("Login component error:", err);
-      alert("Connection Error: Please ensure MetaMask is connected to the Propertix Network.");
+      alert("An unexpected error occurred. Please check MetaMask connection.");
     } finally {
       setIsProcessing(false);
     }
@@ -38,7 +38,7 @@ const Login = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
       <div className="bg-[#0a0a0a] border border-white/10 p-10 rounded-[48px] w-full max-w-md shadow-3xl relative overflow-hidden">
         
-        {/* Background Decor */}
+        {/* Background Decor (Original) */}
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/5 blur-[100px] rounded-full"></div>
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/5 blur-[100px] rounded-full"></div>
         
@@ -65,20 +65,20 @@ const Login = () => {
                 <User className="text-zinc-700 group-hover:text-cyan-500 transition-colors w-5 h-5" />
             </button>
 
-            {/* 🏛️ GOVERNMENT OFFICER (PHASE 1) - Special Highlighted Button */}
+            {/* 🏛️ GOVERNMENT OFFICER (Phase 1) - Added based on your logic, same design style */}
             <button 
                 onClick={() => handleLogin("GOVT_OFFICER")}
                 disabled={loading || isProcessing}
                 className="w-full bg-blue-600/5 hover:bg-blue-600/10 border border-blue-500/20 hover:border-blue-500/50 p-6 rounded-[28px] flex items-center justify-between transition-all group active:scale-[0.98]"
             >
-                <div className="flex flex-col items-start text-left">
+                <div className="flex flex-col items-start">
                     <span className="text-xs font-black uppercase tracking-widest text-blue-400">Govt. Official</span>
                     <span className="text-[9px] text-blue-900 font-black mt-1 uppercase tracking-tight">Phase 1: Legal Identity Verify</span>
                 </div>
                 <Gavel className="text-blue-900 group-hover:text-blue-400 transition-colors w-5 h-5" />
             </button>
 
-            {/* 🛠️ SURVEYOR & REGISTRAR (PHASE 2 & 3) */}
+            {/* 🛠️ SURVEYOR & REGISTRAR (Original Layout) */}
             <div className="grid grid-cols-2 gap-3">
                 <button 
                     onClick={() => handleLogin("SURVEYOR")}
@@ -99,7 +99,7 @@ const Login = () => {
                 </button>
             </div>
 
-            {/* 👑 ADMIN ACCESS */}
+            {/* 👑 ADMIN ACCESS (Original) */}
             <button 
                 onClick={() => handleLogin("ADMIN")}
                 disabled={loading || isProcessing}
@@ -109,7 +109,7 @@ const Login = () => {
             </button>
         </div>
 
-        {/* PROCESSING STATUS */}
+        {/* PROCESSING STATUS (Original) */}
         {(isProcessing || loading) && (
             <div className="mt-8 space-y-3 text-center animate-in fade-in zoom-in duration-500">
                 <div className="flex justify-center gap-2">
@@ -123,7 +123,7 @@ const Login = () => {
             </div>
         )}
 
-        {/* FOOTER */}
+        {/* FOOTER (Original) */}
         <div className="mt-12 pt-8 border-t border-white/5 text-center">
             <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
                 Protocol not registered? 
