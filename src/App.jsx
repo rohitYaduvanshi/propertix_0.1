@@ -16,25 +16,21 @@ import GovernmentPortal from "./pages/GovernmentPortal.jsx";
 
 // --- 🛡️ GUARDS LOGIC ---
 
-// 1. Officer Guard: Check karega ki user Officer hai ya nahi
 const OfficerGuard = ({ children, requiredRole }) => {
   const { isUserLoggedIn, userRole } = useAuth();
   
   if (!isUserLoggedIn) return <Navigate to="/login" replace />;
   
-  // Agar specific role chahiye (jaise sirf Govt Officer)
   if (requiredRole && userRole !== requiredRole) {
     return <Navigate to="/admin" replace />; 
   }
 
-  // General Officer check (Surveyor/Registrar/Govt_Officer)
   const isAnyOfficer = ["GOVT_OFFICER", "SURVEYOR", "REGISTRAR", "ADMIN"].includes(userRole);
   if (!isAnyOfficer) return <Navigate to="/home" replace />;
   
   return children;
 };
 
-// 2. User Guard: Sirf aam Nagrik (Citizen/USER) ke liye
 const UserGuard = ({ children }) => {
   const { isUserLoggedIn, userRole } = useAuth();
   
@@ -48,14 +44,12 @@ const UserGuard = ({ children }) => {
 const App = () => {
   const { isUserLoggedIn, userRole, loading } = useAuth(); 
 
+  // ✅ FIX: Using your requested Loading UI
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
-        <div className="relative w-20 h-20">
-            <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-cyan-500 rounded-full animate-spin"></div>
-        </div>
-        <span className="mt-6 text-xs font-black uppercase tracking-[0.4em] animate-pulse">Establishing Secure Node...</span>
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-500"></div>
+        <span className="ml-4 text-xl font-bold">Connecting to Propertix...</span>
       </div>
     );
   }
@@ -79,11 +73,11 @@ const App = () => {
         <Route path="/about" element={<Layout><About /></Layout>} />
         <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
-        {/* 🏛️ GOVERNMENT OFFICER ROUTE (Phase 1 Only) */}
+        {/* 🏛️ GOVERNMENT OFFICER ROUTE */}
         <Route 
           path="/government-portal" 
           element={
-            <OfficerGuard requiredRole="GOVT_OFF_ROLE">
+            <OfficerGuard requiredRole="GOVT_OFFICER">
                <Layout><GovernmentPortal /></Layout>
             </OfficerGuard>
           } 
@@ -111,7 +105,6 @@ const Layout = ({ children }) => (
   <div className="flex flex-col flex-1 w-full min-h-screen bg-[#050505]">
     <Navbar />
     <main className="flex-1 flex flex-col w-full relative">
-        {/* Background Subtle Gradient */}
         <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
         <div className="relative z-10 flex-1">
             {children}
