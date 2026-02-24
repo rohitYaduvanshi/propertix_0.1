@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -6,24 +7,24 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title PropertyRegistry
- * @dev Ye contract Zameen (Land/Property) ko Blockchain (NFT) par register karne, 
- * kharidne-bechne (Buy/Sell) aur Kiraye (Lease) par dene ke liye banaya gaya hai.
+ * @title PropertyRegistry_v3_Secure
+ * @dev Identity Linking, Govt Verification, and Multi-stage Approval System.
  */
 contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     
     // ==========================================
     // 🎭 ROLES (Adhikariyo ke Post)
     // ==========================================
-    // REGISTRAR: Ye final approval deta hai aur NFT (Deed) generate karta hai.
-    bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
-    // SURVEYOR: Ye zameen ki physical verification (survey) karta hai.
+    bytes32 public constant GOVT_OFFICER_ROLE = keccak256("GOVT_OFFICER_ROLE");
     bytes32 public constant SURVEYOR_ROLE = keccak256("SURVEYOR_ROLE");
+    bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
     // ==========================================
-    // 👤 USER DATA (Profile Data)
+    // 🔐 IDENTITY BINDING (Aadhaar/PAN to Wallet)
     // ==========================================
-    // Ye struct user ki basic details save karta hai (Name, Email, Role)
+    mapping(bytes32 => address) public identityToWallet; 
+    mapping(address => bytes32) public walletToIdentity;
+
     struct UserProfile {
         string name;
         string email;
@@ -32,72 +33,84 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     }
     mapping(address => UserProfile) public users;
 
-    // ==========================================
-    // ⚙️ CONFIGURATION (Fees & Counters)
-    // ==========================================
-    uint256 public registrationFee = 0.001 ether; // Property register karne ki fees
-    uint256 private _tokenIds;                    // Total kitni property register hui hain
+    uint256 public registrationFee = 0.001 ether; 
+    uint256 private _tokenIds;                    
 
     // ==========================================
-    // 📢 EVENTS (Blockchain History ke liye)
+    // 📢 EVENTS
     // ==========================================
     event RequestSubmitted(uint256 indexed requestId, address indexed user);
+    event StatusUpdated(uint256 indexed requestId, Status newStatus);
     event PropertyMinted(uint256 indexed tokenId, address indexed owner);
     event PropertySold(uint256 indexed tokenId, address from, address to, uint256 price, uint256 timestamp);
     event PropertyRented(uint256 indexed tokenId, address tenant, uint256 duration, uint256 price, uint256 timestamp);
-    event LeaseEnded(uint256 indexed tokenId, address tenant, uint256 timestamp);
     event PropertyStatusChanged(uint256 indexed tokenId, string newStatus, uint256 price);
+    event IdentityLinked(address indexed user, bytes32 indexed identityHash);
 
     // ==========================================
-    // 📜 ENUMS (Property Status Options)
+    // 📜 ENUMS
     // ==========================================
-    enum Status { Pending, Surveyed, Approved, Rejected }
+    enum Status { Pending, GovtVerified, Surveyed, Approved, Rejected }
     enum SaleStatus { NotForSale, ForSale, ForLease, Occupied } 
 
     // ==========================================
-    // 🏠 PROPERTY DATA (Main Land Record)
+    // 🏠 PROPERTY DATA
     // ==========================================
-    // Ye struct har ek property ka pura kacha-chittha (record) save karta hai
     struct PropertyRequest {
-        uint256 id;              // Property ki Unique ID
-        address requester;       // Current Malik ka Wallet Address
-        string ownerName;        // Malik ka Naam (Jo Deed pe chhapega)
-        string ipfsMetadata;     // IPFS Link (Images, Docs)
-        string identityRefId;    // Aadhaar ya ID Proof
-        string landArea;         // Zameen ka size (e.g., 1200 Sq Ft)
-        string landLocation;     // Zameen ka Address
+        uint256 id;              
+        address requester;       
+        string ownerName;        
+        string ipfsMetadata;     // Photo and Doc files (Surveyor sees this)
+        string identityRefId;    // Aadhaar/PAN (Only Govt/Registrar see this)
+        string landArea;         
+        string landLocation;     
+        string khasraNumber;     // Survey/Plot Number
         
-        Status status;           // Govt Verification Status (Pending, Approved etc.)
-        SaleStatus saleStatus;   // Market Status (Sale pe hai, Lease pe hai ya Private)
-        uint256 price;           // Agar Sale pe hai to kitne ETH ki hai
+        Status status;           
+        SaleStatus saleStatus;   
+        uint256 price;           
         
-        // --- LEASE (Kiraye) KA DATA ---
-        uint256 leasePrice;      // Mahine ka kiraya
-        uint256 leaseDuration;   // Kitne time ke liye kiraye pe di hai (in seconds)
-        uint256 leaseEndTime;    // Kiraya kab khatam hoga (Timestamp)
-        address tenant;          // Kirayedar ka Wallet Address
-        uint256 requestTime;     // Property kab register hui thi
+        uint256 leasePrice;      
+        uint256 leaseDuration;   
+        uint256 leaseEndTime;    
+        address tenant;          
+        uint256 requestTime;     
     }
 
     mapping(uint256 => PropertyRequest) public requests;
 
-    // Contract Deploy hote hi deployer ko 'Super Admin' bana diya jayega
     constructor() ERC721("IndiaLandRecord", "ILR") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         users[msg.sender] = UserProfile("Super Admin", "admin@gov.in", "ADMIN", true);
     }
 
     // ==========================================
-    // 📝 1. REGISTRATION FUNCTIONS (Updated for Hybrid Model)
+    // 📝 1. SECURE REGISTRATION & LINKING
     // ==========================================
 
-// Naya User ya Officer register karne ke liye
-// Humne 'email' aur 'name' yahan se hata diya hai (Wo MongoDB sambhal lega)
-// Sirf 'Role' ko blockchain par lock karenge for Security.
-    function registerUser(string memory _role, string memory _secretCode) public {
-        require(!users[msg.sender].isRegistered, "Already registered on Blockchain!");
+    /**
+     * @dev User register hote waqt Aadhaar/PAN hash ko wallet se bind karega.
+     */
+    function registerUser(
+        string memory _name, 
+        string memory _email, 
+        string memory _role, 
+        string memory _secretCode, 
+        string memory _aadhaarPAN
+    ) public {
+        require(!users[msg.sender].isRegistered, "Wallet already linked!");
 
-        if (keccak256(bytes(_role)) == keccak256(bytes("SURVEYOR"))) {
+        bytes32 idHash = keccak256(bytes(_aadhaarPAN));
+        require(identityToWallet[idHash] == address(0), "Identity already used by another wallet!");
+
+        // Linking
+        identityToWallet[idHash] = msg.sender;
+        walletToIdentity[msg.sender] = idHash;
+
+        if (keccak256(bytes(_role)) == keccak256(bytes("GOVT_OFFICER"))) {
+            require(keccak256(bytes(_secretCode)) == keccak256(bytes("GOVT123")), "Invalid Code");
+            _grantRole(GOVT_OFFICER_ROLE, msg.sender);
+        } else if (keccak256(bytes(_role)) == keccak256(bytes("SURVEYOR"))) {
             require(keccak256(bytes(_secretCode)) == keccak256(bytes("SURVEY123")), "Invalid Code");
             _grantRole(SURVEYOR_ROLE, msg.sender);
         } else if (keccak256(bytes(_role)) == keccak256(bytes("REGISTRAR"))) {
@@ -105,107 +118,104 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
             _grantRole(REGISTRAR_ROLE, msg.sender);
         }
     
-        // Sirf Role aur Registration status lock kar rahe hain
-        users[msg.sender].role = _role;
-        users[msg.sender].isRegistered = true;
+        users[msg.sender] = UserProfile(_name, _email, _role, true);
+        emit IdentityLinked(msg.sender, idHash);
     }
 
-    // Nayi Property Register karne ki Application dalne ke liye
+    // Nayi Property Request
     function requestRegistration(
         string memory _ownerName, 
         string memory _ipfsMetadata, 
         string memory _identityRefId, 
         string memory _landArea, 
-        string memory _landLocation
+        string memory _landLocation,
+        string memory _khasraNumber
     ) public payable nonReentrant {
+        require(users[msg.sender].isRegistered, "Must link Identity first!");
         require(msg.value >= registrationFee, "Fee too low");
-        _tokenIds++;
         
+        _tokenIds++;
         requests[_tokenIds] = PropertyRequest(
             _tokenIds, msg.sender, _ownerName, _ipfsMetadata, _identityRefId,
-            _landArea, _landLocation, Status.Pending, SaleStatus.NotForSale, 
+            _landArea, _landLocation, _khasraNumber, Status.Pending, SaleStatus.NotForSale, 
             0, 0, 0, 0, address(0), block.timestamp
         );
         
         emit RequestSubmitted(_tokenIds, msg.sender);
     }
 
-    // Surveyor property ko verify (Surveyed) mark karta hai
-    function completeSurvey(uint256 _requestId) public onlyRole(SURVEYOR_ROLE) {
-        requests[_requestId].status = Status.Surveyed;
+    // ==========================================
+    // ⚖️ 2. VERIFICATION PIPELINE
+    // ==========================================
+
+    // Phase 1: Govt Officer (Checks Aadhaar, PAN, Khasra)
+    function verifyByGovt(uint256 _requestId) public onlyRole(GOVT_OFFICER_ROLE) {
+        require(requests[_requestId].status == Status.Pending, "Stage mismatch");
+        requests[_requestId].status = Status.GovtVerified;
+        emit StatusUpdated(_requestId, Status.GovtVerified);
     }
 
-    // Registrar final approval deta hai aur actual NFT (Deed) generate karta hai
+    // Phase 2: Surveyor (Checks Photos & Location)
+    function completeSurvey(uint256 _requestId) public onlyRole(SURVEYOR_ROLE) {
+        require(requests[_requestId].status == Status.GovtVerified, "Govt must verify first");
+        requests[_requestId].status = Status.Surveyed;
+        emit StatusUpdated(_requestId, Status.Surveyed);
+    }
+
+    // Phase 3: Registrar (Final Approval & NFT Minting)
     function approveAndMint(uint256 _requestId) public onlyRole(REGISTRAR_ROLE) {
         PropertyRequest storage req = requests[_requestId];
+        require(req.status == Status.Surveyed, "Must be surveyed first");
+        
         req.status = Status.Approved;
         _safeMint(req.requester, req.id);
         _setTokenURI(req.id, req.ipfsMetadata);
         emit PropertyMinted(req.id, req.requester);
     }
 
-    // Agar property me koi jhol hai to Registrar reject kar sakta hai
-    function rejectRequest(uint256 _requestId) public onlyRole(REGISTRAR_ROLE) {
-        require(requests[_requestId].status != Status.Approved, "Cannot reject approved property");
+    function rejectRequest(uint256 _requestId) public {
+        require(hasRole(GOVT_OFFICER_ROLE, msg.sender) || hasRole(REGISTRAR_ROLE, msg.sender), "Not authorized");
         requests[_requestId].status = Status.Rejected;
+        emit StatusUpdated(_requestId, Status.Rejected);
     }
 
     // ==========================================
-    // 💰 2. SALE LOGIC (Kharidna & Bechna)
+    // 💰 3. MARKET LOGIC
     // ==========================================
-    
-    // Property ko bechne (Sale) ke liye Market me list karna
+
     function listPropertyForSale(uint256 _tokenId, uint256 _priceInWei) public {
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
-        require(requests[_tokenId].status == Status.Approved, "Not Approved");
+        require(requests[_tokenId].status == Status.Approved, "Not Fully Verified");
         
-        // 🚨 Anti-Scam: Agar kirayedar reh raha hai to time khatam hone se pehle sale pe nahi laga sakte
-        if (requests[_tokenId].saleStatus == SaleStatus.Occupied && requests[_tokenId].tenant != address(0)) {
-            require(block.timestamp > requests[_tokenId].leaseEndTime, "Cannot list for sale: Tenant time not over!");
-        }
-
+        // Identity Challenge: Yahan frontend par test dena hoga
         requests[_tokenId].saleStatus = SaleStatus.ForSale;
         requests[_tokenId].price = _priceInWei;
-        
-        // Purana lease (kiraye) ka data mita (wipe) rahe hain
-        requests[_tokenId].leasePrice = 0;
-        requests[_tokenId].leaseDuration = 0;
-        requests[_tokenId].leaseEndTime = 0;
-        requests[_tokenId].tenant = address(0);
-        
         emit PropertyStatusChanged(_tokenId, "For Sale", _priceInWei);
     }
 
-    // Koi dusra user ETH dekar property kharidta hai
     function buyProperty(uint256 _tokenId, string memory _newOwnerName) public payable nonReentrant {
         PropertyRequest storage prop = requests[_tokenId];
         address seller = ownerOf(_tokenId);
 
+        require(users[msg.sender].isRegistered, "Buyer must have linked Identity!");
         require(prop.saleStatus == SaleStatus.ForSale, "Not for sale");
-        require(msg.value >= prop.price, "Low Balance");
-        require(msg.sender != seller, "Cannot buy own");
+        require(msg.value >= prop.price, "Insufficient Funds");
 
-        // 1. Pura paisa purane malik ko transfer karo
         payable(seller).transfer(msg.value);
-
-        // 2. NFT (Property) naye malik ko transfer karo
         _transfer(seller, msg.sender, _tokenId); 
 
-        // 3. Naye Malik ka naam Property record me daal do
         prop.ownerName = _newOwnerName; 
         prop.requester = msg.sender; 
-        
-        // 4. Market se hata do (Not For Sale) aur sab kuch Reset kar do
         prop.saleStatus = SaleStatus.NotForSale;
-        prop.price = 0;
-        prop.leasePrice = 0;     
-        prop.leaseDuration = 0;  
-        prop.leaseEndTime = 0;
-        prop.tenant = address(0);
 
         emit PropertySold(_tokenId, seller, msg.sender, msg.value, block.timestamp);
     }
 
+    // ... (Old Lease Logic remains same but ensures status is Approved)
+        // ==========================================
+    // 🔑 3. LEASE LOGIC (Kiraye par Dena)
+    // ==========================================
+    
     // ==========================================
     // 🔑 3. LEASE LOGIC (Kiraye par Dena)
     // ==========================================

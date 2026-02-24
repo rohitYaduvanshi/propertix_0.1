@@ -5,15 +5,12 @@ import { PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI } from "../blockchain/
 import { useAuth } from "../context/AuthContext";
 import * as htmlToImage from "html-to-image";
 import nftTemplate from "../assets/NFT_Ownership_certificate.png";
+import { ShieldCheck, Clock, CheckCircle2, XCircle, Download, MapPin, Tag, Key, Loader2 } from "lucide-react";
 
-
-
-// LEASE TIMER COMPONENT
-
+// --- LEASE TIMER COMPONENT ---
 const LeaseTimer = ({ leaseEnd, tenant, userRole }) => {
     const [timeLeft, setTimeLeft] = useState("");
     const [isOverdue, setIsOverdue] = useState(false);
-    const [overdueDays, setOverdueDays] = useState(0);
 
     useEffect(() => {
         const calculateTime = () => {
@@ -21,54 +18,31 @@ const LeaseTimer = ({ leaseEnd, tenant, userRole }) => {
             if (now > leaseEnd) {
                 setIsOverdue(true);
                 const daysLate = Math.ceil((now - leaseEnd) / (1000 * 60 * 60 * 24));
-                setOverdueDays(daysLate);
                 setTimeLeft(`Overstayed by ${daysLate} Day(s)`);
             } else {
                 setIsOverdue(false);
                 const diff = leaseEnd - now;
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const mins = Math.floor((diff / (1000 * 60)) % 60);
-                setTimeLeft(`${days}d ${hours}h ${mins}m remaining`);
+                setTimeLeft(`${days}d ${hours}h remaining`);
             }
         };
-
         calculateTime();
         const interval = setInterval(calculateTime, 60000);
         return () => clearInterval(interval);
     }, [leaseEnd]);
 
-
     return (
-        <div className="mt-4 p-3 rounded-xl border bg-black/40 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-            <p className="text-[10px] text-gray-400 uppercase font-bold mb-1 tracking-wider">
-                {userRole === "TENANT" ? "Your Lease Status" : "Tenant Wallet"}
-            </p>
-            {userRole === "OWNER" && (
-                <p className="text-xs text-indigo-400 font-mono mb-3">{tenant.slice(0,8)}...{tenant.slice(-6)}</p>
-            )}
-           
-            <div className={`px-3 py-2 rounded-lg text-xs font-bold border flex flex-col gap-1 ${
-                isOverdue
-                ? 'bg-red-500/10 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50'
-            }`}>
-                <div className="flex items-center gap-2">
-                    <span className="text-lg">{isOverdue ? '⚠️' : '⏳'}</span>
-                    <span>{timeLeft}</span>
-                </div>
-                {isOverdue && (
-                    <span className="text-[9px] text-red-300 bg-red-500/20 px-2 py-1 rounded w-fit mt-1">
-                        🚨 PENALTY ACTIVE: +10% Rent Charge / Day
-                    </span>
-                )}
+        <div className="mt-4 p-4 rounded-2xl border bg-black/40 backdrop-blur-md relative overflow-hidden">
+            <div className={`absolute top-0 left-0 w-1 h-full ${isOverdue ? 'bg-red-500' : 'bg-cyan-500'}`}></div>
+            <p className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Lease Intelligence</p>
+            <div className="flex items-center justify-between">
+                <span className={`text-[10px] font-bold ${isOverdue ? 'text-red-400' : 'text-cyan-400'}`}>{timeLeft}</span>
+                {isOverdue && <span className="text-[8px] bg-red-500 text-white px-2 py-0.5 rounded-full animate-pulse">PENALTY ACTIVE</span>}
             </div>
         </div>
     );
 };
-
-
 
 const OwnerDashboard = () => {
     const [myProperties, setMyProperties] = useState([]);
@@ -82,7 +56,6 @@ const OwnerDashboard = () => {
     const [leaseTimeUnit, setLeaseTimeUnit] = useState("months");
     const { walletAddress, isWalletConnected } = useAuth();
 
-    // --- FETCH DATA ---
     const loadMyProperties = async () => {
         try {
             if (!isWalletConnected || !walletAddress) return;
@@ -91,7 +64,6 @@ const OwnerDashboard = () => {
             const data = await contract.getAllRequests();
             const currentTimestamp = Math.floor(Date.now() / 1000);
 
-            // Filter property if user is OWNER or ACTIVE TENANT
             const filtered = data.filter((item) => {
                 const isOwner = item.requester.toLowerCase() === walletAddress.toLowerCase();
                 const isTenant = item.tenant.toLowerCase() === walletAddress.toLowerCase() && Number(item.leaseEndTime) > currentTimestamp;
@@ -99,78 +71,35 @@ const OwnerDashboard = () => {
             });
 
             const formatted = await Promise.all(filtered.map(async (item) => {
-                let meta = { name: "Unnamed Property", image: null, attributes: [] };
-                if (item.ipfsMetadata && item.ipfsMetadata.startsWith("http")) {
-                    try {
-                        const response = await fetch(item.ipfsMetadata);
-                        const json = await response.json();
-                        meta = { ...meta, ...json };
-                    } catch (err) { console.warn("Error fetching IPFS", err); }
-                }
-                let currentOwnerName = item.ownerName || meta.name;
-                if (!item.ownerName) {
-                    try {
-                        const userProfile = await contract.users(item.requester);
-                        if (userProfile && userProfile[0]) currentOwnerName = userProfile[0];
-                        else if (userProfile && userProfile.name) currentOwnerName = userProfile.name;
-                    } catch (err) {}
-                }
+                let meta = { attributes: [] };
+                try {
+                    const response = await fetch(item.ipfsMetadata);
+                    meta = await response.json();
+                } catch (err) { console.warn("IPFS Fetch Failed"); }
 
-                const getAttr = (key) => meta.attributes?.find(a => a.trait_type === key)?.value || "N/A";
-                let safePrice = "0"; if (item.price) try { safePrice = formatEther(item.price); } catch (e) {}
-                let safeLeasePrice = "0"; if (item.leasePrice) try { safeLeasePrice = formatEther(item.leasePrice); } catch (e) {}
-                const isOwner = item.requester.toLowerCase() === walletAddress.toLowerCase();
-                const registrationDate = new Date(Number(item.requestTime) * 1000).toLocaleDateString('en-IN', {
-                    day: '2-digit', month: 'short', year: 'numeric'
-                });
                 return {
                     id: Number(item.id),
-                    name: currentOwnerName,
-                    address: getAttr("Address"),
-                    type: getAttr("Type"),
-                    status: Number(item.status),
+                    name: item.ownerName,
+                    address: item.landLocation,
+                    khasra: item.khasraNumber, 
+                    status: Number(item.status), // 0:Pending, 1:Govt, 2:Surveyed, 3:Approved
                     saleStatus: Number(item.saleStatus),
-                    salePrice: safePrice,
-                    leasePrice: safeLeasePrice,
+                    salePrice: formatEther(item.price || 0),
+                    leasePrice: formatEther(item.leasePrice || 0),
                     leaseEnd: Number(item.leaseEndTime) * 1000,
                     tenant: item.tenant,
-                    area: getAttr("Area"),
-                    ipfsHash: item.ipfsMetadata,
+                    area: item.landArea,
                     displayImage: meta.image,
-                    date: registrationDate,
-                    userRole: isOwner ? "OWNER" : "TENANT"
+                    date: new Date(Number(item.requestTime) * 1000).toLocaleDateString('en-IN'),
+                    userRole: item.requester.toLowerCase() === walletAddress.toLowerCase() ? "OWNER" : "TENANT"
                 };
             }));
             setMyProperties(formatted.reverse());
-            setLoading(false);
-        } catch (error) {
-            console.error("Loading Error:", error);
-            setLoading(false);
-        }
+        } catch (error) { console.error(error); }
+        finally { setLoading(false); }
     };
 
-
-
-    useEffect(() => {
-        if (isWalletConnected) loadMyProperties();
-    }, [isWalletConnected, walletAddress]);
-
-    // --- ACTIONS ---
-    const openActionModal = (id, type) => {
-        if (type === "PRIVATE") {
-            if (window.confirm("Are you sure you want to Unlist this property?")) executeAction(id, type);
-            return;
-        }
-        setSelectedPropertyId(id);
-        setModalType(type);
-        setInputPrice("");
-        setLeaseTimeVal("");
-        setLeaseTimeUnit("months");
-        setShowModal(true);
-
-    };
-
-
+    useEffect(() => { if (isWalletConnected) loadMyProperties(); }, [isWalletConnected, walletAddress]);
 
     const executeAction = async (id = selectedPropertyId, type = modalType) => {
         try {
@@ -178,370 +107,198 @@ const OwnerDashboard = () => {
             const provider = new BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
+            
             let tx;
-            if (type === "SALE") {
-                if (!inputPrice || isNaN(inputPrice)) { alert("Enter valid ETH price"); setActionLoading(false); return; }
-                tx = await contract.listPropertyForSale(id, parseEther(inputPrice));
-            }
+            if (type === "SALE") tx = await contract.listPropertyForSale(id, parseEther(inputPrice));
             else if (type === "LEASE") {
-                if (!inputPrice || isNaN(inputPrice)) { alert("Enter valid Rent Budget"); setActionLoading(false); return; }
-                if (!leaseTimeVal || isNaN(leaseTimeVal)) { alert("Enter valid Duration"); setActionLoading(false); return; }
-                let durationInSeconds = leaseTimeUnit === "days"
-                    ? parseInt(leaseTimeVal) * 24 * 60 * 60
-                    : parseInt(leaseTimeVal) * 30 * 24 * 60 * 60;
-                tx = await contract.listPropertyForLease(id, parseEther(inputPrice), durationInSeconds);
+                let dur = leaseTimeUnit === "days" ? parseInt(leaseTimeVal)*86400 : parseInt(leaseTimeVal)*2592000;
+                tx = await contract.listPropertyForLease(id, parseEther(inputPrice), dur);
             }
-            else if (type === "PRIVATE") {
-                tx = await contract.makePropertyPrivate(id);
-            }
+            else if (type === "PRIVATE") tx = await contract.makePropertyPrivate(id);
+
             await tx.wait();
-            alert("✅ Success! Status updated.");
+            alert("Protocol Updated!");
             setShowModal(false);
             loadMyProperties();
-        } catch (error) {
-            console.error(error);
-            alert("❌ Failed: " + (error.reason || error.message));
-        }
-        setActionLoading(false);
+        } catch (error) { alert("Failed: " + (error.reason || error.message)); }
+        finally { setActionLoading(false); }
     };
-
-
-
-    // --- DOWNLOAD DEED ---
 
     const downloadNFTCard = async (elementId, propertyName) => {
-        try {
-            const input = document.getElementById(elementId);
-            if(!input) return;
-            document.body.style.cursor = "wait";
-            const dataUrl = await htmlToImage.toPng(input, { quality: 1, pixelRatio: 2, useCORS: true });
-            const link = document.createElement("a");
-            link.href = dataUrl;
-            link.download = `${propertyName.replace(/\s+/g, '_')}_NFT_Deed.png`;
-            link.click();
-        } catch (error) {
-            console.error("Download Error:", error);
-            alert("Failed to download image.");
-        } finally {
-            document.body.style.cursor = "default";
-        }
-
+        const input = document.getElementById(elementId);
+        if(!input) return;
+        const dataUrl = await htmlToImage.toPng(input, { pixelRatio: 2 });
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = `${propertyName}_Deed.png`;
+        link.click();
     };
 
-    const getStatusLabel = (status) => ["⏳ Pending", "📝 Surveyed", "✅ Verified", "❌ Rejected"][status] || "Unknown";
-    const getStatusColor = (status) => ["bg-yellow-500", "bg-blue-500", "bg-emerald-500", "bg-red-500"][status] || "bg-gray-500";
-    if (!isWalletConnected) return <div className="min-h-screen bg-black text-white flex justify-center items-center"><h2>Connect Wallet</h2></div>;
-    if (loading) return <div className="min-h-screen bg-black text-white flex justify-center items-center"><div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div></div>;
+    const getStatusInfo = (status) => {
+        const mapping = [
+            { label: "Phase 1: Govt Review", color: "text-amber-500", bg: "bg-amber-500/10", icon: <Clock size={12}/> },
+            { label: "Phase 2: Surveyor Assigned", color: "text-blue-400", bg: "bg-blue-500/10", icon: <ShieldCheck size={12}/> },
+            { label: "Phase 3: Final Minting", color: "text-purple-400", bg: "bg-purple-500/10", icon: <MapPin size={12}/> },
+            { label: "On-Chain Verified", color: "text-emerald-400", bg: "bg-emerald-500/10", icon: <CheckCircle2 size={12}/> },
+            { label: "Rejected", color: "text-red-500", bg: "bg-red-500/10", icon: <XCircle size={12}/> }
+        ];
+        return mapping[status] || mapping[0];
+    };
+
+    const openActionModal = (id, type) => {
+        if (type === "PRIVATE") {
+            if (window.confirm("Unlist this property from market?")) executeAction(id, type);
+            return;
+        }
+        setSelectedPropertyId(id);
+        setModalType(type);
+        setInputPrice("");
+        setLeaseTimeVal("");
+        setShowModal(true);
+    };
+
+    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-cyan-500" size={40}/></div>;
+
     return (
-        <div className="min-h-screen bg-black text-white pt-8 pb-12 px-4 relative">
-            <div className="max-w-7xl mx-auto relative z-10">
-                <div className="mb-10 pb-6 border-b border-white/10 flex justify-between items-end">
+        <div className="min-h-screen bg-black text-white pt-24 pb-12 px-6 font-sans">
+            <div className="max-w-7xl mx-auto">
+                <header className="mb-16 flex justify-between items-end border-b border-white/5 pb-10">
                     <div>
-                        <h1 className="text-4xl font-bold text-cyan-400 mb-2">My Assets Dashboard</h1>
-                        <p className="text-gray-400">Manage your owned properties and active leases.</p>
+                        <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em] italic mb-2">Authenticated_Ledger_v3</p>
+                        <h1 className="text-5xl font-black italic uppercase tracking-tighter">My Assets</h1>
                     </div>
-                    <div className="bg-zinc-900 px-4 py-2 rounded-lg font-mono text-cyan-400 text-sm border border-zinc-700">
-                        {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    <div className="bg-zinc-900 border border-white/10 px-6 py-3 rounded-2xl font-mono text-xs text-zinc-500 tracking-widest">
+                        SIGNER: {walletAddress.slice(0, 12)}...
                     </div>
-                </div>
+                </header>
+
                 {myProperties.length === 0 ? (
-                    <div className="text-center py-20 bg-zinc-900/50 rounded-3xl border border-dashed border-zinc-700">
-                        <h3 className="text-2xl font-bold mb-2">No Properties Found</h3>
-                        <p className="text-gray-400 mb-4">You don't own or lease any properties yet.</p>
-                        <Link to="/blockchain" className="text-cyan-400 hover:underline">Register New Property</Link>
+                    <div className="py-40 text-center border-2 border-dashed border-zinc-800 rounded-[50px] bg-zinc-900/10">
+                        <h2 className="text-xl font-black uppercase text-zinc-600 tracking-widest">No Digital Deeds Detected</h2>
+                        <Link to="/register-asset" className="mt-6 inline-block bg-white text-black px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-500 transition-all">Register New Land</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {myProperties.map((prop) => (
-                            <div key={prop.id} className={`bg-zinc-900 border rounded-3xl overflow-hidden flex flex-col relative shadow-2xl transition-all ${
-                                prop.userRole === "TENANT" ? 'border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.15)]' :
-                                prop.saleStatus === 1 ? 'border-green-500/50' :
-                                prop.saleStatus === 2 ? 'border-indigo-500/50' :
-                                prop.saleStatus === 3 ? 'border-rose-500/50' : 'border-white/5'
-                            }`}>
-
-                                {/* --- PROPERTY IMAGE --- */}
-
-                                <div className="h-48 bg-zinc-800 relative shrink-0">
-                                    {prop.displayImage ? (
-                                        <img src={prop.displayImage} alt={prop.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-4xl">🏠</div>
-                                    )}
-                                
-                                    <div className="absolute top-4 left-4 flex flex-col gap-2">
-
-                                        {/* TENANT BADGE */}
-
-                                        {prop.userRole === "TENANT" ? (
-
-                                            <div className="px-3 py-1 rounded-lg text-[10px] font-bold uppercase bg-purple-600 text-white shadow-lg w-fit">
-
-                                                🔑 RENTED BY YOU
-
-                                            </div>
-
-                                        ) : (
-
-                                            <div className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase text-white shadow-lg w-fit ${getStatusColor(prop.status)}`}>
-
-                                                {getStatusLabel(prop.status)}
-
-                                            </div>
-
-                                        )}
-
-                                       
-
-                                        {/* SALE / LEASE BADGES (Only for Owner to see status) */}
-
-                                        {prop.userRole === "OWNER" && prop.saleStatus === 1 && <div className="px-3 py-1 rounded-lg text-[10px] font-bold uppercase bg-green-500 text-white shadow-lg w-fit">🏷️ Listed For Sale ({prop.salePrice} ETH)</div>}
-
-                                        {prop.userRole === "OWNER" && prop.saleStatus === 2 && <div className="px-3 py-1 rounded-lg text-[10px] font-bold uppercase bg-indigo-500 text-white shadow-lg w-fit">📝 Listed For Lease ({prop.leasePrice} ETH/mo)</div>}
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {myProperties.map((prop) => {
+                            const statusInfo = getStatusInfo(prop.status);
+                            return (
+                                <div key={prop.id} className={`group bg-[#0a0a0a] border ${prop.status === 3 ? 'border-white/10' : 'border-cyan-500/20'} rounded-[40px] p-2 transition-all hover:translate-y-[-5px]`}>
+                                    <div className="relative h-64 rounded-[35px] overflow-hidden mb-6">
+                                        <img src={prop.displayImage || "https://images.unsplash.com/photo-1500382017468-9049fed747ef"} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="property" />
+                                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                            <span className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-2xl backdrop-blur-md ${statusInfo.bg} ${statusInfo.color}`}>
+                                                {statusInfo.icon} {statusInfo.label}
+                                            </span>
+                                            {prop.saleStatus === 1 && <span className="bg-emerald-500 text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest italic shadow-xl">Selling @ {prop.salePrice} ETH</span>}
+                                        </div>
                                     </div>
 
-                                </div>
-
-
-
-                                {/* --- DETAILS SECTION --- */}
-
-                                <div className="p-6 flex-1 flex flex-col">
-
-                                    <h3 className="text-xl font-bold text-white mb-1 truncate">{prop.name}</h3>
-
-                                    <p className="text-gray-400 text-sm mb-4 truncate">📍 {prop.address}</p>
-
-
-
-                                    {/*UNVERIFIED VIEW (Pending) */}
-
-                                    {prop.status !== 2 ? (
-
-                                        <div className="mb-6 flex-1 flex flex-col items-center justify-center p-6 bg-zinc-800/30 border border-white/5 rounded-xl relative overflow-hidden">
-
-                                            <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(234,179,8,0.15)] animate-pulse">
-
-                                                <span className="text-3xl">⏳</span>
-
-                                            </div>
-
-                                            <h4 className="text-yellow-500 font-bold text-lg mb-2 tracking-wide text-center">Verification Pending</h4>
-
-                                            <p className="text-gray-400 text-xs text-center leading-relaxed">
-
-                                                Your property documents are currently being reviewed by surveyors.
-
-                                            </p>
-
+                                    <div className="px-6 pb-8 space-y-4">
+                                        <div>
+                                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white truncate">{prop.name}</h3>
+                                            <p className="text-[10px] font-bold text-zinc-600 uppercase mt-1 flex items-center gap-1 truncate"><MapPin size={10}/> {prop.address}</p>
                                         </div>
 
-                                    ) : (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-zinc-900/50 p-3 rounded-2xl border border-white/5 text-center">
+                                                <p className="text-[8px] font-black text-zinc-500 uppercase mb-1">Khasra</p>
+                                                <p className="text-xs font-mono font-bold text-cyan-500">{prop.khasra}</p>
+                                            </div>
+                                            <div className="bg-zinc-900/50 p-3 rounded-2xl border border-white/5 text-center">
+                                                <p className="text-[8px] font-black text-zinc-500 uppercase mb-1">Area</p>
+                                                <p className="text-xs font-bold text-white">{prop.area} SQFT</p>
+                                            </div>
+                                        </div>
 
-                                        <>
-
-                                            {/* VERIFIED OWNER VIEW: Show NFT Deed & Controls */}
-
-                                            {prop.userRole === "OWNER" && (
-
-                                                <div className="mb-6 flex flex-col items-center">
-
-                                                    <div id={`nft-card-${prop.id}`} className="relative w-full max-w-[320px] aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-black border border-yellow-500/30">
-
-                                                        {/* FIXED IMAGE TAG (Removed crossOrigin that was breaking it locally) */}
-
-                                                        <img src={nftTemplate} alt="Deed" className="absolute inset-0 w-full h-full object-cover z-0" />
-
-                                                        <div className="absolute inset-0 z-10">
-
-                                                            <div className="absolute top-[28.5%] left-[22%] truncate w-[45%]  text-lg" style={{ color: "#ffffff" }}>{prop.name}</div>
-
-                                                            <div className="absolute top-[32%] right-[12%] text-sm font-black tracking-widest w-[20%] text-center" style={{ color: "#000000" }}>{prop.id}</div>
-
-                                                            <div className="absolute top-[38.5%] left-[10%] text-sm w-[70%] truncate" style={{ color: "#ffffff" }}>{prop.address}</div>
-
-                                                            <div className="absolute top-[47%] left-[32%] text-sm truncate w-[60%]" style={{ color: "#ffffff" }}>{prop.area} sq.ft</div>
-
-                                                            <div className="absolute top-[60%] left-[8%] text-[10px] font-mono break-all w-[84%] leading-tight p-1 rounded" style={{ color: "#22d3ee", backgroundColor: "rgba(0,0,0,0.6)" }}>{walletAddress}</div>
-
-                                                            <div className="absolute bottom-[4%] left-[8%] text-[10px] font-bold tracking-widest px-2 py-0.5 rounded" style={{ color: "#ffffff", backgroundColor: "rgba(220,38,38,0.9)" }}>ISSUED: {prop.date}</div>
-
-                                                        </div>
-
+                                        {prop.status !== 3 ? (
+                                            <div className="py-4 px-6 bg-zinc-900/50 border border-white/5 rounded-3xl text-center">
+                                                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Verification in Progress</p>
+                                                <div className="mt-2 flex justify-center gap-1">
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${prop.status >= 0 ? 'bg-amber-500' : 'bg-zinc-800'}`}></div>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${prop.status >= 1 ? 'bg-blue-400' : 'bg-zinc-800'}`}></div>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${prop.status >= 2 ? 'bg-purple-400' : 'bg-zinc-800'}`}></div>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${prop.status >= 3 ? 'bg-emerald-500' : 'bg-zinc-800'}`}></div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Hidden Deed for HTML-to-Image */}
+                                                <div className="hidden">
+                                                    <div id={`nft-card-${prop.id}`} className="relative w-[600px] h-[750px] bg-black">
+                                                        <img src={nftTemplate} className="w-full h-full" alt="template" />
+                                                        <div className="absolute top-[28%] left-[22%] text-2xl text-white font-bold">{prop.name}</div>
+                                                        <div className="absolute top-[32%] right-[14%] text-xl text-black font-black">{prop.id}</div>
+                                                        <div className="absolute top-[38%] left-[10%] text-lg text-white">{prop.address}</div>
+                                                        <div className="absolute top-[47%] left-[32%] text-lg text-white">{prop.area} sq.ft</div>
+                                                        <div className="absolute top-[61%] left-[8%] text-[12px] text-cyan-400 font-mono break-all w-[80%]">{walletAddress}</div>
+                                                        <div className="absolute bottom-[4%] left-[8%] text-sm text-white font-bold tracking-widest uppercase bg-red-600 px-3 py-1">ISSUED_ON: {prop.date}</div>
                                                     </div>
-
-                                                    <button onClick={() => downloadNFTCard(`nft-card-${prop.id}`, prop.name)} className="w-full mt-4 py-2 bg-zinc-800 rounded-lg text-sm font-bold text-yellow-500 hover:bg-zinc-700 transition">
-
-                                                        ⬇ Download Official Deed
-
-                                                    </button>
-
                                                 </div>
 
-                                            )}
+                                                <button onClick={() => downloadNFTCard(`nft-card-${prop.id}`, prop.name)} className="w-full py-4 border border-emerald-500/30 bg-emerald-500/5 rounded-2xl flex items-center justify-center gap-3 group hover:bg-emerald-500 transition-all">
+                                                    <Download size={14} className="text-emerald-500 group-hover:text-black"/>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 group-hover:text-black">Download Verified Deed</span>
+                                                </button>
 
-
-
-                                            {/* VERIFIED TENANT VIEW: Show Rent Details */}
-
-                                            {prop.userRole === "TENANT" && (
-
-                                                <div className="mb-4 p-4 bg-purple-900/10 border border-purple-500/20 rounded-xl">
-
-                                                    <p className="text-xs text-purple-300 font-bold mb-1">Landlord (Owner)</p>
-
-                                                    <p className="text-sm font-mono text-white mb-3">{prop.name}</p>
-
-                                                    <p className="text-xs text-purple-300 font-bold mb-1">Rent Paid</p>
-
-                                                    <p className="text-sm font-mono text-white">{prop.leasePrice} ETH</p>
-
-                                                </div>
-
-                                            )}
-
-
-
-                                            {/* LEASE TIMER (Visible to Both Owner and Tenant) */}
-
-                                            {prop.saleStatus === 3 && (
-
-                                                <LeaseTimer leaseEnd={prop.leaseEnd} tenant={prop.tenant} userRole={prop.userRole} />
-
-                                            )}
-
-
-
-                                            {/* --- OWNER CONTROLS --- */}
-
-                                            {prop.userRole === "OWNER" && (
-
-                                                <div className="mt-auto flex flex-row gap-3 border-t border-white/5 pt-5">
-
+                                                <div className="flex gap-3">
                                                     {prop.saleStatus === 0 ? (
-
                                                         <>
-
-                                                            <button onClick={() => openActionModal(prop.id, "SALE")} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold shadow-lg hover:-translate-y-0.5 transition-all">🏷️ Sell</button>
-
-                                                            <button onClick={() => openActionModal(prop.id, "LEASE")} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-sm font-bold shadow-lg hover:-translate-y-0.5 transition-all">📝 Lease</button>
-
+                                                            <button onClick={() => openActionModal(prop.id, "SALE")} className="flex-1 py-4 bg-white text-black rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-cyan-500 transition-all">List Sale</button>
+                                                            <button onClick={() => openActionModal(prop.id, "LEASE")} className="flex-1 py-4 bg-zinc-900 border border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:border-cyan-500 transition-all">List Lease</button>
                                                         </>
-
-                                                    ) : prop.saleStatus === 3 ? (
-
-                                                        <button onClick={() => openActionModal(prop.id, "PRIVATE")} className="w-full py-3 rounded-xl bg-zinc-800 text-red-400 border border-red-500/30 hover:bg-red-500/10 text-sm font-bold transition-all">
-
-                                                            🔒 Evict & Reclaim
-
-                                                        </button>
-
                                                     ) : (
-
-                                                        <button onClick={() => openActionModal(prop.id, "PRIVATE")} className="w-full py-3 rounded-xl bg-zinc-800 text-red-400 border border-red-500/30 hover:bg-red-500/10 text-sm font-bold transition-all">
-
-                                                            🔒 Cancel Listing (Make Private)
-
-                                                        </button>
-
+                                                        <button onClick={() => openActionModal(prop.id, "PRIVATE")} className="w-full py-4 bg-red-900/10 border border-red-500/20 text-red-500 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">🔒 Unlist from Market</button>
                                                     )}
-
                                                 </div>
-
-                                            )}
-
-                                        </>
-
-                                    )}
-
+                                            </>
+                                        )}
+                                        {prop.saleStatus === 3 && <LeaseTimer leaseEnd={prop.leaseEnd} tenant={prop.tenant} userRole={prop.userRole}/>}
+                                    </div>
                                 </div>
-
-                            </div>
-
-                        ))}
-
+                            );
+                        })}
                     </div>
-
                 )}
-
             </div>
 
-
-
-            {/* --- MODAL (POPUP) --- */}
-
+            {/* Modal Logic */}
             {showModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4">
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-[50px] w-full max-w-md p-10 shadow-2xl relative overflow-hidden">
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 blur-3xl rounded-full"></div>
+                        <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-2">{modalType === "SALE" ? "Market Setup" : "Lease Terms"}</h3>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-10">Sign on the blockchain to authorize</p>
 
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
-
-                    <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-
-                        <h3 className="text-xl font-bold text-white mb-1">{modalType === "SALE" ? "List for Sale 🏷️" : "List for Lease 📝"}</h3>
-
-                        <p className="text-sm text-gray-400 mb-6">Configure your listing terms below.</p>
-
-
-
-                        <div className="space-y-4">
-
-                            <div>
-
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{modalType === "SALE" ? "Selling Price (ETH)" : "Expected Rent / Month (ETH)"}</label>
-
-                                <input type="number" value={inputPrice} onChange={(e) => setInputPrice(e.target.value)} className="w-full bg-black/50 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 outline-none" placeholder="e.g. 0.05" />
-
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Pricing (ETH)</label>
+                                <input type="number" value={inputPrice} onChange={(e) => setInputPrice(e.target.value)} className="w-full bg-zinc-900 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-cyan-500 outline-none font-bold" placeholder="0.05" />
                             </div>
-
                             {modalType === "LEASE" && (
-
-                                <div>
-
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Lease Duration</label>
-
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Duration</label>
                                     <div className="flex gap-2">
-
-                                        <input type="number" value={leaseTimeVal} onChange={(e) => setLeaseTimeVal(e.target.value)} className="w-2/3 bg-black/50 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 outline-none" placeholder="e.g. 6" />
-
-                                        <select value={leaseTimeUnit} onChange={(e) => setLeaseTimeUnit(e.target.value)} className="w-1/3 bg-zinc-800 border border-zinc-700 rounded-lg px-2 text-white outline-none cursor-pointer">
-
+                                        <input type="number" value={leaseTimeVal} onChange={(e) => setLeaseTimeVal(e.target.value)} className="w-2/3 bg-zinc-900 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-cyan-500 outline-none font-bold" placeholder="6" />
+                                        <select value={leaseTimeUnit} onChange={(e) => setLeaseTimeUnit(e.target.value)} className="w-1/3 bg-zinc-900 border border-white/5 rounded-2xl px-4 text-[10px] font-black uppercase text-zinc-400 outline-none">
                                             <option value="months">Months</option>
-
                                             <option value="days">Days</option>
-
                                         </select>
-
                                     </div>
-
                                 </div>
-
                             )}
-
                         </div>
 
-
-
-                        <div className="grid grid-cols-2 gap-3 mt-8">
-
-                            <button onClick={() => setShowModal(false)} className="py-3 rounded-xl bg-zinc-800 text-white font-bold text-sm hover:bg-zinc-700 transition">Cancel</button>
-
-                            <button onClick={() => executeAction()} disabled={actionLoading} className="py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-sm hover:scale-[1.02] shadow-lg disabled:opacity-50">
-
-                                {actionLoading ? "Confirming..." : "Confirm Listing"}
-
+                        <div className="grid grid-cols-2 gap-4 mt-12">
+                            <button onClick={() => setShowModal(false)} className="py-4 rounded-2xl bg-zinc-800 text-[9px] font-black uppercase tracking-widest">Cancel</button>
+                            <button onClick={() => executeAction()} disabled={actionLoading} className="py-4 rounded-2xl bg-white text-black text-[9px] font-black uppercase tracking-widest hover:bg-cyan-500 shadow-xl disabled:opacity-30">
+                                {actionLoading ? "Signing..." : "Confirm Protocol"}
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
-
             )}
-
         </div>
-
     );
-
 };
+
 export default OwnerDashboard;

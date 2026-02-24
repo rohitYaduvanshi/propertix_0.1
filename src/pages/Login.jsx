@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import { ShieldCheck, User, HardHat, Scale, Gavel } from "lucide-react"; // Icons for better UI
 
 const Login = () => {
   const { loginWithRole, loading } = useAuth();
@@ -11,98 +12,126 @@ const Login = () => {
     try {
       setIsProcessing(true);
       
-      // logicWithRole अब Backend (Neon DB) से data लाकर context state update करेगा
       const success = await loginWithRole(role);
       
       if (success) {
-        // According to ROLE
-        if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
+        // ✅ ROLE BASED REDIRECTION
+        if (role === "GOVT_OFFICER") {
+            navigate("/government-portal"); // ✅ Government Officer का अलग पेज
+        } else if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
             navigate("/admin");
         } else {
             navigate("/home");
         }
       } else {
-        alert("Login failed! This wallet is not registered in our database. Please create an account first.");
+        alert("Login failed! This wallet is not registered as " + role + ". Please check your role or register first.");
       }
     } catch (err) {
       console.error("Login component error:", err);
-      alert("An unexpected error occurred. Please check MetaMask connection.");
+      alert("Connection Error: Please ensure MetaMask is connected to the Propertix Network.");
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
+      <div className="bg-[#0a0a0a] border border-white/10 p-10 rounded-[48px] w-full max-w-md shadow-3xl relative overflow-hidden">
         
-        {/* Decorative Background Glow */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 blur-[80px] rounded-full"></div>
+        {/* Background Decor */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/5 blur-[100px] rounded-full"></div>
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/5 blur-[100px] rounded-full"></div>
         
-        <h1 className="text-3xl font-bold text-white mb-2 text-center tracking-tight">Welcome Back</h1>
-        <p className="text-gray-500 text-xs text-center mb-10 uppercase tracking-widest font-medium">Secure Identity Portal</p>
+        <div className="relative z-10 text-center mb-10">
+            <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <ShieldCheck className="text-cyan-500 w-8 h-8" />
+            </div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic">Protocol Login</h1>
+            <p className="text-zinc-500 text-[10px] uppercase tracking-[0.4em] mt-2 font-bold">Secure Gateway v3.0</p>
+        </div>
 
-        <div className="space-y-4 relative z-10">
-            {/* CITIZEN / USER LOGIN */}
+        <div className="space-y-3 relative z-10">
+            
+            {/* 👤 CITIZEN / USER LOGIN */}
             <button 
                 onClick={() => handleLogin("USER")}
                 disabled={loading || isProcessing}
-                className="w-full bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 hover:border-cyan-500/30 text-white font-bold py-5 rounded-2xl flex items-center justify-between px-6 transition-all group active:scale-[0.98]"
+                className="w-full bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 hover:border-cyan-500/50 p-6 rounded-[28px] flex items-center justify-between transition-all group active:scale-[0.98]"
             >
                 <div className="flex flex-col items-start">
-                    <span className="text-sm text-gray-300 group-hover:text-cyan-400 transition-colors">Citizen Login</span>
-                    <span className="text-[10px] text-gray-600 font-normal mt-0.5 uppercase">For Property Owners & Buyers</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">Citizen Login</span>
+                    <span className="text-[9px] text-zinc-600 font-bold mt-1 uppercase tracking-tight">Access Personal Land Assets</span>
                 </div>
-                <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity">👤</span>
+                <User className="text-zinc-700 group-hover:text-cyan-500 transition-colors w-5 h-5" />
             </button>
 
-            {/* OFFICERS LOGIN SECTION */}
+            {/* 🏛️ GOVERNMENT OFFICER (PHASE 1) - Special Highlighted Button */}
+            <button 
+                onClick={() => handleLogin("GOVT_OFFICER")}
+                disabled={loading || isProcessing}
+                className="w-full bg-blue-600/5 hover:bg-blue-600/10 border border-blue-500/20 hover:border-blue-500/50 p-6 rounded-[28px] flex items-center justify-between transition-all group active:scale-[0.98]"
+            >
+                <div className="flex flex-col items-start text-left">
+                    <span className="text-xs font-black uppercase tracking-widest text-blue-400">Govt. Official</span>
+                    <span className="text-[9px] text-blue-900 font-black mt-1 uppercase tracking-tight">Phase 1: Legal Identity Verify</span>
+                </div>
+                <Gavel className="text-blue-900 group-hover:text-blue-400 transition-colors w-5 h-5" />
+            </button>
+
+            {/* 🛠️ SURVEYOR & REGISTRAR (PHASE 2 & 3) */}
             <div className="grid grid-cols-2 gap-3">
                 <button 
                     onClick={() => handleLogin("SURVEYOR")}
                     disabled={loading || isProcessing}
-                    className="bg-yellow-500/5 hover:bg-yellow-500/10 border border-yellow-500/10 hover:border-yellow-500/30 text-yellow-500 font-bold py-4 rounded-2xl transition-all active:scale-95 text-xs uppercase tracking-tighter"
+                    className="bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 hover:border-amber-500/50 p-5 rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group"
                 >
-                    🚧 Surveyor
+                    <HardHat className="text-zinc-700 group-hover:text-amber-500 w-5 h-5" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Surveyor</span>
                 </button>
 
                 <button 
                     onClick={() => handleLogin("REGISTRAR")}
                     disabled={loading || isProcessing}
-                    className="bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/10 hover:border-emerald-500/30 text-emerald-500 font-bold py-4 rounded-2xl transition-all active:scale-95 text-xs uppercase tracking-tighter"
+                    className="bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 hover:border-emerald-500/50 p-5 rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group"
                 >
-                    ⚖️ Registrar
+                    <Scale className="text-zinc-700 group-hover:text-emerald-500 w-5 h-5" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Registrar</span>
                 </button>
             </div>
 
-            {/* ADMIN ACCESS */}
+            {/* 👑 ADMIN ACCESS */}
             <button 
                 onClick={() => handleLogin("ADMIN")}
                 disabled={loading || isProcessing}
-                className="w-full mt-4 text-[10px] text-zinc-700 hover:text-red-500 font-black tracking-[0.3em] uppercase transition-colors py-2"
+                className="w-full mt-6 text-[9px] text-zinc-800 hover:text-red-500 font-black tracking-[0.5em] uppercase transition-colors py-2"
             >
-                • Government Admin Access •
+                • System Root Access •
             </button>
         </div>
 
         {/* PROCESSING STATUS */}
         {(isProcessing || loading) && (
-            <div className="mt-8 space-y-2 text-center animate-in fade-in zoom-in duration-300">
-                <div className="flex justify-center gap-1">
-                    <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce"></div>
-                    <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="mt-8 space-y-3 text-center animate-in fade-in zoom-in duration-500">
+                <div className="flex justify-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></span>
                 </div>
-                <p className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Syncing Profile from Neon DB...
+                <p className="text-cyan-500 text-[9px] font-black uppercase tracking-[0.3em] italic">
+                    Fetching Identity Hash...
                 </p>
             </div>
         )}
 
         {/* FOOTER */}
-        <p className="text-center text-gray-600 text-[11px] mt-10 font-medium">
-          New to Propertix? <Link to="/register" className="text-cyan-500 font-black hover:text-cyan-400 underline underline-offset-4 ml-1">Create Secure Account</Link>
-        </p>
+        <div className="mt-12 pt-8 border-t border-white/5 text-center">
+            <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+                Protocol not registered? 
+                <Link to="/register" className="text-white hover:text-cyan-500 ml-2 transition-colors underline underline-offset-8">
+                    Create Identity
+                </Link>
+            </p>
+        </div>
       </div>
     </div>
   );
