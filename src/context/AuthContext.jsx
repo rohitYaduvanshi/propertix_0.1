@@ -8,7 +8,6 @@ import {
 
 const AuthContext = createContext(null);
 
-//Backend Endpoint
 const API_BASE_URL = "https://propertixbackend-production.up.railway.app/api/auth";
 
 export const AuthProvider = ({ children }) => {
@@ -19,11 +18,12 @@ export const AuthProvider = ({ children }) => {
     isAdmin: false,
     isSurveyor: false,
     isRegistrar: false,
+    isGovtOfficer: false, // ✅ Added Govt Officer flag
     isOfficer: false
   });
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- SECURE IDENTITY FETCH (Blockchain + Neon DB) ---
+  // --- SECURE IDENTITY FETCH ---
   const fetchUserIdentity = async (account) => {
     try {
       if (!window.ethereum || !account) return null;
@@ -39,24 +39,27 @@ export const AuthProvider = ({ children }) => {
 
       if (!isRegisteredOnBC) return { isRegistered: false };
 
-      // 2. DATABASE SYNC (Fetching Profile Details)
+      // 2. DATABASE SYNC
       let dbUser = { name: "Verified Citizen", email: "Identity Encrypted" };
       try {
         const response = await axios.get(`${API_BASE_URL}/user/${lowerAccount}`);
         if (response.data) dbUser = response.data;
       } catch (err) {
-        console.warn("🛡️ Security Note: Neon DB profile not synced. Relying on Blockchain records.");
+        console.warn("🛡️ Security Note: Neon DB profile not synced.");
       }
 
+      // ✅ Updated Role Logic to include GOVT_OFFICER
       const isAdmin = roleString === "ADMIN";
       const isSurveyor = roleString === "SURVEYOR";
       const isRegistrar = roleString === "REGISTRAR";
+      const isGovtOfficer = roleString === "GOVT_OFFICER"; // ✅ Check for Govt Officer
 
       setRoleData({ 
         isAdmin, 
         isSurveyor, 
-        isRegistrar, 
-        isOfficer: isAdmin || isSurveyor || isRegistrar 
+        isRegistrar,
+        isGovtOfficer,
+        isOfficer: isAdmin || isSurveyor || isRegistrar || isGovtOfficer // ✅ Govt Officer is also an officer
       });
 
       const updatedUser = {
@@ -75,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  //  PERSISTENT SESSION CHECK ---
+  // PERSISTENT SESSION CHECK
   useEffect(() => {
     const initAuth = async () => {
       const isSessionActive = localStorage.getItem("loginSession");
@@ -99,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // ---SECURE LOGIN WITH SIGNATURE ---
+  // --- SECURE LOGIN ---
   const loginWithRole = async (desiredRole) => {
     if (!window.ethereum) return alert("MetaMask required!"), false;
     setLoading(true);
@@ -108,7 +111,6 @@ export const AuthProvider = ({ children }) => {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
       
-      // CRYPTOGRAPHIC PROOF (Sign Message)
       const message = `PROPERTIX PROTOCOL LOGIN\n\nVerify wallet owner for role: ${desiredRole}\nTimestamp: ${Date.now()}`;
       await window.ethereum.request({
         method: "personal_sign",
@@ -119,13 +121,15 @@ export const AuthProvider = ({ children }) => {
 
       if (!identity || !identity.isRegistered) {
         alert("❌ Identity not found on Ledger. Please register first.");
-        return setLoading(false), false;
+        setLoading(false);
+        return false;
       }
 
-      // Role authorization
+      // ✅ Role authorization check
       if (identity.roleString !== "ADMIN" && identity.roleString !== desiredRole) {
           alert(`⚠️ Restricted! Your assigned role is ${identity.roleString}`);
-          return setLoading(false), false;
+          setLoading(false);
+          return false;
       }
 
       localStorage.setItem("loginSession", "active");
@@ -135,6 +139,7 @@ export const AuthProvider = ({ children }) => {
       return true;
 
     } catch (error) {
+      console.error("Login Error:", error);
       setLoading(false);
       return false;
     }
@@ -144,7 +149,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("loginSession");
     setIsUserLoggedIn(false);
     setWalletAddress(null);
-    setRoleData({ isAdmin: false, isSurveyor: false, isRegistrar: false, isOfficer: false });
+    setRoleData({ isAdmin: false, isSurveyor: false, isRegistrar: false, isGovtOfficer: false, isOfficer: false });
     setCurrentUser(null);
     window.location.href = "/login";
   };
@@ -154,6 +159,7 @@ export const AuthProvider = ({ children }) => {
     isUserLoggedIn,
     walletAddress,
     isWalletConnected: !!walletAddress,
+    userRole: currentUser?.role, // ✅ Adding userRole for easier access in App.jsx
     ...roleData,
     currentUser,
     loginWithRole,
