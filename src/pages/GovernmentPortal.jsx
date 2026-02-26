@@ -138,8 +138,8 @@ const GovernmentPortal = () => {
                     </div>
                 ) : (
                     <div className="grid gap-8">
-                        {pendingRequests.map((req) => (
-                            <div key={req.id? req.id.toString() : Math.random()} className="bg-zinc-950 border border-white/5 rounded-[50px] overflow-hidden hover:border-blue-500/30 transition-all duration-500 shadow-3xl">
+                        {pendingRequests.map((req,Index) => (
+                            <div key={req?.id ? req.id.toString() : `req-${index}`} className="bg-zinc-950 border border-white/5 rounded-[50px] overflow-hidden hover:border-blue-500/30 transition-all duration-500 shadow-3xl">
                                 <div className="p-8 md:p-12 flex flex-col xl:flex-row gap-12">
                                     
                                     {/* Section 1: Data Details */}
