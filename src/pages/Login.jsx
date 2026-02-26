@@ -15,14 +15,17 @@ const Login = () => {
       const success = await loginWithRole(role);
       
       if (success) {
-        // According to ROLE (यहां GOVT_OFFICER वाला चेक जोड़ दिया है)
-        if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR" || role === "GOVT_OFFICER") {
+        // ✅ ROLE BASED REDIRECTION FIX:
+        // अगर Govt Officer है तो उसे उसके खास पोर्टल पर भेजो, बाकी स्टाफ को Admin पर
+        if (role === "GOVT_OFFICER") {
+            navigate("/government-portal");
+        } else if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
             navigate("/admin");
         } else {
             navigate("/home");
         }
       } else {
-        alert("Login failed! This wallet is not registered in our database. Please create an account first.");
+        alert("Login failed! This wallet is not registered as " + role + " in our database.");
       }
     } catch (err) {
       console.error("Login component error:", err);
@@ -56,7 +59,7 @@ const Login = () => {
                 <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity">👤</span>
             </button>
 
-            {/* ✅ GOVT OFFICER LOGIN (Exactly in your original design) */}
+            {/* ✅ GOVT OFFICER LOGIN */}
             <button 
                 onClick={() => handleLogin("GOVT_OFFICER")}
                 disabled={loading || isProcessing}
