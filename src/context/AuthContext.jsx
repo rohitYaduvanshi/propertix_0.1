@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin: false,
     isSurveyor: false,
     isRegistrar: false,
-    isGovtOfficer: false, // ✅ Added Govt Officer flag
+    isGovtOfficer: false, // Added Govt Officer flag
     isOfficer: false
   });
   const [currentUser, setCurrentUser] = useState(null);
@@ -48,18 +48,18 @@ export const AuthProvider = ({ children }) => {
         console.warn("🛡️ Security Note: Neon DB profile not synced.");
       }
 
-      // ✅ Updated Role Logic to include GOVT_OFFICER
+      //  Updated Role Logic to include GOVT_OFFICER
       const isAdmin = roleString === "ADMIN";
       const isSurveyor = roleString === "SURVEYOR";
       const isRegistrar = roleString === "REGISTRAR";
-      const isGovtOfficer = roleString === "GOVT_OFFICER"; // ✅ Check for Govt Officer
+      const isGovtOfficer = roleString === "GOVT_OFFICER"; //  Check for Govt Officer
 
       setRoleData({ 
         isAdmin, 
         isSurveyor, 
         isRegistrar,
         isGovtOfficer,
-        isOfficer: isAdmin || isSurveyor || isRegistrar || isGovtOfficer // ✅ Govt Officer is also an officer
+        isOfficer: isAdmin || isSurveyor || isRegistrar || isGovtOfficer //  Govt Officer is also an officer
       });
 
       const updatedUser = {
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
     isUserLoggedIn,
     walletAddress,
     isWalletConnected: !!walletAddress,
-    userRole: currentUser?.role, // ✅ Adding userRole for easier access in App.jsx
+    userRole: currentUser?.role, // Adding userRole for easier access in App.jsx
     ...roleData,
     currentUser,
     loginWithRole,
