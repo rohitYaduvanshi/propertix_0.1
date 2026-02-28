@@ -15,7 +15,7 @@ const Login = () => {
       const success = await loginWithRole(role);
       
       if (success) {
-        // ✅ ROLE BASED REDIRECTION FIX:
+        // ROLE BASED REDIRECTION FIX:
         // अगर Govt Officer है तो उसे उसके खास पोर्टल पर भेजो, बाकी स्टाफ को Admin पर
         if (role === "GOVT_OFFICER") {
             navigate("/government-portal");
@@ -59,7 +59,7 @@ const Login = () => {
                 <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity">👤</span>
             </button>
 
-            {/* ✅ GOVT OFFICER LOGIN */}
+            {/* GOVT OFFICER LOGIN */}
             <button 
                 onClick={() => handleLogin("GOVT_OFFICER")}
                 disabled={loading || isProcessing}
