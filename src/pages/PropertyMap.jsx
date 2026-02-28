@@ -69,7 +69,7 @@ const PropertyMap = () => {
         const mapped = await Promise.all(requests.map(async (req) => {
             let meta = { attributes: [] };
             
-            // ✅ Only show properties that are status 3 (Approved & Minted)
+            // Only show properties that are status 3 (Approved & Minted)
             if (Number(req.status) !== 3) return null;
 
             try {
@@ -132,7 +132,7 @@ const PropertyMap = () => {
         const signer = await provider.getSigner();
         const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-        // ✅ Identity Check is performed by the smart contract automatically
+        // Identity Check is performed by the smart contract automatically
         let tx = actionModal.type === 'SALE' 
             ? await contract.buyProperty(selectedProperty.id, formData.name, { value: parseEther(amount) })
             : await contract.rentProperty(selectedProperty.id, { value: parseEther(amount) });
@@ -152,7 +152,7 @@ const PropertyMap = () => {
   return (
     <div className="flex w-full bg-black h-screen overflow-hidden relative font-sans">
       
-      {/* 🟢 SIDEBAR */}
+      {/* SIDEBAR */}
       <div className={`bg-zinc-950 border-r border-white/5 z-[1001] flex flex-col w-full md:w-[420px] absolute md:relative h-full transition-transform duration-300 ${isMobileListOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
            <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
                <div className="mb-8">
@@ -195,7 +195,7 @@ const PropertyMap = () => {
            </div>
       </div>
 
-      {/* 🔵 MAP AREA */}
+      {/* MAP AREA */}
       <div className="flex-1 relative h-full bg-zinc-950">
         <button onClick={() => setIsMobileListOpen(!isMobileListOpen)} className="md:hidden absolute bottom-10 left-1/2 -translate-x-1/2 z-[1002] bg-white text-black px-10 py-4 rounded-2xl font-black shadow-2xl text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all">
           {isMobileListOpen ? "✕ CLOSE LEDGER" : "📋 VIEW MARKET"}
@@ -228,7 +228,7 @@ const PropertyMap = () => {
         </MapContainer>
       </div>
 
-      {/* 🟡 ASSET DETAIL PANEL */}
+      {/*ASSET DETAIL PANEL */}
       {selectedProperty && !actionModal.show && (
             <div className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-end md:items-center justify-center p-0 md:p-8 animate-in slide-in-from-bottom-10 duration-500">
               <div className="bg-[#0a0a0a] border border-white/10 rounded-t-[50px] md:rounded-[40px] w-full md:max-w-xl overflow-hidden relative shadow-[0_0_100px_rgba(34,211,238,0.1)]">
