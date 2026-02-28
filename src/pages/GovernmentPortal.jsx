@@ -35,7 +35,7 @@ const GovernmentPortal = () => {
             const pending = allRequests.filter(req => req && Number(req.status) === 0);
 
             const detailedPending = await Promise.all(pending.map(async (req) => {
-                // ✅ Safe BigInt to String conversion for keys and IDs
+                // Safe BigInt to String conversion for keys and IDs
                 const safeIdStr = req.id.toString(); 
                 
                 try {
@@ -74,7 +74,7 @@ const GovernmentPortal = () => {
     const handleVerify = async (originalId) => {
         if (!originalId) return;
         try {
-            // ✅ FIX: originalId (BigInt) को सीधे इस्तेमाल करें
+            // FIX: originalId (BigInt) को सीधे इस्तेमाल करें
             setActionLoading(originalId.toString());
             const provider = new BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
@@ -86,7 +86,7 @@ const GovernmentPortal = () => {
             alert("✅ Identity Bonded Successfully!");
             fetchPendingRequests();
         } catch (error) {
-            // ✅ Fix for toString() error in alert
+            //  Fix for toString() error in alert
             const msg = error.reason || error.message || "Unknown error";
             alert("Verification Failed: " + msg);
         } finally {
