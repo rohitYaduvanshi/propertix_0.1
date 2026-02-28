@@ -48,7 +48,7 @@ const Register_Asset = () => {
     }
   }, [registrationPurpose]);
 
-  // ✅ Simple Handlers (AI logic removed for now)
+  //  Simple Handlers (AI logic removed for now)
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
     if (files.length > 0) setImages(files);
