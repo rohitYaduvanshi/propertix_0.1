@@ -99,7 +99,7 @@ const AdminPanel = () => {
     } finally { setLoading(false); }
   };
 
-  // ✅ SURVEYOR DASHBOARD (Phase 2: After Govt Verification)
+  // SURVEYOR DASHBOARD (Phase 2: After Govt Verification)
   const SurveyorDashboard = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="bg-amber-500/10 border border-amber-500/30 p-6 rounded-3xl flex items-center justify-between">
@@ -116,7 +116,7 @@ const AdminPanel = () => {
         </div>
         <div className="grid gap-4">
             {requests.map((req) => {
-                // 🛑 केवल वही दिखेंगे जो Govt Officer से पास हो चुके हैं (Status 1)
+                // (Status 1)
                 if (Number(req.status) !== 1) return null; 
                 return (
                     <div key={req.id} className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[32px] border border-white/5 hover:border-amber-500/50 transition-all flex justify-between items-center group">
@@ -141,7 +141,7 @@ const AdminPanel = () => {
     </div>
   );
 
-  // ✅ REGISTRAR DASHBOARD (Phase 3: Final Minting)
+  // REGISTRAR DASHBOARD (Phase 3: Final Minting)
   const RegistrarDashboard = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="bg-cyan-500/10 border border-cyan-500/30 p-6 rounded-3xl flex items-center justify-between">
@@ -153,7 +153,7 @@ const AdminPanel = () => {
         </div>
         <div className="grid gap-4">
             {requests.map((req) => {
-                // 🛑 केवल वही दिखेंगे जिनका Survey हो चुका है (Status 2)
+                // (Status 2)
                 if (Number(req.status) !== 2) return null; 
                 return (
                     <div key={req.id} className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[32px] border border-white/5 hover:border-cyan-500/50 transition-all flex justify-between items-center">
@@ -176,7 +176,7 @@ const AdminPanel = () => {
     </div>
   );
 
-  // ✅ SUPER ADMIN
+  // SUPER ADMIN
   const SuperAdminDashboard = () => (
     <div className="space-y-8 animate-in zoom-in-95 duration-500">
         <div className="bg-red-500/5 border border-red-500/20 p-10 rounded-[50px] text-center relative overflow-hidden">

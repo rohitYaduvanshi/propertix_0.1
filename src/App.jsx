@@ -93,7 +93,7 @@ const App = () => {
         <Route path="/dashboard" element={<UserGuard><Layout><OwnerDashboard /></Layout></UserGuard>} />
         <Route path="/profile" element={<UserGuard><Layout><MyProfile /></Layout></UserGuard>} />
 
-        {/* 🚨 404 CATCH-ALL */}
+        {/* 404 CATCH-ALL */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
