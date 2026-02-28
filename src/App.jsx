@@ -44,7 +44,7 @@ const UserGuard = ({ children }) => {
 const App = () => {
   const { isUserLoggedIn, userRole, loading } = useAuth();
 
-  // ✅ FIX: Using your requested Loading UI
+  //  FIX: Using your requested Loading UI
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white">

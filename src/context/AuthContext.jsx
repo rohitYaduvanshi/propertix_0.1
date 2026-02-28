@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }) => {
         return false;
       }
 
-      // ✅ Role authorization check
+      //  Role authorization check
       if (identity.roleString !== "ADMIN" && identity.roleString !== desiredRole) {
           alert(`⚠️ Restricted! Your assigned role is ${identity.roleString}`);
           setLoading(false);

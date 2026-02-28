@@ -84,7 +84,7 @@ const Register = () => {
       // 3. BLOCKCHAIN REGISTRATION (Binding Wallet to Identity)
       setStatus("Step 3/4: Securing Identity on Blockchain...");
       
-      // ✅ अब हम 5 पैरामीटर्स भेज रहे हैं जैसा आपके Smart Contract में है
+      //  अब हम 5 पैरामीटर्स भेज रहे हैं जैसा Smart Contract में है
       // Aadhaar को Hash (id) करके भेज रहे हैं Security के लिए
       const tx = await contract.registerUser(
         formData.name,
