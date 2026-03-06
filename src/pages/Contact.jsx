@@ -1,7 +1,6 @@
 import React from 'react';
 import { Construction, Clock, ShieldAlert } from 'lucide-react';
 
-// ✅ TypeScript wala ": React.FC" hata diya hai taaki build pass ho jaye
 const UnderDevelopment = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 p-4 font-sans">
@@ -32,7 +31,7 @@ const UnderDevelopment = () => {
           </p>
         </div>
 
-        {/* Professional Badges */}
+        {/* Professional Status Badges */}
         <div className="flex flex-col gap-3 pt-6 border-t border-gray-100">
           <div className="flex items-center justify-center gap-2 text-sm text-amber-600 bg-amber-50 py-2 rounded-lg font-medium">
             <Clock className="w-4 h-4" />
@@ -44,7 +43,7 @@ const UnderDevelopment = () => {
           </div>
         </div>
 
-        {/* Back Button for Demo */}
+        {/* Back Button for Demo Navigation */}
         <button 
           onClick={() => window.history.back()}
           className="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95"
