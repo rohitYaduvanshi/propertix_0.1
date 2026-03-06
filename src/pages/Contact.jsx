@@ -1,9 +1,10 @@
 import React from 'react';
 import { Construction, Clock, ShieldAlert } from 'lucide-react';
 
-const UnderDevelopment: React.FC = () => {
+// ✅ TypeScript wala ": React.FC" hata diya hai taaki build pass ho jaye
+const UnderDevelopment = () => {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 p-4 font-sans">
       <div className="max-w-md w-full text-center space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-blue-100">
         
         {/* Animated Icon Container */}
