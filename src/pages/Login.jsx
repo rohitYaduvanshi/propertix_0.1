@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+// Nayi context import ki
+import { useSmartAccount } from "../context/SmartAccountContext"; 
 import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const { loginWithRole, loading } = useAuth();
+  // initialize function yahan se nikala
+  const { initializeSmartAccount } = useSmartAccount(); 
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -11,12 +15,17 @@ const Login = () => {
     try {
       setIsProcessing(true);
       
-      // logicWithRole अब Backend (Neon DB) से data लाकर context state update करेगा
       const success = await loginWithRole(role);
       
       if (success) {
-        // ROLE BASED REDIRECTION FIX:
-        // अगर Govt Officer है तो उसे उसके खास पोर्टल पर भेजो, बाकी स्टाफ को Admin पर
+        // --- BICONOMY INITIALIZATION ---
+        // Login success hote hi window.ethereum use karke 
+        // Smart Account initialize kar rahe hain
+        if (window.ethereum) {
+            await initializeSmartAccount(window.ethereum);
+        }
+
+        // ROLE BASED REDIRECTION:
         if (role === "GOVT_OFFICER") {
             navigate("/government-portal");
         } else if (role === "ADMIN" || role === "SURVEYOR" || role === "REGISTRAR") {
@@ -110,7 +119,7 @@ const Login = () => {
                     <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                 </div>
                 <p className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Syncing Profile from Neon DB...
+                    {isProcessing ? "Initializing Gasless Wallet..." : "Syncing Profile from Neon DB..."}
                 </p>
             </div>
         )}

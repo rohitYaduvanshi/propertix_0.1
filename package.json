@@ -11,6 +11,9 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@biconomy/account": "^4.5.7",
+    "@biconomy/bundler": "^3.1.4",
+    "@biconomy/paymaster": "^3.1.4",
     "@emailjs/browser": "^4.4.1",
     "@neondatabase/serverless": "^1.0.2",
     "@tensorflow-models/mobilenet": "^2.1.1",
@@ -21,9 +24,10 @@
     "axios": "^1.13.2",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
+    "crypto-js": "^4.2.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
-    "ethers": "^6.16.0",
+    "ethers": "^5.7.2",
     "express": "^5.2.1",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

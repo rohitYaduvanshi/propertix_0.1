@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { BrowserProvider, Contract, id } from "ethers"; // Added 'id' for hashing
+import { BrowserProvider, Contract } from "ethers"; // ethers v6 format
 import axios from "axios";
 import {
   PROPERTY_REGISTRY_ADDRESS,
   PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig";
 
+// Naye contexts aur utils import kiye
+import { useSmartAccount } from "../context/SmartAccountContext";
+import { getAadharHash } from "../utils/aadharUtils";
+
 const Register = () => {
   const navigate = useNavigate();
+  // Biconomy hook se initialize function nikala
+  const { initializeSmartAccount } = useSmartAccount();
+
   const [formData, setFormData] = useState({ 
     name: "", 
     email: "", 
@@ -20,7 +27,7 @@ const Register = () => {
   const [status, setStatus] = useState("");
   const [connectedAddress, setConnectedAddress] = useState("");
 
-  const HARDHAT_CHAIN_ID = "0x7a69";
+  const HARDHAT_CHAIN_ID = "0x7a69"; // Amoy ke liye "0x13882" use karein mainnet/testnet par
   const NGROK_RPC_URL = "https://pseudoascetically-respective-granville.ngrok-free.dev";
 
   useEffect(() => {
@@ -54,8 +61,13 @@ const Register = () => {
       const walletAddress = accounts[0];
       setConnectedAddress(walletAddress);
 
+      // --- BICONOMY INITIALIZATION ---
+      // User ke register karte hi uska Smart Account piche initialize kar rahe hain
+      setStatus("Initializing Gasless Wallet...");
+      await initializeSmartAccount(window.ethereum);
+
       // 2. FORCE NETWORK SWITCH
-      setStatus("Step 2/4: Connecting to Propertix Testnet...");
+      setStatus("Step 2/4: Connecting to Propertix Network...");
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
@@ -82,22 +94,24 @@ const Register = () => {
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
       // 3. BLOCKCHAIN REGISTRATION (Binding Wallet to Identity)
+      // Aadhaar Hashing for Privacy
+      const aadharHash = getAadharHash(formData.aadhaar);
+
       setStatus("Step 3/4: Securing Identity on Blockchain...");
       
-     
       const tx = await contract.registerUser(
         formData.name,
         formData.email,
         formData.role,
         formData.secretCode || "N/A",
-        formData.aadhaar
+        aadharHash // Asli Aadhaar ki jagah Hash bhej rahe hain
       );
       await tx.wait();
       console.log("✅ Identity Bonded on Blockchain");
 
       // 4. BACKEND SYNC
       setStatus("Step 4/4: Syncing with Database...");
-      const signatureMessage = `Link Identity to Wallet\nName: ${formData.name}\nAadhaar Hash: ${id(formData.aadhaar)}\nWallet: ${walletAddress}`;
+      const signatureMessage = `Link Identity to Wallet\nName: ${formData.name}\nAadhaar Hash: ${aadharHash}\nWallet: ${walletAddress}`;
       const signature = await signer.signMessage(signatureMessage);
 
       const response = await axios.post("https://propertixbackend-production.up.railway.app/api/auth/register", {
@@ -105,7 +119,7 @@ const Register = () => {
         email: formData.email,
         role: formData.role,
         walletAddress: walletAddress.toLowerCase(),
-        aadhaarHash: id(formData.aadhaar), // Security: Hash stored in DB
+        aadhaarHash: aadharHash, // Security: Hash stored in DB
         signature: signature
       });
 
