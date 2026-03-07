@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { BrowserProvider, Contract } from "ethers"; // ethers v6 format
+import { BrowserProvider, Contract } from "ethers"; // ethers v6
 import axios from "axios";
 import {
   PROPERTY_REGISTRY_ADDRESS,
   PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig";
 
-// Naye contexts aur utils import kiye
 import { useSmartAccount } from "../context/SmartAccountContext";
 import { getAadharHash } from "../utils/aadharUtils";
 
 const Register = () => {
   const navigate = useNavigate();
-  // Biconomy hook se initialize function nikala
   const { initializeSmartAccount } = useSmartAccount();
 
   const [formData, setFormData] = useState({ 
@@ -27,8 +25,9 @@ const Register = () => {
   const [status, setStatus] = useState("");
   const [connectedAddress, setConnectedAddress] = useState("");
 
-  const HARDHAT_CHAIN_ID = "0x7a69"; // Amoy ke liye "0x13882" use karein mainnet/testnet par
-  const NGROK_RPC_URL = "https://pseudoascetically-respective-granville.ngrok-free.dev";
+  // UPDATE: Polygon Amoy Testnet Chain ID (Decimal: 80002)
+  const AMOY_CHAIN_ID = "0x13882"; 
+  const AMOY_RPC_URL = "https://rpc-amoy.polygon.technology/";
 
   useEffect(() => {
     if (window.ethereum) {
@@ -62,26 +61,26 @@ const Register = () => {
       setConnectedAddress(walletAddress);
 
       // --- BICONOMY INITIALIZATION ---
-      // User ke register karte hi uska Smart Account piche initialize kar rahe hain
       setStatus("Initializing Gasless Wallet...");
       await initializeSmartAccount(window.ethereum);
 
-      // 2. FORCE NETWORK SWITCH
-      setStatus("Step 2/4: Connecting to Propertix Network...");
+      // 2. FORCE NETWORK SWITCH (To Polygon Amoy)
+      setStatus("Step 2/4: Connecting to Polygon Amoy...");
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: HARDHAT_CHAIN_ID }],
+          params: [{ chainId: AMOY_CHAIN_ID }],
         });
       } catch (switchError) {
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: HARDHAT_CHAIN_ID,
-              chainName: 'Propertix Testnet',
-              rpcUrls: [NGROK_RPC_URL],
-              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }
+              chainId: AMOY_CHAIN_ID,
+              chainName: 'Polygon Amoy Testnet',
+              rpcUrls: [AMOY_RPC_URL],
+              nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+              blockExplorerUrls: ['https://amoy.polygonscan.com/']
             }],
           });
         } else {
@@ -93,10 +92,8 @@ const Register = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-      // 3. BLOCKCHAIN REGISTRATION (Binding Wallet to Identity)
-      // Aadhaar Hashing for Privacy
+      // 3. BLOCKCHAIN REGISTRATION
       const aadharHash = getAadharHash(formData.aadhaar);
-
       setStatus("Step 3/4: Securing Identity on Blockchain...");
       
       const tx = await contract.registerUser(
@@ -104,13 +101,12 @@ const Register = () => {
         formData.email,
         formData.role,
         formData.secretCode || "N/A",
-        aadharHash // Asli Aadhaar ki jagah Hash bhej rahe hain
+        aadharHash
       );
       await tx.wait();
-      console.log("✅ Identity Bonded on Blockchain");
 
       // 4. BACKEND SYNC
-      setStatus("Step 4/4: Syncing with Database...");
+      setStatus("Step 4/4: Syncing with Propertix Database...");
       const signatureMessage = `Link Identity to Wallet\nName: ${formData.name}\nAadhaar Hash: ${aadharHash}\nWallet: ${walletAddress}`;
       const signature = await signer.signMessage(signatureMessage);
 
@@ -119,13 +115,13 @@ const Register = () => {
         email: formData.email,
         role: formData.role,
         walletAddress: walletAddress.toLowerCase(),
-        aadhaarHash: aadharHash, // Security: Hash stored in DB
+        aadhaarHash: aadharHash,
         signature: signature
       });
 
       if (response.status === 200 || response.status === 201) {
         setStatus("Identity Bonded!");
-        alert("🎉 Identity Linked & Registered Successfully! Ledger entry created.");
+        alert("🎉 Identity Linked Successfully! You can now use Gasless features.");
         navigate("/login");
       }
 
@@ -143,10 +139,8 @@ const Register = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans text-white">
       <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-[40px] w-full max-w-md shadow-2xl relative overflow-hidden">
         
-        {/* Background Decor */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-cyan-500/10 blur-[80px] rounded-full"></div>
 
-        {/* Badge */}
         <div className="mb-6 text-center relative z-10">
           <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-mono tracking-tighter ${connectedAddress ? "border-green-500/30 bg-green-500/5 text-green-400" : "border-yellow-500/30 bg-yellow-500/5 text-yellow-400"
             }`}>
@@ -192,7 +186,7 @@ const Register = () => {
           </div>
 
           {formData.role !== "USER" && (
-            <input type="password" required onChange={(e) => setFormData({ ...formData, secretCode: e.target.value })} className="w-full bg-red-500/5 border border-red-500/20 text-white p-4 rounded-2xl outline-none transition text-xs font-bold placeholder:text-red-900/50" placeholder="Officer Access Key" />
+            <input type="password" required value={formData.secretCode} onChange={(e) => setFormData({ ...formData, secretCode: e.target.value })} className="w-full bg-red-500/5 border border-red-500/20 text-white p-4 rounded-2xl outline-none transition text-xs font-bold placeholder:text-red-900/50" placeholder="Officer Access Key" />
           )}
 
           <button type="submit" disabled={loading}
