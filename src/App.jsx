@@ -94,7 +94,7 @@ const App = () => {
         <Route path="/profile" element={<UserGuard><Layout><MyProfile /></Layout></UserGuard>} />
         <Route 
           path="/transfer-ownership" 
-          element={<UserGuard><Layout><TransferOwnership /></Layout></UserGuard>} 
+          element={<UserGuard><Layout><GiftOwnership /></Layout></UserGuard>} 
         />
 
         {/* 404 CATCH-ALL */}
