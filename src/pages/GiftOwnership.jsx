@@ -135,7 +135,7 @@ const GiftOwnership = () => {
                 {/* Final Action Button */}
                 <button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-cyan-600 to-blue-700 py-5 rounded-2xl font-black text-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                  className="w-full bg-gradient-to-r from-cyan-600 to-blue-700 py-5 rounded-2xl font-medium text-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-3"
                 >
                   Confirm & Generate Gift Deed NFT
                   <ArrowRightLeft className="w-5 h-5" />
