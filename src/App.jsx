@@ -13,8 +13,9 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import { useAuth } from "./context/AuthContext.jsx";
 import Register from "./pages/Registersys.jsx";
 import GovernmentPortal from "./pages/GovernmentPortal.jsx";
+import TransferOwnership from "./pages/TransferOwnership.jsx"; 
 
-// --- 🛡️ GUARDS LOGIC ---
+// GUARDS LOGIC ---
 
 const OfficerGuard = ({ children, requiredRole }) => {
   const { isUserLoggedIn, userRole } = useAuth();
@@ -40,11 +41,10 @@ const UserGuard = ({ children }) => {
   return children;
 };
 
-// --- 🖥️ MAIN APP ---
+//MAIN APP ---
 const App = () => {
   const { isUserLoggedIn, userRole, loading } = useAuth();
 
-  //  FIX: Using your requested Loading UI
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white">
@@ -58,7 +58,7 @@ const App = () => {
     <div className="flex flex-col min-h-screen bg-black text-white w-full">
       <Routes>
 
-        {/* 🔓 PUBLIC ROUTES */}
+        {/*PUBLIC ROUTES */}
         <Route
           path="/login"
           element={
@@ -73,7 +73,7 @@ const App = () => {
         <Route path="/about" element={<Layout><About /></Layout>} />
         <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
-        {/* 🏛️ GOVERNMENT OFFICER ROUTE */}
+        {/*GOVERNMENT OFFICER ROUTE */}
         <Route
           path="/government-portal"
           element={
@@ -83,15 +83,19 @@ const App = () => {
           }
         />
 
-        {/* 🛠️ ADMIN/OFFICER ROUTES (Surveyor & Registrar) */}
+        {/* ADMIN/OFFICER ROUTES (Surveyor & Registrar) */}
         <Route path="/admin" element={<OfficerGuard><Layout><AdminPanel /></Layout></OfficerGuard>} />
 
-        {/* 👤 CITIZEN PROTECTED ROUTES */}
+        {/* CITIZEN PROTECTED ROUTES */}
         <Route path="/home" element={<UserGuard><Layout><Home /></Layout></UserGuard>} />
         <Route path="/registerAsset" element={<UserGuard><Layout><Blockchain /></Layout></UserGuard>} />
         <Route path="/map" element={<UserGuard><Layout><PropertyMap /></Layout></UserGuard>} />
         <Route path="/dashboard" element={<UserGuard><Layout><OwnerDashboard /></Layout></UserGuard>} />
         <Route path="/profile" element={<UserGuard><Layout><MyProfile /></Layout></UserGuard>} />
+        <Route 
+          path="/transfer-ownership" 
+          element={<UserGuard><Layout><TransferOwnership /></Layout></UserGuard>} 
+        />
 
         {/* 404 CATCH-ALL */}
         <Route path="*" element={<Navigate to="/" replace />} />

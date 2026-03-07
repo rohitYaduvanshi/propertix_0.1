@@ -252,4 +252,13 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    //For Family terms -> giving the Ownership
+    
+    function transferToFamily(address to, uint256 propertyId, string memory relation) public {
+        require(ownerOf(propertyId) == msg.sender, "You don't own this land");
+        // Add logic to log the relationship for government records
+        _safeTransfer(msg.sender, to, propertyId, "");
+        emit PropertyGifted(msg.sender, to, propertyId, relation);
+    }
 }

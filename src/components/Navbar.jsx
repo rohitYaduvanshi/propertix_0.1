@@ -20,7 +20,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);       
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
 
-  // 🛑 Check: Are we on Admin Page?
+  //Check: Are we on Admin Page?
   const isAdminPage = location.pathname === "/admin";
 
   // --- DUMMY USER DATA ---
@@ -85,6 +85,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-8">
             <NavLink to="/" className={linkClasses}>Home</NavLink>
             <NavLink to="/registerAsset" className={linkClasses}>RegisterAsset</NavLink>
+            <NavLink to="/TransferOwnership" className={linkClasses}>GiftOwnership</NavLink>
             <NavLink to="/map" className={linkClasses}>Property-Map</NavLink>
             <NavLink to="/about" className={linkClasses}>About</NavLink>
             <NavLink to="/contact" className={linkClasses}>Contact</NavLink>

@@ -105,7 +105,7 @@ const Register = () => {
         email: formData.email,
         role: formData.role,
         walletAddress: walletAddress.toLowerCase(),
-        aadhaarHash: id(formData.aadhaar), // ✅ Security: Hash stored in DB
+        aadhaarHash: id(formData.aadhaar), // Security: Hash stored in DB
         signature: signature
       });
 
