@@ -13,7 +13,7 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import { useAuth } from "./context/AuthContext.jsx";
 import Register from "./pages/Registersys.jsx";
 import GovernmentPortal from "./pages/GovernmentPortal.jsx";
-import GiftOwnership from "./pages/TransferOwnership.jsx"; 
+import GiftOwnership from "./pages/GiftOwnership.jsx"; 
 
 // GUARDS LOGIC ---
 
@@ -93,7 +93,7 @@ const App = () => {
         <Route path="/dashboard" element={<UserGuard><Layout><OwnerDashboard /></Layout></UserGuard>} />
         <Route path="/profile" element={<UserGuard><Layout><MyProfile /></Layout></UserGuard>} />
         <Route 
-          path="/transfer-ownership" 
+          path="/gift-ownership" 
           element={<UserGuard><Layout><GiftOwnership /></Layout></UserGuard>} 
         />
 
