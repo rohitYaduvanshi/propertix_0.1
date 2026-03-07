@@ -161,7 +161,7 @@ const Home = () => {
             <section className="relative flex flex-col items-center justify-center px-8 pt-5 pb-10 overflow-hidden min-h-screen bg-[#000000]">
 
                 {/* ULTRA-PREMIUM MESH BACKGROUND START */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#020203]">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#FFFDD1]">
                     {/* RESPONSIVE "HOW TO START" BUTTON */}
                     {/* ULTIMATE NOTION BUTTON FIX */}
                     <a
