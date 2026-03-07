@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
 /**
  * @title PropertyRegistry_v4_Final
  * @dev 4-Role System: Identity Linking, Govt Verification, Surveyor Audit, and Registrar Minting.
@@ -76,6 +75,8 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     event PropertyRented(uint256 indexed tokenId, address tenant, uint256 duration, uint256 price, uint256 timestamp);
     event PropertyStatusChanged(uint256 indexed tokenId, string newStatus, uint256 price);
     event IdentityLinked(address indexed user, bytes32 indexed identityHash);
+    event PropertyGifted(address indexed from, address indexed to, uint256 propertyId, string relation);
+
 
     // ==========================================
     // 🏗️ CONSTRUCTOR
