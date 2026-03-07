@@ -13,7 +13,7 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import { useAuth } from "./context/AuthContext.jsx";
 import Register from "./pages/Registersys.jsx";
 import GovernmentPortal from "./pages/GovernmentPortal.jsx";
-import TransferOwnership from "./pages/TransferOwnership.jsx"; 
+import GiftOwnership from "./pages/TransferOwnership.jsx"; 
 
 // GUARDS LOGIC ---
 
