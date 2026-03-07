@@ -20,7 +20,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);       
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
 
-  //Check: Are we on Admin Page?
+  // 🛑 Check: Are we on Admin Page?
   const isAdminPage = location.pathname === "/admin";
 
   // --- DUMMY USER DATA ---
@@ -85,7 +85,6 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-8">
             <NavLink to="/" className={linkClasses}>Home</NavLink>
             <NavLink to="/registerAsset" className={linkClasses}>RegisterAsset</NavLink>
-            <NavLink to="/giftOwnership" className={linkClasses}>GiftOwnership</NavLink>
             <NavLink to="/map" className={linkClasses}>Property-Map</NavLink>
             <NavLink to="/about" className={linkClasses}>About</NavLink>
             <NavLink to="/contact" className={linkClasses}>Contact</NavLink>
@@ -242,7 +241,6 @@ const Navbar = () => {
                 <div className="flex flex-col space-y-2">
                     <NavLink to="/" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Home</NavLink>
                     <NavLink to="/registerAsset" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>RegisterAsset</NavLink>
-                    <NavLink to="/giftOwnership" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>GiftOwnership</NavLink>
                     <NavLink to="/map" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Property-Map</NavLink>
                     <NavLink to="/about" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>About</NavLink>
                     <NavLink to="/contact" className={mobileLinkClasses} onClick={() => setIsMenuOpen(false)}>Contact</NavLink>

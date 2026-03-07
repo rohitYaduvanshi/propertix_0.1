@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
-import { ethers } from "ethers"; // ethers v5 format
+import { BrowserProvider, Contract, parseEther } from "ethers";
 import { ShieldAlert, MapPin, Database, CheckCircle, FileText, UploadCloud } from "lucide-react"; 
 
 import {
   PROPERTY_REGISTRY_ADDRESS,
   PROPERTY_REGISTRY_ABI,
 } from "../blockchain/contractConfig.js";
-
-// Naye contexts aur utils import kiye
 import { useAuth } from "../context/AuthContext.jsx";
-import { useSmartAccount } from "../context/SmartAccountContext.jsx";
-import { getAadharHash } from "../utils/aadharUtils.js";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../utils/ipfs.js";
 
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
@@ -26,9 +22,6 @@ L.Icon.Default.mergeOptions({
 
 const Register_Asset = () => {
   const { isWalletConnected } = useAuth();
-  // Biconomy Smart Account hook
-  const { smartAccount, smartAccountAddress } = useSmartAccount();
-
   const [registrationPurpose, setRegistrationPurpose] = useState("Ownership");
   const [formData, setFormData] = useState({
     state: "", district: "", village: "", aadhaar: "",
@@ -55,6 +48,7 @@ const Register_Asset = () => {
     }
   }, [registrationPurpose]);
 
+  //  Simple Handlers (AI logic removed for now)
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
     if (files.length > 0) setImages(files);
@@ -82,18 +76,11 @@ const Register_Asset = () => {
     finally { setStatus(null); }
   };
 
-  // --- GASLESS REGISTRATION LOGIC ---
   const handleRegister = async (e) => {
     e.preventDefault();
-    
-    // Check if Smart Account is ready
-    if (!smartAccount) {
-        return alert("Gasless Wallet is initializing. Please wait or reconnect wallet.");
-    }
-    
+    if (!isWalletConnected) return alert("Please connect your wallet first.");
     if (images.length < 1 || !docFile) return alert("Upload required property files.");
     if (!formData.khasraNumber) return alert("Official Khasra/Plot Number is required.");
-    if (!formData.aadhaar) return alert("Aadhaar Number is required for identity mapping.");
 
     try {
       setIsSubmitting(true);
@@ -106,53 +93,38 @@ const Register_Asset = () => {
       }
       const docUrl = await uploadFileToIPFS(docFile);
       
-      // Aadhaar Hashing for Privacy
-      const aadharHash = getAadharHash(formData.aadhaar);
-
       const metadata = { 
         ...formData, 
-        aadhaar: "PROTECTED_BY_HASH", // Asli Aadhaar IPFS par nahi bhej rahe
-        aadharHash: aadharHash,
         purpose: registrationPurpose, 
         images: imageUrls, 
         document: docUrl, 
         location: coordinates,
         timestamp: new Date().toISOString()
       };
-      
       const metadataURL = await uploadJSONToIPFS(metadata);
 
-      setStatus("Step 2/3: Generating Gasless Transaction...");
+      setStatus("Step 2/3: Authorizing Blockchain Ledger...");
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
 
-      // Biconomy Transaction Encode karna
-      const contractInterface = new ethers.utils.Interface(PROPERTY_REGISTRY_ABI);
-      const data = contractInterface.encodeFunctionData("requestRegistration", [
+      const tx = await contract.requestRegistration(
         formData.ownerName, 
         metadataURL, 
         formData.area.toString(), 
         formData.address,
-        formData.khasraNumber
-      ]);
+        formData.khasraNumber,
+        { value: parseEther("0.001") }
+      );
 
-      const tx = {
-        to: PROPERTY_REGISTRY_ADDRESS,
-        data: data,
-        // Yahan 'value' hataya ja sakta hai agar contract allow kare, 
-        // kyunki user ke pass crypto nahi hoga. 
-        // Agar zaroori hai toh Paymaster balance se jayega.
-      };
+      setStatus("Step 3/3: Finalizing Governance Request...");
+      await tx.wait();
 
-      // Biconomy sendTransaction call (Gasless)
-      const userOpResponse = await smartAccount.sendTransaction(tx);
-      
-      setStatus("Step 3/3: Finalizing on Blockchain...");
-      const { transactionHash } = await userOpResponse.wait();
-
-      setTxHash(transactionHash);
-      setStatus("🎉 Application Filed! User paid ₹0 Gas Fees.");
+      setTxHash(tx.hash);
+      setStatus("🎉 Application Filed! Waiting for Govt Verification.");
     } catch (err) { 
       console.error(err);
-      setErrorMessage(err.message || "Biconomy Transaction failed.");
+      setErrorMessage(err.reason || "Transaction failed. Check if identity is linked or gas is sufficient.");
       setShowError(true);
       setStatus(null);
     } finally { 
@@ -163,57 +135,55 @@ const Register_Asset = () => {
   return (
     <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden font-sans">
       
+      {/* ERROR MODAL */}
       {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/90 backdrop-blur-xl">
           <div className="relative bg-zinc-950 border border-red-500/30 p-8 rounded-[40px] max-w-sm w-full text-center shadow-2xl">
             <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-black uppercase italic tracking-tighter">Protocol Sync Error</h2>
+            <h2 className="text-xl font-black uppercase italic tracking-tighter">Chain Protocol Error</h2>
             <p className="mt-4 text-zinc-500 text-[10px] leading-relaxed uppercase tracking-widest">{errorMessage}</p>
             <button onClick={() => setShowError(false)} className="mt-8 w-full py-4 bg-red-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Dismiss</button>
           </div>
         </div>
       )}
 
+      {/* Decorative Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="w-full max-w-6xl mb-12 text-center lg:text-left relative z-10 mt-10">
-        <p className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase mb-4 italic">Gasless_Registry_Node</p>
+        <p className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase mb-4 italic">Registry_Node_Access</p>
         <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase italic">
           Digital Land Deed<br/>
-          <span className="text-cyan-500">Biconomy AA Sync</span>
+          <span className="text-cyan-500">Blockchain Sync</span>
         </h1>
-        {smartAccountAddress && (
-            <p className="text-[10px] text-zinc-500 mt-2 font-mono uppercase tracking-widest">
-                Connected via Smart Account: <span className="text-cyan-500">{smartAccountAddress}</span>
-            </p>
-        )}
       </div>
 
       <div className="relative w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-start z-10">
         
+        {/* LEFT: STATUS TRACKER */}
         <div className="space-y-6 lg:sticky lg:top-24">
           <div className="p-10 bg-zinc-950/40 border border-white/5 rounded-[48px] backdrop-blur-3xl shadow-3xl">
             <h2 className="text-xl font-black text-white mb-8 italic uppercase tracking-tighter">Deed Lifecycle</h2>
             <div className="space-y-8">
                <div className="flex items-start gap-5">
-                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500"><Database className="w-5 h-5"/></div>
+                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.1)]"><Database className="w-5 h-5"/></div>
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-white tracking-widest">Phase 1: Gasless Submission</h4>
-                    <p className="text-[9px] text-zinc-500 mt-1 leading-relaxed">Identity linked via Aadhaar Hash. Fees sponsored by Biconomy Paymaster.</p>
+                    <h4 className="text-[11px] font-black uppercase text-white tracking-widest">Phase 1: Legal Submission</h4>
+                    <p className="text-[9px] text-zinc-500 mt-1 leading-relaxed">Data anchored to IPFS & Blockchain. Govt Officer verifies Khasra link.</p>
                   </div>
                </div>
                <div className="flex items-start gap-5">
                   <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-700"><MapPin className="w-5 h-5"/></div>
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 2: Verified Identity</h4>
-                    <p className="text-[9px] text-zinc-700 mt-1">Immutable mapping between Aadhaar Hash and Smart Account Address.</p>
+                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 2: Field Survey</h4>
+                    <p className="text-[9px] text-zinc-700 mt-1">Ground inspection by Official Surveyor to confirm boundaries.</p>
                   </div>
                </div>
                <div className="flex items-start gap-5">
                   <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-700"><CheckCircle className="w-5 h-5"/></div>
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 3: Digital Deed</h4>
-                    <p className="text-[9px] text-zinc-700 mt-1">Registrar issues the Digital Certificate to your Smart Wallet.</p>
+                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 3: NFT Minting</h4>
+                    <p className="text-[9px] text-zinc-700 mt-1">Registrar issues the Immutable Digital Certificate (NFT).</p>
                   </div>
                </div>
             </div>
@@ -221,12 +191,13 @@ const Register_Asset = () => {
           
           {txHash && (
             <div className="p-6 bg-cyan-500/5 border border-cyan-500/20 rounded-[32px] animate-pulse">
-              <p className="text-[10px] font-black text-cyan-400 uppercase mb-2 italic">Transaction_Hash_Success</p>
+              <p className="text-[10px] font-black text-cyan-400 uppercase mb-2 italic">Protocol_Sync_Active</p>
               <p className="text-[9px] font-mono text-zinc-500 break-all">{txHash}</p>
             </div>
           )}
         </div>
 
+        {/* RIGHT: REGISTRATION FORM */}
         <div className="w-full bg-[#080808] border border-white/10 p-8 md:p-12 rounded-[56px] shadow-3xl">
           <form onSubmit={handleRegister} className="space-y-8">
             <div className="flex p-1.5 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
@@ -244,27 +215,15 @@ const Register_Asset = () => {
                <input type="text" placeholder="Village" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, village: e.target.value })} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-cyan-500/5 border border-cyan-500/10 p-6 rounded-3xl">
-                    <label className="text-[9px] font-black uppercase text-cyan-500 tracking-[0.4em] mb-3 block">Aadhaar Identity</label>
-                    <input 
-                        type="text" 
-                        placeholder="12 Digit Aadhaar Number" 
-                        required
-                        className="w-full bg-black/40 border border-zinc-800 p-5 rounded-xl text-xs outline-none focus:border-cyan-500 transition-all font-bold tracking-widest" 
-                        onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })} 
-                    />
-                </div>
-                <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-3xl">
-                    <label className="text-[9px] font-black uppercase text-zinc-500 tracking-[0.4em] mb-3 block">Khasra Number</label>
-                    <input 
-                        type="text" 
-                        placeholder="Plot ID from Records" 
-                        required
-                        className="w-full bg-black/40 border border-zinc-800 p-5 rounded-xl text-xs outline-none focus:border-cyan-500 transition-all font-bold tracking-widest" 
-                        onChange={(e) => setFormData({ ...formData, khasraNumber: e.target.value })} 
-                    />
-                </div>
+            <div className="bg-cyan-500/5 border border-cyan-500/10 p-6 rounded-3xl">
+               <label className="text-[9px] font-black uppercase text-cyan-500 tracking-[0.4em] mb-3 block">Plot Identity (Khasra No)</label>
+               <input 
+                  type="text" 
+                  placeholder="Official ID from Revenue Records" 
+                  required
+                  className="w-full bg-black/40 border border-zinc-800 p-5 rounded-xl text-xs outline-none focus:border-cyan-500 transition-all font-bold tracking-widest" 
+                  onChange={(e) => setFormData({ ...formData, khasraNumber: e.target.value })} 
+               />
             </div>
 
             <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-zinc-900 hover:bg-zinc-800 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-white/5 transition-all active:scale-95 shadow-lg">Verify Location on Map</button>
@@ -305,8 +264,8 @@ const Register_Asset = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting || !smartAccount} className="w-full py-6 bg-white text-black font-black text-xs rounded-[24px] tracking-[0.4em] uppercase hover:bg-cyan-500 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 disabled:opacity-20">
-              {isSubmitting ? "SYNCING_WITH_PROTOCOL..." : !smartAccount ? "INITIALIZING_WALLET..." : "EXECUTE GASLESS DEED"}
+            <button type="submit" disabled={isSubmitting} className="w-full py-6 bg-white text-black font-black text-xs rounded-[24px] tracking-[0.4em] uppercase hover:bg-cyan-500 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 disabled:opacity-20">
+              {isSubmitting ? "TRANSACTION_IN_PROGRESS" : "EXECUTE DEED REQUEST"}
             </button>
             
             {status && (

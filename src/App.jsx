@@ -14,7 +14,6 @@ import { useAuth } from "./context/AuthContext.jsx";
 import Register from "./pages/Registersys.jsx";
 import GovernmentPortal from "./pages/GovernmentPortal.jsx";
 import GiftOwnership from "./pages/GiftOwnership.jsx"; 
-import SmartAccountProvider from "./context/SmartAccountContext.jsx"; 
 
 // GUARDS LOGIC ---
 
