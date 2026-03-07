@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, User, ShieldCheck, ArrowRightLeft } from 'lucide-react';
 
-const TransferOwnership = () => {
+const GiftOwnership = () => {
   const [formData, setFormData] = useState({
     recipientWallet: '',
     recipientAadhar: '',
@@ -98,4 +98,4 @@ const TransferOwnership = () => {
   );
 };
 
-export default TransferOwnership;
+export default GiftOwnership;
