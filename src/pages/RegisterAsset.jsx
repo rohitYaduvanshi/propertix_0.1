@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
-import { BrowserProvider, Contract, parseEther } from "ethers";
+// ethers remove kiya kyunki abhi hum chain bypass kar rahe hain
 import { ShieldAlert, MapPin, Database, CheckCircle, FileText, UploadCloud } from "lucide-react"; 
 
-import {
-  PROPERTY_REGISTRY_ADDRESS,
-  PROPERTY_REGISTRY_ABI,
-} from "../blockchain/contractConfig.js";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useSmartAccount } from "../context/SmartAccountContext.jsx";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../utils/ipfs.js";
 
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
@@ -21,7 +17,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const Register_Asset = () => {
-  const { isWalletConnected } = useAuth();
+  const { smartAccountAddress } = useSmartAccount();
   const [registrationPurpose, setRegistrationPurpose] = useState("Ownership");
   const [formData, setFormData] = useState({
     state: "", district: "", village: "", aadhaar: "",
@@ -35,10 +31,7 @@ const Register_Asset = () => {
   const [docFile, setDocFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
-  const [txHash, setTxHash] = useState("");
-
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [txHash, setTxHash] = useState(""); // Mock hash for UI
 
   useEffect(() => {
     if (registrationPurpose === "Government") {
@@ -48,7 +41,6 @@ const Register_Asset = () => {
     }
   }, [registrationPurpose]);
 
-  //  Simple Handlers (AI logic removed for now)
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
     if (files.length > 0) setImages(files);
@@ -78,14 +70,14 @@ const Register_Asset = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!isWalletConnected) return alert("Please connect your wallet first.");
+    if (!smartAccountAddress) return alert("Please Login first.");
     if (images.length < 1 || !docFile) return alert("Upload required property files.");
-    if (!formData.khasraNumber) return alert("Official Khasra/Plot Number is required.");
 
     try {
       setIsSubmitting(true);
-      setStatus("Step 1/3: Storing Assets on IPFS...");
       
+      // Step 1: Upload to IPFS [cite: 2026-01-24]
+      setStatus("Step 1/2: Storing Assets on IPFS...");
       const imageUrls = [];
       for (let img of images) {
         const url = await uploadFileToIPFS(img);
@@ -95,38 +87,27 @@ const Register_Asset = () => {
       
       const metadata = { 
         ...formData, 
-        purpose: registrationPurpose, 
+        requester: smartAccountAddress,
         images: imageUrls, 
         document: docUrl, 
-        location: coordinates,
-        timestamp: new Date().toISOString()
+        location: coordinates
       };
-      const metadataURL = await uploadJSONToIPFS(metadata);
+      const metadataCID = await uploadJSONToIPFS(metadata);
+      console.log("IPFS Storage Success:", metadataCID);
 
-      setStatus("Step 2/3: Authorizing Blockchain Ledger...");
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new Contract(PROPERTY_REGISTRY_ADDRESS, PROPERTY_REGISTRY_ABI, signer);
+      // Step 2: Simulate Blockchain (Bypassed) [cite: 2026-03-01]
+      setStatus("Step 2/2: Mocking Ledger Auth...");
+      
+      // Artificial delay for realism
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const tx = await contract.requestRegistration(
-        formData.ownerName, 
-        metadataURL, 
-        formData.area.toString(), 
-        formData.address,
-        formData.khasraNumber,
-        { value: parseEther("0.001") }
-      );
-
-      setStatus("Step 3/3: Finalizing Governance Request...");
-      await tx.wait();
-
-      setTxHash(tx.hash);
-      setStatus("🎉 Application Filed! Waiting for Govt Verification.");
+      setTxHash("PROPTX_MOCK_" + Math.random().toString(36).substring(7).toUpperCase());
+      setStatus("🎉 Prototype Request Sent! Ready for Verification.");
+      
+      alert("Prototype Success: Asset data stored on IPFS. Transaction bypassed for demo.");
     } catch (err) { 
       console.error(err);
-      setErrorMessage(err.reason || "Transaction failed. Check if identity is linked or gas is sufficient.");
-      setShowError(true);
-      setStatus(null);
+      setStatus("IPFS Error. Check API Keys.");
     } finally { 
       setIsSubmitting(false); 
     }
@@ -135,26 +116,14 @@ const Register_Asset = () => {
   return (
     <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden font-sans">
       
-      {/* ERROR MODAL */}
-      {/* {showError && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/90 backdrop-blur-xl">
-          <div className="relative bg-zinc-950 border border-red-500/30 p-8 rounded-[40px] max-w-sm w-full text-center shadow-2xl">
-            <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-black uppercase italic tracking-tighter">Chain Protocol Error</h2>
-            <p className="mt-4 text-zinc-500 text-[10px] leading-relaxed uppercase tracking-widest">{errorMessage}</p>
-            <button onClick={() => setShowError(false)} className="mt-8 w-full py-4 bg-red-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Dismiss</button>
-          </div>
-        </div>
-      )} */}
-
       {/* Decorative Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="w-full max-w-6xl mb-12 text-center lg:text-left relative z-10 mt-10">
-        <p className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase mb-4 italic">Registry_Node_Access</p>
+        <p className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase mb-4 italic">Prototype_Node_Mode</p>
         <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase italic">
-          Digital Land Deed<br/>
-          <span className="text-cyan-500">Blockchain Sync</span>
+          Asset Registration<br/>
+          <span className="text-cyan-500">Demo Environment</span>
         </h1>
       </div>
 
@@ -163,27 +132,20 @@ const Register_Asset = () => {
         {/* LEFT: STATUS TRACKER */}
         <div className="space-y-6 lg:sticky lg:top-24">
           <div className="p-10 bg-zinc-950/40 border border-white/5 rounded-[48px] backdrop-blur-3xl shadow-3xl">
-            <h2 className="text-xl font-black text-white mb-8 italic uppercase tracking-tighter">Deed Lifecycle</h2>
+            <h2 className="text-xl font-black text-white mb-8 italic uppercase tracking-tighter">Demo Lifecycle</h2>
             <div className="space-y-8">
                <div className="flex items-start gap-5">
-                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.1)]"><Database className="w-5 h-5"/></div>
+                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500"><Database className="w-5 h-5"/></div>
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-white tracking-widest">Phase 1: Legal Submission</h4>
-                    <p className="text-[9px] text-zinc-500 mt-1 leading-relaxed">Data anchored to IPFS & Blockchain. Govt Officer verifies Khasra link.</p>
-                  </div>
-               </div>
-               <div className="flex items-start gap-5">
-                  <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-700"><MapPin className="w-5 h-5"/></div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 2: Field Survey</h4>
-                    <p className="text-[9px] text-zinc-700 mt-1">Ground inspection by Official Surveyor to confirm boundaries.</p>
+                    <h4 className="text-[11px] font-black uppercase text-white tracking-widest">Phase 1: Asset Storage</h4>
+                    <p className="text-[9px] text-zinc-500 mt-1 leading-relaxed">Images & Deeds are stored on decentralized IPFS node.</p>
                   </div>
                </div>
                <div className="flex items-start gap-5">
                   <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-700"><CheckCircle className="w-5 h-5"/></div>
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 3: NFT Minting</h4>
-                    <p className="text-[9px] text-zinc-700 mt-1">Registrar issues the Immutable Digital Certificate (NFT).</p>
+                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 2: Mock Ledger</h4>
+                    <p className="text-[9px] text-zinc-700 mt-1 leading-relaxed">Chain protocol bypassed for frontend-only prototype testing.</p>
                   </div>
                </div>
             </div>
@@ -191,7 +153,7 @@ const Register_Asset = () => {
           
           {txHash && (
             <div className="p-6 bg-cyan-500/5 border border-cyan-500/20 rounded-[32px] animate-pulse">
-              <p className="text-[10px] font-black text-cyan-400 uppercase mb-2 italic">Protocol_Sync_Active</p>
+              <p className="text-[10px] font-black text-cyan-400 uppercase mb-2 italic">Mock_Hash_Generated</p>
               <p className="text-[9px] font-mono text-zinc-500 break-all">{txHash}</p>
             </div>
           )}
@@ -213,17 +175,6 @@ const Register_Asset = () => {
                <input type="text" placeholder="State" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
                <input type="text" placeholder="District" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, district: e.target.value })} />
                <input type="text" placeholder="Village" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, village: e.target.value })} />
-            </div>
-
-            <div className="bg-cyan-500/5 border border-cyan-500/10 p-6 rounded-3xl">
-               <label className="text-[9px] font-black uppercase text-cyan-500 tracking-[0.4em] mb-3 block">Plot Identity (Khasra No)</label>
-               <input 
-                  type="text" 
-                  placeholder="Official ID from Revenue Records" 
-                  required
-                  className="w-full bg-black/40 border border-zinc-800 p-5 rounded-xl text-xs outline-none focus:border-cyan-500 transition-all font-bold tracking-widest" 
-                  onChange={(e) => setFormData({ ...formData, khasraNumber: e.target.value })} 
-               />
             </div>
 
             <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-zinc-900 hover:bg-zinc-800 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-white/5 transition-all active:scale-95 shadow-lg">Verify Location on Map</button>
@@ -248,8 +199,6 @@ const Register_Asset = () => {
               </div>
             </div>
 
-            <textarea placeholder="Physical Address & Nearby Landmarks..." required className="w-full bg-zinc-900/40 border border-zinc-800 p-5 rounded-3xl text-[11px] font-bold h-28 resize-none outline-none focus:border-cyan-500" onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-            
             <div className="grid grid-cols-2 gap-4">
               <div onClick={() => document.getElementById('img-up').click()} className={`group border-2 border-dashed p-8 rounded-3xl text-center cursor-pointer transition-all duration-500 ${images.length > 0 ? "border-cyan-500 bg-cyan-500/5" : "border-zinc-800 hover:border-zinc-600 bg-zinc-900/20"}`}>
                 <input id="img-up" type="file" multiple hidden accept="image/*" onChange={handleImageUpload} />
@@ -264,8 +213,8 @@ const Register_Asset = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="w-full py-6 bg-white text-black font-black text-xs rounded-[24px] tracking-[0.4em] uppercase hover:bg-cyan-500 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 disabled:opacity-20">
-              {isSubmitting ? "TRANSACTION_IN_PROGRESS" : "EXECUTE DEED REQUEST"}
+            <button type="submit" disabled={isSubmitting} className="w-full py-6 bg-white text-black font-black text-xs rounded-[24px] tracking-[0.4em] uppercase hover:bg-cyan-500 transition-all active:scale-95 disabled:opacity-20">
+              {isSubmitting ? "UPLOADING_TO_IPFS..." : "SUBMIT PROTOTYPE REQUEST"}
             </button>
             
             {status && (
@@ -281,7 +230,6 @@ const Register_Asset = () => {
   );
 };
 
-// Helper Components for Map
 const MapController = ({ coords }) => {
   const map = useMap();
   useEffect(() => { if (coords) map.setView([coords.lat, coords.lng], 16); }, [coords, map]);
