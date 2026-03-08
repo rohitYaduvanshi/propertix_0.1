@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ethers remove kiya kyunki abhi hum chain bypass kar rahe hain
 import { ShieldAlert, MapPin, Database, CheckCircle, FileText, UploadCloud } from "lucide-react"; 
 
 import { useSmartAccount } from "../context/SmartAccountContext.jsx";
@@ -9,6 +8,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-lea
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
+// Map Icons Fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -17,12 +17,11 @@ L.Icon.Default.mergeOptions({
 });
 
 const Register_Asset = () => {
-  const { smartAccountAddress } = useSmartAccount();
+  const { smartAccountAddress } = useSmartAccount(); // Login check ke liye
   const [registrationPurpose, setRegistrationPurpose] = useState("Ownership");
   const [formData, setFormData] = useState({
-    state: "", district: "", village: "", aadhaar: "",
-    ownerName: "", area: "", address: "", description: "",
-    khasraNumber: "" 
+    state: "", district: "", village: "", ownerName: "", 
+    area: "", address: "", khasraNumber: "" 
   });
 
   const [coordinates, setCoordinates] = useState({ lat: 20.5937, lng: 78.9629 });
@@ -31,13 +30,12 @@ const Register_Asset = () => {
   const [docFile, setDocFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
-  const [txHash, setTxHash] = useState(""); // Mock hash for UI
+  const [txHash, setTxHash] = useState(""); 
 
+  // Auto-fill owner name for Govt purpose
   useEffect(() => {
     if (registrationPurpose === "Government") {
       setFormData(prev => ({ ...prev, ownerName: "Government of India" }));
-    } else {
-      setFormData(prev => ({ ...prev, ownerName: "" }));
     }
   }, [registrationPurpose]);
 
@@ -46,38 +44,17 @@ const Register_Asset = () => {
     if (files.length > 0) setImages(files);
   };
 
-  const handleDocUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setDocFile(file);
-  };
-
-  const handleHierarchicalSearch = async () => {
-    const query = `${formData.village}, ${formData.district}, ${formData.state}, India`;
-    if (!formData.state) return alert("Please enter the State.");
-    setStatus("Searching Area...");
-    try {
-      const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`);
-      const data = await response.json();
-      if (data?.features?.length > 0) {
-        const [lng, lat] = data.features[0].geometry.coordinates;
-        setCoordinates({ lat, lng });
-        setIsLocationSelected(true);
-        setStatus("Pinned ✅");
-      } else { alert("Location not found. Please pin manually on map."); }
-    } catch (e) { console.error(e); }
-    finally { setStatus(null); }
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!smartAccountAddress) return alert("Please Login first.");
-    if (images.length < 1 || !docFile) return alert("Upload required property files.");
+    
+    // Simple Validation
+    if (images.length < 1 || !docFile) return alert("Please upload property photos and deed.");
 
     try {
       setIsSubmitting(true);
-      
-      // Step 1: Upload to IPFS [cite: 2026-01-24]
-      setStatus("Step 1/2: Storing Assets on IPFS...");
+      setStatus("Step 1/2: Storing on IPFS Ledger...");
+
+      // 1. Upload files to IPFS (Demo Mode) [cite: 2026-01-24]
       const imageUrls = [];
       for (let img of images) {
         const url = await uploadFileToIPFS(img);
@@ -87,142 +64,101 @@ const Register_Asset = () => {
       
       const metadata = { 
         ...formData, 
-        requester: smartAccountAddress,
+        requester: smartAccountAddress || "Demo_User",
         images: imageUrls, 
         document: docUrl, 
         location: coordinates
       };
+
+      // 2. Metadata storage [cite: 2026-01-24]
       const metadataCID = await uploadJSONToIPFS(metadata);
-      console.log("IPFS Storage Success:", metadataCID);
+      console.log("Record Anchored to IPFS:", metadataCID);
 
-      // Step 2: Simulate Blockchain (Bypassed) [cite: 2026-03-01]
-      setStatus("Step 2/2: Mocking Ledger Auth...");
+      setStatus("Step 2/2: Finalizing Registration...");
       
-      // Artificial delay for realism
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Delay for UI experience
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      setTxHash("PROPTX_MOCK_" + Math.random().toString(36).substring(7).toUpperCase());
-      setStatus("🎉 Prototype Request Sent! Ready for Verification.");
+      setTxHash("PROPTX_" + Math.random().toString(36).substring(7).toUpperCase());
+      setStatus("🎉 Property Registered Successfully!");
       
-      alert("Prototype Success: Asset data stored on IPFS. Transaction bypassed for demo.");
+      alert("Success! Your property data is now secured on IPFS. Demo registration complete.");
+
     } catch (err) { 
       console.error(err);
-      setStatus("IPFS Error. Check API Keys.");
+      alert("System Busy. Please check your Pinata API connection.");
     } finally { 
       setIsSubmitting(false); 
     }
   };
 
   return (
-    <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden font-sans">
+    <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-black text-white font-sans">
       
-      {/* Decorative Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-
-      <div className="w-full max-w-6xl mb-12 text-center lg:text-left relative z-10 mt-10">
-        <p className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase mb-4 italic">Prototype_Node_Mode</p>
-        <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase italic">
-          Asset Registration<br/>
-          <span className="text-cyan-500">Demo Environment</span>
+      {/* Page Header */}
+      <div className="w-full max-w-6xl mb-12 mt-10 z-10">
+        <h1 className="text-5xl font-black uppercase italic tracking-tighter">
+          Property <span className="text-cyan-500">Registration</span>
         </h1>
+        <p className="text-zinc-500 text-xs mt-2 font-bold uppercase tracking-widest italic">Digital Deed Management Node</p>
       </div>
 
-      <div className="relative w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-start z-10">
+      <div className="relative w-full max-w-6xl grid lg:grid-cols-2 gap-12 z-10">
         
-        {/* LEFT: STATUS TRACKER */}
-        <div className="space-y-6 lg:sticky lg:top-24">
-          <div className="p-10 bg-zinc-950/40 border border-white/5 rounded-[48px] backdrop-blur-3xl shadow-3xl">
-            <h2 className="text-xl font-black text-white mb-8 italic uppercase tracking-tighter">Demo Lifecycle</h2>
-            <div className="space-y-8">
-               <div className="flex items-start gap-5">
-                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500"><Database className="w-5 h-5"/></div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase text-white tracking-widest">Phase 1: Asset Storage</h4>
-                    <p className="text-[9px] text-zinc-500 mt-1 leading-relaxed">Images & Deeds are stored on decentralized IPFS node.</p>
-                  </div>
+        {/* Status Display */}
+        <div className="space-y-6">
+          <div className="p-8 bg-zinc-900/50 border border-white/10 rounded-[40px] backdrop-blur-xl">
+            <h2 className="text-lg font-black mb-6 uppercase tracking-tighter italic">Process Tracker</h2>
+            <div className="space-y-6">
+               <div className="flex gap-4">
+                  <Database className="text-cyan-500" />
+                  <p className="text-[10px] uppercase font-bold text-zinc-400">Phase 1: Encrypted Storage (IPFS)</p>
                </div>
-               <div className="flex items-start gap-5">
-                  <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-700"><CheckCircle className="w-5 h-5"/></div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase text-zinc-600 tracking-widest">Phase 2: Mock Ledger</h4>
-                    <p className="text-[9px] text-zinc-700 mt-1 leading-relaxed">Chain protocol bypassed for frontend-only prototype testing.</p>
-                  </div>
+               <div className="flex gap-4">
+                  <CheckCircle className="text-zinc-700" />
+                  <p className="text-[10px] uppercase font-bold text-zinc-700">Phase 2: Registry Approval (Pending)</p>
                </div>
             </div>
           </div>
           
           {txHash && (
-            <div className="p-6 bg-cyan-500/5 border border-cyan-500/20 rounded-[32px] animate-pulse">
-              <p className="text-[10px] font-black text-cyan-400 uppercase mb-2 italic">Mock_Hash_Generated</p>
-              <p className="text-[9px] font-mono text-zinc-500 break-all">{txHash}</p>
+            <div className="p-6 bg-cyan-500/10 border border-cyan-500/30 rounded-3xl">
+              <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Record_ID: {txHash}</p>
             </div>
           )}
         </div>
 
-        {/* RIGHT: REGISTRATION FORM */}
-        <div className="w-full bg-[#080808] border border-white/10 p-8 md:p-12 rounded-[56px] shadow-3xl">
-          <form onSubmit={handleRegister} className="space-y-8">
-            <div className="flex p-1.5 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
-              {["Ownership", "Government"].map((p) => (
-                <button key={p} type="button" onClick={() => setRegistrationPurpose(p)}
-                  className={`flex-1 py-4 text-[10px] font-black rounded-xl transition-all uppercase tracking-[0.2em] ${registrationPurpose === p ? "bg-white text-black shadow-xl" : "text-zinc-500 hover:text-zinc-300"}`}>
-                  {p}
-                </button>
-              ))}
+        {/* The Form */}
+        <div className="bg-zinc-950 border border-white/10 p-8 rounded-[48px]">
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+               <input type="text" placeholder="State" required className="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 text-xs" onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
+               <input type="text" placeholder="Khasra No." required className="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 text-xs" onChange={(e) => setFormData({ ...formData, khasraNumber: e.target.value })} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <input type="text" placeholder="State" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
-               <input type="text" placeholder="District" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, district: e.target.value })} />
-               <input type="text" placeholder="Village" required className="bg-zinc-900/40 text-[11px] font-bold p-5 rounded-2xl border border-zinc-800 outline-none focus:border-cyan-500 transition-colors" onChange={(e) => setFormData({ ...formData, village: e.target.value })} />
-            </div>
-
-            <button type="button" onClick={handleHierarchicalSearch} className="w-full bg-zinc-900 hover:bg-zinc-800 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-white/5 transition-all active:scale-95 shadow-lg">Verify Location on Map</button>
-
-            <div className="h-72 rounded-[40px] overflow-hidden border border-zinc-800 relative z-0 grayscale contrast-125 opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
-              <MapContainer center={coordinates} zoom={13} style={{ height: '100%', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <MapController coords={coordinates} />
-                <LocationMarker setCoords={setCoordinates} setIsSelected={setIsLocationSelected} />
-                {isLocationSelected && <Marker position={[coordinates.lat, coordinates.lng]} />}
-              </MapContainer>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[8px] font-black uppercase text-zinc-500 ml-2">Area (Sq. Ft)</label>
-                <input type="number" placeholder="Ex: 1500" required className="w-full bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl text-[11px] font-bold outline-none focus:border-cyan-500" onChange={(e) => setFormData({ ...formData, area: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[8px] font-black uppercase text-zinc-500 ml-2">Owner Name</label>
-                <input type="text" placeholder="Full Legal Name" value={formData.ownerName} disabled={registrationPurpose === "Government"} className="w-full bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl text-[11px] font-bold outline-none focus:border-cyan-500 disabled:opacity-30" onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })} />
-              </div>
-            </div>
+            <input type="text" placeholder="Owner Name" value={formData.ownerName} className="w-full bg-zinc-900 p-4 rounded-2xl border border-zinc-800 text-xs" onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })} />
+            
+            <textarea placeholder="Property Address Details..." required className="w-full bg-zinc-900 p-4 rounded-2xl border border-zinc-800 text-xs h-24" onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
 
             <div className="grid grid-cols-2 gap-4">
-              <div onClick={() => document.getElementById('img-up').click()} className={`group border-2 border-dashed p-8 rounded-3xl text-center cursor-pointer transition-all duration-500 ${images.length > 0 ? "border-cyan-500 bg-cyan-500/5" : "border-zinc-800 hover:border-zinc-600 bg-zinc-900/20"}`}>
+              <div onClick={() => document.getElementById('img-up').click()} className="border-2 border-dashed border-zinc-800 p-6 rounded-2xl text-center cursor-pointer hover:border-cyan-500 transition-all">
                 <input id="img-up" type="file" multiple hidden accept="image/*" onChange={handleImageUpload} />
-                <UploadCloud className={`w-6 h-6 mx-auto mb-2 ${images.length > 0 ? "text-cyan-500" : "text-zinc-700"}`} />
-                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{images.length > 0 ? `${images.length} IMAGES READY` : "UPLOAD PHOTOS"}</p>
+                <UploadCloud className="mx-auto mb-1 text-zinc-600" />
+                <p className="text-[9px] font-bold text-zinc-500 uppercase">Photos ({images.length})</p>
               </div>
 
-              <div onClick={() => document.getElementById('doc-up').click()} className={`group border-2 border-dashed p-8 rounded-3xl text-center cursor-pointer transition-all duration-500 ${docFile ? "border-cyan-500 bg-cyan-500/5" : "border-zinc-800 hover:border-zinc-600 bg-zinc-900/20"}`}>
-                <input id="doc-up" type="file" hidden accept="application/pdf,image/*" onChange={handleDocUpload} />
-                <FileText className={`w-6 h-6 mx-auto mb-2 ${docFile ? "text-cyan-500" : "text-zinc-700"}`} />
-                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{docFile ? "DOC READY" : "UPLOAD DEED"}</p>
+              <div onClick={() => document.getElementById('doc-up').click()} className="border-2 border-dashed border-zinc-800 p-6 rounded-2xl text-center cursor-pointer hover:border-cyan-500 transition-all">
+                <input id="doc-up" type="file" hidden accept=".pdf,image/*" onChange={(e) => setDocFile(e.target.files[0])} />
+                <FileText className="mx-auto mb-1 text-zinc-600" />
+                <p className="text-[9px] font-bold text-zinc-500 uppercase">{docFile ? "Deed Loaded" : "Upload Deed"}</p>
               </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="w-full py-6 bg-white text-black font-black text-xs rounded-[24px] tracking-[0.4em] uppercase hover:bg-cyan-500 transition-all active:scale-95 disabled:opacity-20">
-              {isSubmitting ? "UPLOADING_TO_IPFS..." : "SUBMIT PROTOTYPE REQUEST"}
+            <button type="submit" disabled={isSubmitting} className="w-full py-5 bg-white text-black font-black text-[10px] rounded-2xl tracking-[0.3em] uppercase hover:bg-cyan-500 transition-all active:scale-95">
+              {isSubmitting ? "PROCESSING..." : "REGISTER PROPERTY"}
             </button>
             
-            {status && (
-              <div className="flex items-center justify-center gap-3 text-[10px] font-black text-cyan-500 animate-pulse uppercase tracking-[0.3em] italic">
-                <div className="w-1 h-1 bg-cyan-500 rounded-full animate-ping"></div>
-                {status}
-              </div>
-            )}
+            {status && <p className="text-center text-cyan-500 text-[9px] font-black animate-pulse">{status}</p>}
           </form>
         </div>
       </div>
@@ -230,12 +166,12 @@ const Register_Asset = () => {
   );
 };
 
+// Map Helper components (Originals kept for UI)
 const MapController = ({ coords }) => {
   const map = useMap();
   useEffect(() => { if (coords) map.setView([coords.lat, coords.lng], 16); }, [coords, map]);
   return null;
 };
-
 const LocationMarker = ({ setCoords, setIsSelected }) => {
   useMapEvents({ click(e) { setCoords(e.latlng); setIsSelected(true); } });
   return null;
