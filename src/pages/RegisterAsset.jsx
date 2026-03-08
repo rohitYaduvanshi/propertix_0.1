@@ -136,7 +136,7 @@ const Register_Asset = () => {
     <section className="relative flex flex-col items-center px-4 md:px-8 py-8 min-h-screen bg-[#000000] text-white overflow-hidden font-sans">
       
       {/* ERROR MODAL */}
-      {showError && (
+      {/* {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/90 backdrop-blur-xl">
           <div className="relative bg-zinc-950 border border-red-500/30 p-8 rounded-[40px] max-w-sm w-full text-center shadow-2xl">
             <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -145,7 +145,7 @@ const Register_Asset = () => {
             <button onClick={() => setShowError(false)} className="mt-8 w-full py-4 bg-red-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Dismiss</button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Decorative Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
