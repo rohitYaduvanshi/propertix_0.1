@@ -1,0 +1,11 @@
+{
+  "name": "propertix-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "property-blockchain"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=property-blockchain && cp -r property-blockchain/dist dist"
+  }
+}
