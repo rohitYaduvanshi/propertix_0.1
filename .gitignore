@@ -1,0 +1,22 @@
+# Dependency directories
+node_modules/
+property-blockchain/node_modules/
+backend/node_modules/
+
+# Local env files
+.env
+.env.local
+property-blockchain/.env
+backend/.env
+
+# Build outputs
+property-blockchain/dist/
+property-blockchain/dist-ssr/
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary files
+*.log

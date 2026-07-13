@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# API routes → Netlify Functions redirect
+[[redirects]]
+  from = "/api/auth/register"
+  to = "/.netlify/functions/register"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/user/:address"
+  to = "/.netlify/functions/get-user?address=:address"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/update-profile"
+  to = "/.netlify/functions/update-profile"
+  status = 200
+
+# React Router — SPA fallback (LAST mein rakhna zaroori hai)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
