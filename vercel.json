@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd property-blockchain && npm install && npm run build",
+  "outputDirectory": "property-blockchain/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
