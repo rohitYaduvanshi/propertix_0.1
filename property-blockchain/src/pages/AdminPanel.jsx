@@ -90,6 +90,7 @@ const AdminPanel = () => {
         else if (actionType === "APPROVE") tx = await contract.approveAndMint(id);
         else if (actionType === "REJECT") tx = await contract.rejectRequest(id);
         else if (actionType === "WITHDRAW") tx = await contract.withdrawFunds();
+        else if (actionType === "VERIFY") tx = await contract.verifyByGovt(id);
 
         await tx.wait();
         alert(`Action ${actionType} Successful!`);
@@ -98,6 +99,49 @@ const AdminPanel = () => {
         alert("Transaction Failed: " + (error.reason || error.message));
     } finally { setLoading(false); }
   };
+
+  // GOVT OFFICER DASHBOARD (Phase 1: Verify & Bond)
+  const GovtOfficerDashboard = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-blue-500/10 border border-blue-500/30 p-6 rounded-3xl flex items-center justify-between">
+            <div>
+                <h2 className="text-xl font-black text-blue-500 uppercase tracking-tighter flex items-center gap-2 italic">
+                     Government Verification Desk
+                </h2>
+                <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mt-1">Status: Auditing New Registrations</p>
+            </div>
+            <div className="text-right">
+                <span className="text-2xl font-black text-white">{requests.filter(r => Number(r.status) === 0).length}</span>
+                <p className="text-[8px] text-zinc-500 uppercase font-black">Pending Verifications</p>
+            </div>
+        </div>
+        <div className="grid gap-4">
+            {requests.map((req) => {
+                if (Number(req.status) !== 0) return null; 
+                return (
+                    <div key={req.id} className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[32px] border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <span className="bg-blue-500/20 text-blue-500 text-[10px] px-3 py-1 rounded-full font-black uppercase italic">ID: #{req.id.toString()}</span>
+                                <span className="text-amber-500 text-[9px] font-black uppercase tracking-widest">● Pending Audit</span>
+                            </div>
+                            <p className="text-white font-bold text-sm tracking-tight italic uppercase">Deed Name: {req.ownerName}</p>
+                            <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Location: {req.landLocation} | Area: {req.landArea?.toString()} SQFT</p>
+                            <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Khasra Number: {req.khasraNumber || "N/A"}</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <button onClick={() => handleAction(req.id, "REJECT")} className="text-red-500 text-[10px] font-black uppercase tracking-widest hover:underline px-4">Reject</button>
+                            <button onClick={() => handleAction(req.id, "VERIFY")} disabled={loading} className="bg-blue-600 text-white font-black text-[10px] px-8 py-4 rounded-2xl uppercase tracking-[0.2em] hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50">
+                                {loading ? "Verifying..." : "Verify & Bond"}
+                            </button>
+                        </div>
+                    </div>
+                );
+            })}
+             {requests.filter(r => Number(r.status) === 0).length === 0 && <div className="py-20 text-center border-2 border-dashed border-zinc-800 rounded-[40px] text-zinc-600 font-bold uppercase text-xs">No new requests pending verification.</div>}
+        </div>
+    </div>
+  );
 
   // SURVEYOR DASHBOARD (Phase 2: After Govt Verification)
   const SurveyorDashboard = () => (
@@ -257,8 +301,15 @@ const AdminPanel = () => {
                 </div>
             </header>
 
-            <main>
-                {isAdmin ? <SuperAdminDashboard /> : 
+            <main className="space-y-12">
+                {isAdmin ? (
+                    <>
+                        <SuperAdminDashboard />
+                        <GovtOfficerDashboard />
+                        <SurveyorDashboard />
+                        <RegistrarDashboard />
+                    </>
+                ) : 
                  isSurveyor ? <SurveyorDashboard /> : 
                  isRegistrar ? <RegistrarDashboard /> : (
                     <div className="py-40 text-center space-y-6 bg-zinc-900/20 rounded-[50px] border border-white/5">

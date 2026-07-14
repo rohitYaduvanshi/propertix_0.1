@@ -82,6 +82,9 @@ contract PropertyRegistry is ERC721URIStorage, AccessControl, ReentrancyGuard {
     // ==========================================
     constructor() ERC721("IndiaLandRecord", "ILR") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(GOVT_OFFICER_ROLE, msg.sender);
+        _grantRole(SURVEYOR_ROLE, msg.sender);
+        _grantRole(REGISTRAR_ROLE, msg.sender);
         users[msg.sender] = UserProfile("Super Admin", "admin@gov.in", "ADMIN", true);
     }
 
