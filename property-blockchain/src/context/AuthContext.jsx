@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       return { isRegistered: true, roleString };
     } catch (error) {
       console.error("❌ Critical Identity Error:", error);
+      alert("Identity Fetch Error: " + (error.reason || error.message));
       return null;
     }
   };
@@ -143,6 +144,7 @@ export const AuthProvider = ({ children }) => {
 
     } catch (error) {
       console.error("Login Error:", error);
+      alert("Login Error Details: " + (error.reason || error.message));
       setLoading(false);
       return false;
     }
