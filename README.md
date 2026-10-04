@@ -7,7 +7,7 @@
 
 ## 📁 Project Structure
 
-```
+```                                             
 Propertix/
 ├── backend/                          # Express REST API (deployed on Railway / Vercel)
 │   ├── db/                           # Drizzle ORM schema
